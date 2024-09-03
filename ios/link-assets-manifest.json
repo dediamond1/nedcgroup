@@ -1,0 +1,85 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/ComviqSans-Bold_1197263553.otf",
+      "sha1": "2cbeacd0de8f619421bac324b32335a4fba513ca"
+    },
+    {
+      "path": "assets/fonts/comviqSansBoldBACKUP.woff",
+      "sha1": "1eb9d90b3f955687e5bb6d39f1e19cc1d0eecaec"
+    },
+    {
+      "path": "assets/fonts/comviqSansRegularBACKUPwoff2",
+      "sha1": "4401a637a08f180b9078d3100a6ff8689ee20c71"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWeb-Bold.eot",
+      "sha1": "67297c3702b0fcf58478c071065d9a2b7d368313"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWeb-Bold.woff",
+      "sha1": "c3123cc4282b8b199c21b40ffad575f6e471f406"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWeb-Bold.woff2",
+      "sha1": "2bf53259d6fa6b13fa0f7a2e4324b5443e4e26e1"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWeb-Regular.eot",
+      "sha1": "831e2026c5b0fd2e74b4231c5201d169d25aec5e"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWeb-Regular.woff",
+      "sha1": "684b20175bc3a44f7d9d855784c52108ff9a638c"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWeb-Regular.woff2",
+      "sha1": "4401a637a08f180b9078d3100a6ff8689ee20c71"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWebBold.ttf",
+      "sha1": "5932dd586a0bebd8ab4480f703ff5e40f12f9b0c"
+    },
+    {
+      "path": "assets/fonts/ComviqSansWebRegular.ttf",
+      "sha1": "a8e840c6c35d1396c0fe0d50494fc00c742aac1d"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-Bold.ttf",
+      "sha1": "020aaec9cdeb59aa8ebd2e4c693527cddb2d1577"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-BoldItalic.ttf",
+      "sha1": "9ec6f8b1c000fe9d081f2598d801ed85cef63a63"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-Italic.ttf",
+      "sha1": "1f02c79207884c1d1adf3b0679bbacb1d17c6f39"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-Light.ttf",
+      "sha1": "d060b0ff74b379dcc3d10ac2d024602af419d9f0"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-LightItalic.ttf",
+      "sha1": "7b5e622026245d52f4eafbaa9564ece8e8889dc9"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-Medium.ttf",
+      "sha1": "da662f767e6261491e20da197bd7ffbb7a7d122c"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-MediumItalic.ttf",
+      "sha1": "f96c9c3a3bf40efdc9b20afcc8203f6e47e87ea5"
+    },
+    {
+      "path": "assets/fonts/Ubuntu-Regular.ttf",
+      "sha1": "8238e55f0320c3abc74057c988367c2f25fa3727"
+    },
+    {
+      "path": "assets/fonts/UFL.txt",
+      "sha1": "72062da2045ec80b124ba50d667306ef4396763c"
+    }
+  ]
+}

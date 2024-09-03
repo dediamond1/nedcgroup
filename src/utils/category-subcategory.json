@@ -1,0 +1,440 @@
+{
+  "category": [
+    {
+      "id": "1",
+      "name": "Fastpris",
+      "icon": "baby-face-outline",
+      "subText": "Surf, fria samtal och SMS/MMS",
+      "subcategory": [
+        {
+          "cId": "1",
+          "subid": "7",
+          "operator": "Comviq",
+          "name": "Fastpris Vecka 45 kr",
+          "price": "45",
+          "data": "0,5 GB (0,5 GB inom EU/EES)",
+          "InfoPos": "Surf, fria samtal, SMS/MMS inom Sverige",
+          "validity": "7 dagar",
+          "articalId": "40045",
+          "ean": "7330596002328",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "1",
+          "subid": "6",
+          "operator": "Comviq",
+          "name": "Fastpris Mini 95 kr",
+          "price": "95",
+          "data": "3 GB",
+          "InfoPos": "200 samtalsminuter, 2000 SMS och 2000 MMS inom Sverige",
+          "validity": "30 dagar",
+          "articalId": "40095",
+          "ean": "7330596002663",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "1",
+          "subid": "5",
+          "operator": "Comviq",
+          "name": "Fastpris 145 kr",
+          "price": "145",
+          "data": "5 GB (5 GB inom EU/EES)",
+          "InfoPos": "Surf, fria samtal, SMS/MMS inom Sverige",
+          "validity": "30 dagar",
+          "articalId": "40145",
+          "ean": "7330596002403",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "1",
+          "subid": "4",
+          "operator": "Comviq",
+          "name": "Fastpris 195 kr",
+          "price": "195",
+          "data": "10 GB (10 GB inom EU/EES)",
+          "InfoPos": "Surf, fria samtal, SMS/MMS inom Sverige",
+          "validity": "30 dagar",
+          "articalId": "40195",
+          "ean": "7330596002304",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "1",
+          "subid": "3",
+          "operator": "Comviq",
+          "name": "Fastpris 245 kr",
+          "price": "245",
+          "data": "20 GB (12 GB inom EU/EES)",
+          "InfoPos": "Surf, fria samtal, SMS/MMS inom Sverige + 100 utlandsminuter till 41 lander",
+          "validity": "30 dagar",
+          "articalId": "40245",
+          "ean": "7330596002236",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "1",
+          "subid": "2",
+          "operator": "Comviq",
+          "name": "Fastpris 295 kr",
+          "price": "295",
+          "data": "40 GB (12 GB inom EU/EES)",
+          "InfoPos": "Surf, fria samtal, SMS/MMS inom Sverige + 500 utlandsminuter till 41 lander",
+          "validity": "30 dagar",
+          "articalId": "40295",
+          "ean": "7330596002694",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "1",
+          "subid": "1",
+          "operator": "Comviq",
+          "name": "Fastpris 345 kr",
+          "price": "345",
+          "data": "100 GB (18 GB inom EU/ESS)",
+          "InfoPos": "Surf, fria samtal, SMS/MMS inom Sverige + 1000 utlandsminuter till 41 lander",
+          "validity": "30 dagar",
+          "articalId": "41345",
+          "ean": "7330596002960",
+          "vatCardValue": "25%"
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "name": "Mobilt Bredband",
+      "subText": "Obegransad surf",
+      "subcategory": [
+        {
+          "cId": "8",
+          "subid": "136",
+          "operator": "Comviq",
+          "name": "Mobilt Bredband 399kr",
+          "price": "399",
+          "data": "Obegransad surf",
+          "InfoPos": "Gäller inom i Sverige. Gar INTE att ringa eller SMS med",
+          "validity": "30 dagar",
+          "articalId": "92399",
+          "ean": "7330596003011",
+          "vatCardValue": "25%"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Amigos",
+      "icon": "weather-sunny",
+      "subText": "Billigt till hela världen!",
+
+      "subcategory": [
+        {
+          "cId": "2",
+          "subid": "13",
+          "operator": "Comviq",
+          "name": "Amigos 50 kr",
+          "price": "50",
+          "data": "0,5 GB (0,5 GB inom EU/EES)",
+          "InfoPos": "Billigt till hela varlden!",
+          "validity": "30 dagar",
+          "articalId": "20050",
+          "ean": "7330596001598",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "2",
+          "subid": "12",
+          "operator": "Comviq",
+          "name": "Amigos Afrika 59 kr",
+          "price": "59",
+          "data": "0,2 GB (0,2 GB inom EU/EES)",
+          "InfoPos": "Billigt till hela varlden!",
+          "validity": "30 dagar",
+          "articalId": "20059",
+          "ean": "7330596001864",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "2",
+          "subid": "14",
+          "operator": "Comviq",
+          "name": "Amigos 100 kr",
+          "price": "100",
+          "data": "2 GB (2 GB inom EU/EES)",
+          "InfoPos": "Billigt till hela varlden!",
+          "validity": "30 dagar",
+          "articalId": "20100",
+          "ean": "7330596001123",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "2",
+          "subid": "11",
+          "operator": "Comviq",
+          "name": "Amigos 200 kr",
+          "price": "200",
+          "data": "5 GB (5 GB inom EU/EES)",
+          "InfoPos": "Billigt till hela varlden!",
+          "validity": "30 dagar",
+          "articalId": "20200",
+          "ean": "7330596001086",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "2",
+          "subid": "10",
+          "operator": "Comviq",
+          "name": "Amigos Allo 20 min (85 kr)",
+          "price": "85",
+          "data": "1 GB (1 GB inom EU/EES)",
+          "InfoPos": "Fastpris till Mellanostern, Nordafrika och EU/EES",
+          "validity": "30 dagar",
+          "articalId": "20085",
+          "ean": "7330596002908",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "2",
+          "subid": "9",
+          "operator": "Comviq",
+          "name": "Amigos Allo 50 min (155 kr)",
+          "price": "155",
+          "data": "3 GB (3 GB inom EU/EES)",
+          "InfoPos": "Fastpris till Mellanostern, Nordafrika och EU/EES",
+          "validity": "30 dagar",
+          "articalId": "20155",
+          "ean": "7330596002922",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "2",
+          "subid": "8",
+          "operator": "Comviq",
+          "name": "Amigos Allo 100 min (185 kr)",
+          "price": "185",
+          "data": "5 GB (5 GB inom EU/EES)",
+          "InfoPos": "Fastpris till Mellanostern, Nordafrika och EU/EES",
+          "validity": "30 dagar",
+          "articalId": "20185",
+          "ean": "7330596002946",
+          "vatCardValue": "25%"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "name": "Kompis",
+      "icon": "account-group-outline",
+      "subcategory": [
+        {
+          "cId": "3",
+          "subid": "14",
+          "operator": "Comviq",
+          "name": "Kompis 95 kr",
+          "price": "95",
+          "data": "1 GB (0,2 GB inom EU/EES)",
+          "InfoPos": "Fria samtal, SMS/MMS till Comviq & Tele2",
+          "validity": "30 dagar",
+          "articalId": "30095",
+          "ean": "7330596002441",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "3",
+          "subid": "15",
+          "operator": "Comviq",
+          "name": "Kompis 75 kr",
+          "price": "75",
+          "data": "0,2 GB (0,2 GB inom EU/EES)",
+          "InfoPos": "Fria samtal, SMS/MMS till Comviq & Tele2",
+          "validity": "30 dagar",
+          "articalId": "30075",
+          "ean": "7330596001109",
+          "vatCardValue": "0%"
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "name": "Standard",
+      "icon": "calendar-clock",
+      "subcategory": [
+        {
+          "cId": "4",
+          "subid": "16",
+          "operator": "Comviq",
+          "name": "Standard 250 kr",
+          "price": "250",
+          "data": "1 GB (1 GB inom EU/EES)",
+          "InfoPos": "For sallananvandare, galler i 365 dagar",
+          "validity": "365 dagar",
+          "articalId": "10250",
+          "ean": "7330596000683",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "4",
+          "subid": "17",
+          "operator": "Comviq",
+          "name": "Standard 100 kr",
+          "price": "100",
+          "data": "0,2 GB (0,2 GB inom EU/EES)",
+          "InfoPos": "For sallananvandare, galler i 365 dagar",
+          "validity": "365 dagar",
+          "articalId": "10100",
+          "ean": "7330596000676",
+          "vatCardValue": "0%"
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "name": "+Saldo",
+      "icon": "cash-plus",
+      "subcategory": [
+        {
+          "cId": "5",
+          "subid": "18",
+          "operator": "Comviq",
+          "name": "+Saldo 100 kr",
+          "price": "100",
+          "data": "0,2 GB (0,2 GB inom EU/EES)",
+          "InfoPos": "For betaltjanster och samtal till och fran utlandet",
+          "validity": "365 dagar",
+          "articalId": "80100",
+          "ean": "7330596002816",
+          "vatCardValue": "0%"
+        },
+        {
+          "cId": "5",
+          "subid": "19",
+          "operator": "Comviq",
+          "name": "+Saldo 50 kr",
+          "price": "50",
+          "data": " ",
+          "InfoPos": "For betaltjanster och samtal till och fran utlandet",
+          "validity": "365 dagar",
+          "articalId": "80050",
+          "ean": "7330596002809",
+          "vatCardValue": "0%"
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "name": "Surf",
+      "icon": "wifi",
+      "subcategory": [
+        {
+          "cId": "6",
+          "subid": "20",
+          "operator": "Comviq",
+          "name": "Surf 295 kr",
+          "price": "295",
+          "data": "20 GB",
+          "InfoPos": "När du behover ännu mer surf",
+          "validity": "30 dagar",
+          "articalId": "90295",
+          "ean": "7330596002854",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "6",
+          "subid": "21",
+          "operator": "Comviq",
+          "name": "Surf 175 kr",
+          "price": "175",
+          "data": "6 GB",
+          "InfoPos": "När du behover ännu mer surf",
+          "validity": "30 dagar",
+          "articalId": "90175",
+          "ean": "7330596002830",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "6",
+          "subid": "2143",
+          "operator": "Comviq",
+          "name": "Surf 115 kr",
+          "price": "115",
+          "data": "3 GB",
+          "InfoPos": "När du behöver ännu mer surf",
+          "validity": "30 dagar",
+          "articleId": "90115",
+          "ean": "7330596003028",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "6",
+          "subid": "22",
+          "operator": "Comviq",
+          "name": "Surf 55 kr",
+          "price": "55",
+          "data": "1 GB",
+          "InfoPos": "När du behover ännu mer surf",
+          "validity": "30 dagar",
+          "articalId": "91055",
+          "ean": "7330596002717",
+          "vatCardValue": "25%"
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "name": "Boost",
+      "icon": "rocket-outline",
+      "subcategory": [
+        {
+          "cId": "7",
+          "subid": "23",
+          "operator": "Comviq",
+          "name": "Boost 1 Vecka 199 kr",
+          "price": "199",
+          "data": "Obegransad surf (10 GB inom EU/EES)",
+          "InfoPos": "Surfa obegransat i 168 timmar",
+          "validity": "168 timmar",
+          "articalId": "92199",
+          "ean": "7330596002984",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "7",
+          "subid": "24",
+          "operator": "Comviq",
+          "name": "Boost  72 timmar 119 kr",
+          "price": "119",
+          "data": "Obegransat (5 GB inom EU/EES)",
+          "InfoPos": "Surfa obegransat 72 timmar ",
+          "validity": "72 timmar",
+          "articalId": "92119",
+          "ean": "7330596002977",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "7",
+          "subid": "25",
+          "operator": "Comviq",
+          "name": "Boost 24 timmar 59 kr",
+          "price": "59",
+          "data": "Obegransat (2 GB inom EU/EES)",
+          "InfoPos": "Surfa obegransat 72 timmar ",
+          "validity": "24 timmar",
+          "articalId": "92059",
+          "ean": "7330596002991",
+          "vatCardValue": "25%"
+        },
+        {
+          "cId": "7",
+          "subid": "25434",
+          "operator": "Comviq",
+          "name": "Boost 30 dagar 399 kr",
+          "price": "399",
+          "data": "Surfa obegransat i 30 dagar (30 GB inom EU/EES)",
+          "InfoPos": "Surfa obegransat i 30 dagar (30 GB inom EU/EES)",
+          "validity": "30 dagar",
+          "articalId": "92398",
+          "ean": "7330596002991",
+          "vatCardValue": "25%"
+        }
+      ]
+    }
+  ]
+}

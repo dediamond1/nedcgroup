@@ -1,0 +1,98 @@
+useEffect(() => {
+    if (printers.length === 0) {
+      initializeBluetooth();
+    }
+    getCompanyDetails();
+    getToken()
+      .then(token => setLoggedUser(token))
+      .catch(error => console.log(error));
+  }, [printers]);
+
+
+
+<ScrollView style={styles.container}>
+        <View style={styles.resultContainer}>
+          <View style={styles.titleContainer}>
+            <View>
+              <AppText
+                style={styles.title}
+                text={`${'COMVIQ'} ${
+                  voucherDescription ? voucherDescription + ' ' + 'kr' : ''
+                }`}
+              />
+              <AppText style={styles.description} text={`${moreInfo?.data}`} />
+              {showVoucherInfo && (
+                <AppText
+                  style={styles.subTitle}
+                  text={`Gäller framtill ${formatedDate}`}
+                />
+              )}
+            </View>
+            {/* <AppText text={`${data?.price} kr`} /> */}
+          </View>
+          <View style={styles.devider} />
+          {showVoucherInfo && (
+            <View style={styles.result}>
+              <View style={{alignItems: 'center'}}>
+                <AppText style={styles.resultTitle} text="Värdekod" />
+                <AppText
+                  style={styles.resultNumbers}
+                  text={` *110*${data?.voucherNumber}#`}
+                />
+              </View>
+              <View style={{alignItems: 'center'}}>
+                <AppText style={styles.resultTitle} text="Serienummer" />
+                <AppText
+                  style={styles.resultNumbers}
+                  text={serialNumber ? serialNumber : ''}
+                />
+              </View>
+            </View>
+          )}
+        </View>
+        {showVoucherInfo && <View style={styles.qrCodeContainer}></View>}
+
+        {printers.length > 0 ? (
+          <AppButton
+            text={currentPrinter ? 'Printa voucher' : 'Välj printer'}
+            onPress={() => printOutVoucher()}
+            style={{padding: 16, backgroundColor: 'green'}}
+          />
+        ) : (
+          <View style={{alignItems: 'center', justifyContent: 'center'}}>
+            <AppText
+              text={'Inga bluetooth-enheter hittades.'}
+              style={{color: '#e2027b', fontSize: 15}}
+            />
+            <AppText
+              text={
+                'Vänligen kontrollera att bluetooth är på och att du inte använder mobiltelefon. den här appen är gjord för posterminal (en utskriftsenhet)..'
+              }
+              style={{color: '#e2027b', textAlign: 'center', fontSize: 15}}
+            />
+          </View>
+        )}
+
+        <View style={{height: 40}} />
+        <Modal visible={!currentPrinter && choosePrinter}>
+          <TopHeader icon={'close'} title="Välj printer" />
+          <View style={{padding: 10}}>
+            <AppText
+              text={'Klicka först på printernsnamn t.ex IposPrinter blå färg'}
+              style={{color: '#000', fontSize: 14}}
+            />
+
+            <AppText style={{color: '#000'}} text={`Printern:`} />
+            {printers.map((printer, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => handleConnectPrinter(printer)}>
+                <AppText
+                  style={{color: 'blue'}}
+                  text={`${printer.device_name} \n`}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Modal>
+      </ScrollView>
