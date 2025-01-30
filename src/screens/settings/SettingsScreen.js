@@ -4,7 +4,6 @@ import { AppText } from '../../components/appText';
 import { TopHeader } from '../../components/header/TopHeader';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AppScreen } from '../../helper/AppScreen';
-import CodePush from 'react-native-code-push';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { Status } from '../../../helper/Status';
 import DeviceInfo from 'react-native-device-info';
@@ -24,63 +23,9 @@ export const SetttingsScreen = () => {
   const getUpdate = async () => {
     try {
       setLoadingStatus(true);
-      const updateAvailable = await CodePush.checkForUpdate();
-      if (updateAvailable) {
-        CodePush.sync(
-          {
-            checkFrequency: CodePush.CheckFrequency.MANUAL,
-            installMode: CodePush.InstallMode.IMMEDIATE,
-            deploymentKey: appkey,
-            updateDialog: {
-              title: 'Ny uppdatering',
-              mandatoryContinueButtonLabel: 'Uppdatera nu',
-            },
-          },
-          status => {
-            let text;
-            switch (status) {
-              case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-              case CodePush.SyncStatus.AWAITING_USER_ACTION:
-                text = 'Söker efter uppdatering...';
-                break;
-              case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-                text = 'Hämtar uppdatering...';
-                break;
-              case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-                text = 'Installerar uppdatering...';
-                setLoadingStatus(true);
-                setShowProgress(true);
-                break;
-
-              case CodePush.SyncStatus.UP_TO_DATE:
-                text = 'Appen är redan i senaste uppdateringen.';
-                setLoadingStatus(false);
-                setNoUpdateAvailable(true);
-                break;
-              case CodePush.SyncStatus.UNKNOWN_ERROR:
-                text = 'Något gick fel när uppdateringen hämtades!...';
-                setLoadingStatus(false);
-                setNoUpdateAvailable(true);
-                break;
-
-              default:
-                break;
-            }
-            setLoadingStatus(false);
-            setUpdateText(text);
-          },
-          downloadProgress => {
-            const { receivedBytes, totalBytes } = downloadProgress;
-            const progressStatus = Math.ceil(
-              (receivedBytes / totalBytes) * 100,
-            );
-            setProgress(progressStatus);
-          },
-        );
-      } else {
-        setLoadingStatus(false);
-        setNoUpdateAvailable(true);
-      }
+      // Removed CodePush related code
+      setLoadingStatus(false);
+      setNoUpdateAvailable(true);
     } catch (error) {
       console.log(error);
     }
@@ -89,10 +34,7 @@ export const SetttingsScreen = () => {
   return (
     <>
       <AppScreen
-        style={{ flex: 1 }}
-        showIcon="true"
-        FlatIIconStyle={{ bottom: 120 }}
-        iconAction={() => navigation.goBack()}>
+        style={{ flex: 1 }}>
         <TopHeader title={'INSTÄLLNINGAR'} loading={loadingStatus} icon={true} onPress={()=> navigation.goBack()} />
         {loadingStatus && (
           <Status
@@ -137,12 +79,9 @@ export const SetttingsScreen = () => {
               )}
             />
           </View>
-          <TouchableOpacity style={styles.setting} onPress={getUpdate}>
-            <MaterialIcon name="update" size={24} color="#fff" />
-            <AppText text={'Uppdatera appen'} style={styles.settingText} />
-          </TouchableOpacity>
+         
           <AppText
-            text={'NEDC Group AB v1.0.2'}
+            text={`NEDC Group AB v${AppVersion}`}
             style={{ color: '#222222', textAlign: 'center' }}
           />
         </View>

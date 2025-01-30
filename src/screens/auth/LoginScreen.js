@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Platform,
   Pressable,
-
 } from 'react-native';
 import { TopHeader } from '../../components/header/TopHeader';
 import { Formik } from 'formik';
@@ -15,7 +14,6 @@ import * as Yup from 'yup';
 import { AppInput } from '../../components/input/AppInput';
 import { AppButton } from '../../components/button/AppButton';
 import { AppScreen } from '../../helper/AppScreen';
-
 
 import { colors } from '../../constants/colors';
 import { AppText } from '../../components/appText';
@@ -28,15 +26,11 @@ import { NormalLoader } from '../../../helper/Loader2';
 const validate = Yup.object().shape({
   email: Yup.string().email('Ange rätt e-post').required('Ange e-post'),
   password: Yup.string().required('Ange Lösenord'),
-  pincode: Yup.string().max(4).required('ange pinkod'),
 });
 
 export const LoginScreen = () => {
-  const { loading: load, error, authenticate, setError } = useAuthenticate()
+  const { loading: load, error, authenticate, setError, setLoading } = useAuthenticate()
   const navigation = useNavigation();
-  const authenticateUser = async (email, password) => {
-    await authenticate({ email: email, password: password })
-  }
 
   return (
     <>
@@ -57,7 +51,6 @@ export const LoginScreen = () => {
           subTitle={load ? 'loggar in...' : 'Fel e-post eller lösenord...'}
           cantelText={"Försök igen"}
           cantelTextStyle={{ width: '100%' }}
-
           onPressCancel={() => setError(false)}
         />
       ) : null}
@@ -68,11 +61,13 @@ export const LoginScreen = () => {
         <AppScreen style={styles.screen}>
           <TopHeader title={'LOGGA IN'} />
           <Formik
-            initialValues={{ email: '', password: '', pincode: '' }}
+            initialValues={{ email: '', password: '' }}
             validationSchema={validate}
-            onSubmit={async ({ email, password }) => {
-              authenticateUser(email, password);
-            }}>
+            onSubmit={(values) => {
+              Keyboard.dismiss();
+              authenticate(values.email, values.password);
+            }}
+          >
             {({
               handleChange,
               handleSubmit,
@@ -80,6 +75,8 @@ export const LoginScreen = () => {
               errors,
               touched,
               values,
+              isValid,
+              dirty
             }) => (
               <KeyboardAvoidingView
                 style={styles.contentContainer}
@@ -99,6 +96,11 @@ export const LoginScreen = () => {
                   autoCapitalize="none"
                   onChangeText={handleChange('email')}
                   onBlur={handleBlur('email')}
+                  onSubmitEditing={() => {
+                    if (isValid && dirty) {
+                      handleSubmit();
+                    }
+                  }}
                   style={{
                     padding: 12,
                     borderWidth: 2,
@@ -129,7 +131,11 @@ export const LoginScreen = () => {
                   value={values.password}
                   onChangeText={handleChange('password')}
                   onBlur={handleBlur('password')}
-                  onSubmitEditing={handleSubmit}
+                  onSubmitEditing={() => {
+                    if (isValid && dirty) {
+                      handleSubmit();
+                    }
+                  }}
                   style={{
                     padding: 12,
                     borderWidth: 2,
@@ -142,22 +148,17 @@ export const LoginScreen = () => {
                 {touched.password && errors.password && (
                   <AppText style={styles.errText} text={errors.password} />
                 )}
-                {!load && (
-                  <AppButton
-                    style={{
-                      padding: 16,
-                      backgroundColor: load ? 'grey' : '#2bb2e0',
-                    }}
-                    textStyle={{ fontFamily: "ComviqSansWebRegular", fontSize: 18 }}
-                    loading={load}
-                    text={'Logga in'}
-                    onPress={() => {
-                      handleSubmit;
-                      Keyboard.dismiss();
-                      authenticate(values.email, values.password);
-                    }}
-                  />
-                )}
+                <AppButton
+                  style={{
+                    padding: 16,
+                    backgroundColor: !(isValid && dirty) || load ? 'grey' : '#2bb2e0',
+                  }}
+                  textStyle={{ fontFamily: "ComviqSansWebRegular", fontSize: 18 }}
+                  loading={load}
+                  text={'Logga in'}
+                  onPress={handleSubmit}
+                  disabled={!(isValid && dirty) || load}
+                />
 
                 <View>
                   <AppText
@@ -166,20 +167,21 @@ export const LoginScreen = () => {
                       color: '#222222',
                       textAlign: 'center',
                       marginVertical: 10,
+                      fontFamily: "ComviqSansWebRegular",
                       fontSize: 16,
-                      fontFamily: "ComviqSansWebRegular"
                     }}
                   />
-                  <Pressable onPress={() => navigation.navigate('HELP')}>
+                  <Pressable onPress={() => navigation.navigate('QUICK_SUPPORT')}>
                     <AppText
-                      text={'Kontakta support'}
+                      text={'Få Snabbsupport'}
                       style={{
                         color: '#e2027b',
                         textAlign: 'center',
                         fontSize: 18,
+                        textTransform: "uppercase",
                         padding: 16,
                         textDecorationLine: 'underline',
-                        fontFamily: "ComviqSansWebRegular"
+                        fontFamily: "ComviqSansWebBold"
                       }}
                     />
                   </Pressable>

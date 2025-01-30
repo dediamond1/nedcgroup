@@ -18,6 +18,7 @@ import Announcement from './helper/Announcement';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl } from './src/constants/api';
 import DeviceInfo from 'react-native-device-info';
+import { api } from './src/api/api';
 
 const App = () => {
   const netInfo = useNetInfo();
@@ -44,21 +45,22 @@ const App = () => {
 
   const fetchLatestVersion = async () => {
     try {
-      const response = await fetch(`${baseUrl}/api/latest-version`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      setLatestVersion(data.latestVersion);
-      setUpdateUrl(data.updateUrl);
-      const currentVersion = DeviceInfo.getVersion();
-      setCurrentVersion(currentVersion);
-
-      if (data.latestVersion !== currentVersion) {
-        setUpdateVisible(true);
-      } else {
-        // If the version is up-to-date, immediately fetch announcements
-        fetchAnnouncement();
+      const {data} = await api.get(`/api/latest-version`);
+      console.log("data", data)
+      if (data?.message === "No version information available") {
+        return
+      }else{
+        setLatestVersion(data.latestVersion);
+        setUpdateUrl(data.updateUrl);
+        const currentVersion = DeviceInfo.getVersion();
+        setCurrentVersion(currentVersion);
+  
+        if (data.latestVersion !== currentVersion) {
+          setUpdateVisible(true);
+        } else {
+          // If the version is up-to-date, immediately fetch announcements
+          fetchAnnouncement();
+        }
       }
     } catch (error) {
       console.error('Error fetching the latest version:', error);

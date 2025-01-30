@@ -17,7 +17,7 @@
           "validity": "7 dagar",
           "articalId": "40045",
           "ean": "7330596002328",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "1",
@@ -30,7 +30,7 @@
           "validity": "30 dagar",
           "articalId": "40095",
           "ean": "7330596002663",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "1",
@@ -43,7 +43,7 @@
           "validity": "30 dagar",
           "articalId": "40145",
           "ean": "7330596002403",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "1",
@@ -56,7 +56,7 @@
           "validity": "30 dagar",
           "articalId": "40195",
           "ean": "7330596002304",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "1",
@@ -69,7 +69,7 @@
           "validity": "30 dagar",
           "articalId": "40245",
           "ean": "7330596002236",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "1",
@@ -82,7 +82,7 @@
           "validity": "30 dagar",
           "articalId": "40295",
           "ean": "7330596002694",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "1",
@@ -95,7 +95,7 @@
           "validity": "30 dagar",
           "articalId": "41345",
           "ean": "7330596002960",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         }
       ]
     },
@@ -115,7 +115,7 @@
           "validity": "30 dagar",
           "articalId": "92399",
           "ean": "7330596003011",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         }
       ]
     },
@@ -189,7 +189,7 @@
           "validity": "30 dagar",
           "articalId": "20085",
           "ean": "7330596002908",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "2",
@@ -202,7 +202,7 @@
           "validity": "30 dagar",
           "articalId": "20155",
           "ean": "7330596002922",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "2",
@@ -215,7 +215,7 @@
           "validity": "30 dagar",
           "articalId": "20185",
           "ean": "7330596002946",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         }
       ]
     },
@@ -334,7 +334,7 @@
           "validity": "30 dagar",
           "articalId": "90295",
           "ean": "7330596002854",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "6",
@@ -347,7 +347,7 @@
           "validity": "30 dagar",
           "articalId": "90175",
           "ean": "7330596002830",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "6",
@@ -358,9 +358,9 @@
           "data": "3 GB",
           "InfoPos": "När du behöver ännu mer surf",
           "validity": "30 dagar",
-          "articleId": "90115",
+          "articalId": "90115",
           "ean": "7330596003028",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "6",
@@ -373,7 +373,7 @@
           "validity": "30 dagar",
           "articalId": "91055",
           "ean": "7330596002717",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         }
       ]
     },
@@ -393,7 +393,7 @@
           "validity": "168 timmar",
           "articalId": "92199",
           "ean": "7330596002984",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "7",
@@ -406,7 +406,7 @@
           "validity": "72 timmar",
           "articalId": "92119",
           "ean": "7330596002977",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "7",
@@ -419,7 +419,7 @@
           "validity": "24 timmar",
           "articalId": "92059",
           "ean": "7330596002991",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         },
         {
           "cId": "7",
@@ -432,7 +432,7 @@
           "validity": "30 dagar",
           "articalId": "92398",
           "ean": "7330596002991",
-          "vatCardValue": "25%"
+          "vatCardValue": "0%"
         }
       ]
     }

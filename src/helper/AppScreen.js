@@ -9,7 +9,7 @@ export const AppScreen = ({ style, children, showIcon = false, iconAction, FlatI
     return (
         <SafeAreaView style={[styles.screen, style]}>
             {children}
-            {showIcon && <FloatingActionButton style={FlatIIconStyle} icon={"menu"} onPress={iconAction} />}
+            {showIcon && <FloatingActionButton style={FlatIIconStyle} icon={"home"} onPress={iconAction} />}
         </SafeAreaView>
     )
 }

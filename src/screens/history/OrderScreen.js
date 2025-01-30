@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useContext } from 'react';
-import { FlatList, Modal, View, Alert, Platform } from 'react-native';
+import { FlatList, View, Alert, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AppText } from '../../components/appText';
 import { AppButton } from '../../components/button/AppButton';
@@ -9,58 +9,34 @@ import { baseUrl } from '../../constants/api';
 import { AuthContext } from '../../context/auth.context';
 import { AppScreen } from '../../helper/AppScreen';
 import { getToken, removeToken } from '../../helper/storage';
-import { generatePDF } from '../../helper/Share'; // Ensure this path is correct
-import { WebView } from 'react-native-webview';
-import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
 import { NormalLoader } from '../../../helper/Loader2';
-export const OrderHistory = () => {
+import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+export const OrderHistory = ({route}) => {
+
+  const {operator} = route?.params
   const [orderHistory, setOrderHistory] = useState([]);
+  const [filteredOrderHistory, setFilteredOrderHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [pdfUri, setPdfUri] = useState('');
-  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation();
   const { setInActive } = useContext(AuthContext);
-
-  const checkAndRequestPermissions = async () => {
-    const permission = Platform.OS === 'android' ? PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE : PERMISSIONS.IOS.PHOTO_LIBRARY;
-
-    try {
-      const result = await check(permission);
-
-      if (result === RESULTS.GRANTED) {
-        console.log('Permission is granted');
-        return true;
-      } else if (result === RESULTS.DENIED) {
-        const requestResult = await request(permission);
-        if (requestResult === RESULTS.GRANTED) {
-          console.log('Permission granted after request');
-          return true;
-        } else {
-          console.error('Permission request denied');
-          Alert.alert(
-            'Permission Required',
-            'To generate and view the PDF, the app needs access to your storage. Please grant the permission in your settings.',
-            [{ text: 'Open Settings', onPress: () => openSettings() }]
-          );
-          return false;
-        }
-      } else {
-        console.error('Permission result is not granted or denied');
-        return false;
-      }
-    } catch (error) {
-      console.error('Permission error:', error);
-      return false;
-    }
-  };
+  const { companyInfo, getCompanyInfo } = useGetCompanyInfo();
 
   const getAllOrders = async () => {
     try {
       setLoading(true);
       const jsontoken = await getToken();
       const token = JSON.parse(jsontoken);
+      await getCompanyInfo();
 
-      const response = await fetch(`${baseUrl}/api/order`, {
+      let url = `${baseUrl}/api/order`;
+      if (operator === 'LYCA') {
+        url = `${baseUrl}/api/lyca-order`;
+      }
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           authorization: `Bearer ${token}`,
@@ -79,26 +55,12 @@ export const OrderHistory = () => {
         setInActive(true);
       } else {
         setOrderHistory(data?.orderlist || []);
+        setFilteredOrderHistory(data?.orderlist || []);
       }
       setLoading(false);
     } catch (error) {
       setLoading(false);
       console.error('Error fetching orders:', error);
-    }
-  };
-
-  const generateAndShowPDF = async () => {
-    const hasPermission = await checkAndRequestPermissions();
-    if (!hasPermission) {
-      return;
-    }
-
-    try {
-      const { uri } = await generatePDF(orderHistory);
-      setPdfUri(uri);
-      setShowPdfModal(true);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
     }
   };
 
@@ -111,81 +73,142 @@ export const OrderHistory = () => {
     };
   }, [navigation]);
 
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    const filtered = orderHistory.filter(
+      (item) =>
+        item.voucherNumber.toLowerCase().includes(text.toLowerCase()) ||
+        item.serialNumber.toLowerCase().includes(text.toLowerCase())
+    );
+    setFilteredOrderHistory(filtered);
+  };
+
+  const resetSearch = () => {
+    setSearchQuery('');
+    setFilteredOrderHistory(orderHistory);
+  };
+
   if (loading) {
     return <NormalLoader loading={loading} subTitle='laddar oder historiken...'/>;
   }
 
   return (
     <AppScreen
-      style={{ flex: 1 }}
-      iconAction={() => navigation.goBack()}
+      style={styles.screen}
+      iconAction={() => navigation.navigate('INTRO')}
       showIcon={true}>
       <TopHeader title={'Orderhistoriken'} icon onPress={() => navigation.goBack()} />
-      <AppButton
-        text={"Generate PDF"}
-        onPress={generateAndShowPDF}
-      />
-      {orderHistory.length ? (
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          onChangeText={handleSearch}
+          keyboardType='number-pad'
+          value={searchQuery}
+          placeholder="Sök vouchernummer/serienummer"
+        />
+       
+          <TouchableOpacity onPress={resetSearch} style={styles.resetButton}>
+            <Icon name="close-circle" size={24} color="#fff" />
+            <AppText text="Återställ" style={styles.resetText} />
+          </TouchableOpacity>
+       
+      </View>
+      {filteredOrderHistory.length ? (
         <FlatList
           refreshing={loading}
           onRefresh={getAllOrders}
-          contentContainerStyle={{ padding: 10 }}
-          data={orderHistory}
+          contentContainerStyle={styles.flatListContent}
+          data={filteredOrderHistory}
           keyExtractor={item => item.id.toString()}
-          ListFooterComponent={<View style={{ height: 60 }} />}
+          ListFooterComponent={<View style={styles.flatListFooter} />}
           renderItem={({ item }) => (
             <OrderItems
               item={item}
-              onPress={() => navigation.navigate('ORDER_DETAILS', { data: item })}
+              onPress={() => navigation.navigate('ORDER_DETAILS', { data: item, companyInfo: companyInfo, operator })}
             />
           )}
         />
       ) : (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'space-evenly',
-            padding: 16,
-            alignItems: 'center',
-          }}>
+        <View style={styles.noHistoryContainer}>
           <AppText
             text={'Ingen orderhistorik hittades'}
-            style={{ color: '#222222', fontSize: 17.4 }}
+            style={styles.noHistoryText}
           />
           <AppButton
             text={'Hämta orderhistoriken '}
             icon="reload"
             iconColor="#222222"
-            textStyle={{ flex: 1, color: '#222222' }}
-            style={{
-              width: '100%',
-              backgroundColor: '#fff',
-              borderColor: '#222222',
-              borderWidth: 1,
-            }}
+            textStyle={styles.buttonText}
+            style={styles.button}
             onPress={getAllOrders}
           />
         </View>
       )}
-      {pdfUri && (
-        <Modal
-          visible={showPdfModal}
-          onRequestClose={() => setShowPdfModal(false)}
-          style={{ flex: 1 }}
-        >
-          <TopHeader
-            title="PDF Preview"
-            icon="close"
-            onPress={() => setShowPdfModal(false)}
-          />
-          <View style={{ flex: 1 }}>
-            <WebView
-              source={{ uri: pdfUri }}
-              style={{ flex: 1 }}
-            />
-          </View>
-        </Modal>
-      )}
     </AppScreen>
   );
 };
+
+const styles = StyleSheet.create({
+  screen: { 
+    flex: 1 
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 10,
+    borderColor: '#3b3687',
+    borderWidth: 2,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  filterIcon: {
+    paddingLeft: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 10,
+    fontSize: 14,
+    fontFamily: 'ComviqSansWebBold',
+  },
+  resetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3b3687',
+    padding: 8,
+  },
+  resetText: {
+    marginLeft: 5,
+    color: '#fff',
+    fontFamily: 'ComviqSansWebBold',
+    textTransform: 'uppercase',
+    fontSize: 14,
+  },
+  flatListContent: { 
+    padding: 10 
+  },
+  flatListFooter: { 
+    height: 60 
+  },
+  noHistoryContainer: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+    padding: 16,
+    alignItems: 'center',
+  },
+  noHistoryText: { 
+    color: '#222222', 
+    fontSize: 17.4 
+  },
+  buttonText: { 
+    flex: 1, 
+    color: '#222222' 
+  },
+  button: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderColor: '#222222',
+    borderWidth: 1,
+  },
+});

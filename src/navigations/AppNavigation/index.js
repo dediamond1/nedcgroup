@@ -4,6 +4,7 @@ import { colors } from '../../constants/colors';
 import { StyleSheet } from 'react-native';
 import { MainNavigation } from '../homeNavigations/MainNavigation';
 import { AllSimCardsNavigations } from '../AllSimRegNavigations';
+import LycaNavigation from '../lyckaNavigations/LycaNavigation';
 
 const Stack = createStackNavigator();
 
@@ -14,7 +15,7 @@ export const AppNav = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-      }}>
+      }}initialRouteName='HOME'>
       <Stack.Screen
         name="HOME"
         component={MainNavigation}
@@ -23,6 +24,10 @@ export const AppNav = () => {
         name="ALL_SIM_CARDS"
         component={AllSimCardsNavigations}
 
+      />
+      <Stack.Screen
+        name="LYCA_NAVIGATION"
+        component={LycaNavigation}
       />
     </Stack.Navigator>
   );

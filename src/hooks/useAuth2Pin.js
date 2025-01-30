@@ -19,7 +19,7 @@ export const useAuth2Pin = () => {
     }, [])
 
 
-    const verifyPincode = async ({ pinCode, data, title, moreInfo }) => {
+    const verifyPincode = async ({ pinCode, data, title, moreInfo, navigateTo }) => {
         try {
             setLoading(true);
             const response = await api.post(`/api/manager/confirmpinCheck`, {
@@ -50,7 +50,7 @@ export const useAuth2Pin = () => {
                     break;
                 case 'Pin code is Correct':
                     setLoading(false);
-                    return navigation.navigate('CHECKOUT', {
+                    return navigation.navigate(navigateTo ? navigateTo : 'CHECKOUT', {
                         data: data,
                         title: title,
                         moreInfo: moreInfo,

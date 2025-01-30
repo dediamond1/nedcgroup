@@ -3,7 +3,7 @@ import { Text, View, TouchableOpacity, TextInput, StyleSheet } from "react-nativ
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
-export const PincodeInput = ({ onPress }) => {
+export const PincodeInput = ({ onPress, backgroundColor ="#3b3687" }) => {
     const [pincode, setPincode] = useState('');
 
     const handleNumberPress = (number) => {
@@ -59,46 +59,46 @@ export const PincodeInput = ({ onPress }) => {
 
             <View style={styles.numberPad}>
                 <View style={styles.row}>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('1')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('1')}>
                         <Text style={styles.numberButtonText}>1</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('2')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('2')}>
                         <Text style={styles.numberButtonText}>2</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('3')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('3')}>
                         <Text style={styles.numberButtonText}>3</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.row}>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('4')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('4')}>
                         <Text style={styles.numberButtonText}>4</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('5')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('5')}>
                         <Text style={styles.numberButtonText}>5</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('6')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('6')}>
                         <Text style={styles.numberButtonText}>6</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.row}>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('7')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('7')}>
                         <Text style={styles.numberButtonText}>7</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('8')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('8')}>
                         <Text style={styles.numberButtonText}>8</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('9')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('9')}>
                         <Text style={styles.numberButtonText}>9</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.row}>
-                    <TouchableOpacity style={[styles.numberButton,]} disabled={pincode.length < 4} onPress={handleSubmitt}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} disabled={pincode.length < 4} onPress={handleSubmitt}>
                         <MaterialCommunityIcons name='check' size={45} color="#ffffff" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.numberButton} onPress={() => handleNumberPress('0')}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} onPress={() => handleNumberPress('0')}>
                         <Text style={styles.numberButtonText}>0</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.numberButton]} disabled={pincode.length === 0} onPress={handleDeletePress}>
+                    <TouchableOpacity style={[styles.numberButton, {backgroundColor}]} disabled={pincode.length === 0} onPress={handleDeletePress}>
                         <MaterialCommunityIcons name='backspace-outline' color={"#fff"} size={30} />
 
                     </TouchableOpacity>
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     numberButton: {
-        backgroundColor: '#2bb2e0',
+        backgroundColor: '#3b3687',
         borderRadius: 73 / 2,
         width: 70,
         height: 70,

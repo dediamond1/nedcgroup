@@ -1,10 +1,9 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { AppText } from '../appText';
 import { format } from 'date-fns';
 
-export const OrderItems = ({ item, onPress }) => {
+export const OrderItems = ({ item, onPress, operator }) => {
   const {
     voucherNumber,
     OrderDate,
@@ -28,49 +27,14 @@ export const OrderItems = ({ item, onPress }) => {
       activeOpacity={0.7}
       onPress={onPress}>
       <View style={styles.content}>
-        {voucherNumber && (
-          <View>
-            <View>
-              <AppText style={styles.title} text={voucherDescription} />
-            </View>
-            <View>
-              <AppText style={styles.voucherName} text={'Voucher nummer'} />
-              <AppText style={styles.description} text={voucherNumber} />
-            </View>
-          </View>
-        )}
-        {OrderDate && (
-          <View style={styles.dateContainer}>
-            <View style={{ alignItems: 'center', fontSize: 14 }}>
-              <AppText
-                style={{ fontFamily: 'ComviqSansWebBold', fontSize: 16 }}
-                text={'Datum'}
-              />
-              <AppText
-                style={{ fontFamily: 'ComviqSansWebBold', fontSize: 16 }}
-                text={formattedDate}
-              />
-            </View>
-            <View
-              style={{
-                alignItems: 'center',
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}>
-              <AppText
-                text={'Tid: '}
-                style={{ fontFamily: 'ComviqSansWebBold', fontSize: 16 }}
-              />
-              <AppText
-                text={formattedTime}
-                style={{
-                  fontFamily: 'ComviqSansWebBold',
-                  fontSize: 16,
-                }}
-              />
-            </View>
-          </View>
-        )}
+        <View style={styles.voucherSection}>
+          <AppText style={styles.voucherTitle} text={voucherDescription} />
+          <AppText style={styles.voucherNumber} text={voucherNumber} />
+        </View>
+        <View style={styles.dateSection}>
+          <AppText style={styles.dateValue} text={formattedDate} />
+          <AppText style={styles.timeValue} text={`Tid: ${formattedTime}`} />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -78,33 +42,51 @@ export const OrderItems = ({ item, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 14,
-    backgroundColor: '#2bb2e0',
+    padding: 16,
+    backgroundColor: '#3b3687',
     marginVertical: 8,
     borderRadius: 10,
-  },
-
-  voucherName: {
-    fontSize: 18,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
-  },
-  title: {
-    fontSize: 18,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
-  },
-  description: {
-    fontSize: 18,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   content: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dateContainer: {
-    flexDirection: 'column',
+  voucherSection: {
+    flex: 1,
+  },
+  voucherTitle: {
+    fontSize: 16,
+    color: '#fff',
+    fontFamily: 'ComviqSansWebBold',
+  },
+  voucherNumber: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: 'ComviqSansWebBold',
+  },
+  dateSection: {
+    textAlign: 'right',
+  },
+  dateLabel: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: 'ComviqSansWebBold',
+  },
+  dateValue: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: 'ComviqSansWebBold',
+    marginBottom: 2,
+  },
+  timeValue: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: 'ComviqSansWebBold',
   },
 });

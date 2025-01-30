@@ -40,11 +40,8 @@ export const PurchaseSuccess = ({ loading, onPressPrint, serialNumber, voucherNu
                         </View>
                         {/* <QRCodeComponent value={`*110*${voucherNumber}#`} size={110} /> */}
                     </>}
-                    <TouchableOpacity style={styles.printaVoucherButton} activeOpacity={.6} onPress={onPressPrint}>
-                        <AppText text={"printa vouchern igen"} style={{ color: "white", fontSize: 17, textTransform: "uppercase", fontFamily: "ComviqSansWebBold", }} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.homeButton} activeOpacity={.6} onPress={() => naviagtion.navigate('MAIN')}>
-                        <AppText text={"huvudmeyn"} style={{ color: "black", fontSize: 19, textTransform: "capitalize", fontFamily: "ComviqSansWebRegular", }} />
+                    <TouchableOpacity style={styles.printaVoucherButton} activeOpacity={.6} onPress={() => naviagtion.navigate('INTRO')}>
+                        <AppText text={"Tillbaka till huvudmeyn"} style={{ color: "#fff", fontSize: 19, fontFamily: "ComviqSansWebRegular", }} />
                     </TouchableOpacity>
                 </View>
 
@@ -102,7 +99,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#2bb2e0"
+        backgroundColor: "#3b3687"
     },
     homeButton: {
         padding: 14,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { View } from 'react-native';
 import { FlatList, StyleSheet } from 'react-native';
@@ -8,13 +8,21 @@ import { FloatingActionButton } from '../button/FloatingActionButton';
 import { TopHeader } from '../header/TopHeader';
 import { VoucherItems } from './voucherItems/VoucherItems';
 import { AppButton } from '../button/AppButton';
+import { api } from '../../api/api';
+import { AuthContext } from '../../context/auth.context';
+import { ActivityIndicator } from 'react-native';
 
 export const Vouchers = () => {
   const navigation = useNavigation();
+  const [categories, setCategories] = useState([])
+  const [isLoading, setIsLoading] = useState(false); // Added state for loading indicator
+  const { user, setInActive, setUser } = useContext(AuthContext);
+ 
 
+  
   return (
     <AppScreen style={styles.screen}>
-      <TopHeader textStyle={styles.headerTitle} iconName="menu" icon title={'COMVIQ'} style={{ backgroundColor: "#2bb2e0" }} onPress={() => navigation.navigate('INTRO')} />
+      <TopHeader textStyle={styles.headerTitle} iconName="arrow-left" icon title={'COMVIQ'} onPress={() => navigation.navigate('INTRO')} />
 
       <FlatList
         contentContainerStyle={styles.contextContainer}
@@ -39,11 +47,14 @@ export const Vouchers = () => {
         ListFooterComponent={() => <View style={{ height: 70 }} />}
       />
       <FloatingActionButton
-        icon={'menu'}
-        bgColor="#2bb2e0"
+        icon={'arrow-left'}
+        bgColor="#3b3687"
         size={70}
         onPress={() => navigation.navigate('INTRO')}
       />
+      {isLoading && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#3b3687" />
+      </View>}
     </AppScreen>
   );
 };

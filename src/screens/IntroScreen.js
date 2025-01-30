@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  Image,
 } from 'react-native';
 import { AppText } from '../components/appText';
 import { AppScreen } from '../helper/AppScreen';
@@ -21,11 +22,11 @@ const screenWidth = Dimensions.get('screen').width;
 const itemWidth = (screenWidth - 30) / 2; // Space for two items side by side with some margin
 
 const introContent = [
-  { title: 'COMVIQ', link: 'HOME' },
-  { title: 'Lycka', link: 'HOME' },
+  { title: 'COMVIQ', link: 'HOME_START' },
+{ title: 'LycaMobil', link: 'LYCA_NAVIGATION', backgroundColor: '#fff', img: require('../../assets/images/Lycamobile.png') },
   { title: 'Registrera kontankort', icon: <MaterialCommunityIcons name="sim" size={iconSize} color="#e2027b" />, link: 'ALL_SIM_CARDS' },
   { title: 'Orderhistoriken', icon: <AntDesign name="reload1" size={iconSize} color="#e2027b" />, link: 'ORDER_HISTORY_NAV' },
-  { title: 'Techdev Cyber', link: 'TECHDEV', subTitle: 'Få 15% provision' },
+ // { title: 'Techdev Cyber', link: 'TECHDEV', subTitle: 'Få 15% provision' },
   { title: 'Nyheter', icon: <Icon name="newspaper-o" size={iconSize} color="#e2027b" />, link: 'NEW_NAVIGATIONS' },
   { title: 'App Inställningar', icon: <AntDesign name="setting" size={iconSize} color="#e2027b" />, link: 'APP_SETTINGS' },
   { title: 'Logga ut', icon: <AntDesign name="logout" size={iconSize} color="#e2027b" />, link: 'LOGOUT' },
@@ -50,55 +51,40 @@ export default function IntroScreen({ navigation }) {
       />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.mainContent}>
-          {/* Side-by-side sections for "COMVIQ" and "Lycka" */}
+          {/* Side-by-side sections for "COMVIQ" and "LycaMobil" */}
           <View style={styles.topRow}>
             {introContent.slice(0, 2).map((intro, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => handlePress(intro.link)}
-                style={styles.sideBySideItem}
+                style={[
+                  styles.sideBySideItem,
+                  { backgroundColor: intro.backgroundColor || '#e2027b', borderWidth: intro.img ? 2 : 0, borderColor: '#666' }
+                ]}
               >
-                <AppText text={intro.title} style={styles.topItemText} />
+                {intro.img ? (
+                  <Image source={intro.img} style={styles.introImage} resizeMode="contain" />
+                ) : (
+                  <AppText text={intro.title} style={[styles.topItemText, {fontSize: 32}]} />
+                )}
               </TouchableOpacity>
             ))}
           </View>
 
-          {/* Full-width for "Techdev Cyber" */}
-          <TouchableOpacity
-            onPress={() => handlePress('TECHDEV')}
-            style={[styles.fullWidthItem, { backgroundColor: '#011527' }]}
-          >
-            <AppText text="Techdev Cyber" style={styles.topItemText} />
-            <View style={styles.discountContainer}>
-              <Feather name='dollar-sign' size={16} color="#fff" />
-              <AppText text="Få 15% provision" style={styles.discountText} />
-            </View>
-          </TouchableOpacity>
 
           {/* List items with icons on the left and text on the right */}
-          {introContent.slice(2, -1).map((intro, index) => intro.title !== "Techdev Cyber" &&(
+          {introContent.slice(2).map((intro, index) => intro.title !== "Techdev Cyber" && (
             <TouchableOpacity
               key={index}
-              onPress={() => handlePress(intro.link)}
-              style={styles.listItem}
+              onPress={() => intro.link === 'LOGOUT' ? handleLogout() : handlePress(intro.link)}
+              style={[styles.listItem, intro.link === 'LOGOUT' && styles.logoutButton]}
             >
               <View style={styles.iconContainer}>
                 {intro.icon}
               </View>
-              <AppText text={intro.title} style={styles.listItemText} />
+              <AppText text={intro.title} style={[styles.listItemText, intro.link === 'LOGOUT' && { color: '#fff' }]} />
             </TouchableOpacity>
           ))}
-
-          {/* Logout button */}
-          <TouchableOpacity
-            onPress={handleLogout}
-            style={[styles.listItem, styles.logoutButton]}
-          >
-            <View style={styles.iconContainer}>
-              <AntDesign name="logout" size={iconSize} color="#fff" />
-            </View>
-            <AppText text="Logga ut" style={[styles.listItemText, {color: '#fff'}]} />
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </AppScreen>
@@ -132,11 +118,16 @@ const styles = StyleSheet.create({
   },
   sideBySideItem: {
     width: itemWidth,
+    height: 80, // Set a fixed height for both items
     padding: 15,
-    backgroundColor: '#e2027b',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden', // Ensure the image doesn't overflow
+  },
+  introImage: {
+    width: '100%',
+    height: '100%',
   },
   fullWidthItem: {
     width: '100%',
@@ -168,7 +159,7 @@ const styles = StyleSheet.create({
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: 11,
     marginVertical: 10,
     backgroundColor: '#fff',
     borderRadius: 8,
@@ -181,7 +172,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listItemText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#000',
     fontFamily: 'ComviqSansWebBold',
     marginLeft: 10,

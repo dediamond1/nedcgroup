@@ -1,0 +1,161 @@
+{
+  "categories": [
+    {
+      "name": "Saldo",
+      "subcategories": [
+        {
+          "name": "Saldo 50 SEK",
+          "articleId": "35015"
+        },
+        {
+          "name": "Saldo 100 SEK",
+          "articleId": "35016"
+        },
+        {
+          "name": "Saldo 200 SEK",
+          "articleId": "35017"
+        }
+      ]
+    },
+    {
+      "name": "Fast Pris",
+      "subcategories": [
+        {
+          "name": "Fast Pris 49 SEK",
+          "articleId": "35019",
+          "details": [
+            "1 GB National data",
+            "300 National SMS",
+            "300 National minutes",
+            "eSIM available",
+            "EU Roaming",
+            "5G at no extra cost"
+          ]
+        },
+        {
+          "name": "Fast Pris 85 SEK",
+          "articleId": "35010",
+          "details": [
+            "4 GB National data",
+            "Unlimited national SMS",
+            "Unlimited national minutes",
+            "Data rollover",
+            "eSIM available",
+            "EU Roaming",
+            "5G at no extra cost"
+          ]
+        },
+        {
+          "name": "Fast Pris 99 SEK",
+          "articleId": "35011",
+          "details": [
+            "6 GB National data",
+            "Unlimited national minutes",
+            "100 International bonus minutes",
+            "Unlimited national SMS",
+            "eSIM available",
+            "Data rollover",
+            "EU Roaming",
+            "5G at no extra cost"
+          ]
+        },
+        {
+          "name": "Fast Pris 149 SEK",
+          "articleId": "35014",
+          "details": [
+            "10GB+10GB National data",
+            "Unlimited national minutes",
+            "300 International bonus minutes",
+            "Unlimited national SMS",
+            "Data rollover",
+            "eSIM available",
+            "EU Roaming",
+            "5G at no extra cost"
+          ]
+        },
+        {
+          "name": "Fast Pris 199 SEK",
+          "articleId": "35013"
+        },
+        {
+          "name": "Fast Pris 238 SEK",
+          "articleId": "35050",
+          "details": [
+            "40GB National data",
+            "Unlimited national minutes",
+            "500 International minutes",
+            "Unlimited national SMS",
+            "Data rollover",
+            "eSIM available",
+            "EU Roaming",
+            "5G at no extra cost"
+          ]
+        },
+        {
+          "name": "Fast Pris 340 SEK",
+          "articleId": "35051"
+        },
+        {
+          "name": "Fast Pris 398 SEK",
+          "articleId": "35052",
+          "details": [
+            "150 GB in Sweden",
+            "Unlimited Calls & Text",
+            "1000 Minutes to International Countries",
+            "EU Roaming Data up to 35 GB",
+            "ESIM & Data Rollover",
+            "No Contract or Commitment",
+            "Auto Renewal Enabled",
+            "5G at no extra cost"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Surf",
+      "subcategories": [
+        {
+          "name": "Surf 39 SEK",
+          "articleId": "35024"
+        },
+        {
+          "name": "Surf 69 SEK",
+          "articleId": "35025"
+        },
+        {
+          "name": "Surf 89 SEK",
+          "articleId": "35026"
+        },
+        {
+          "name": "Surf 99 SEK",
+          "articleId": "35027"
+        },
+        {
+          "name": "Surf 199 SEK",
+          "articleId": "35028"
+        }
+      ]
+    },
+    {
+      "name": "All in One",
+      "subcategories": [
+        {
+          "name": "All in One 49 SEK",
+          "articleId": "35023"
+        },
+        {
+          "name": "All in One 99 SEK",
+          "articleId": "35020"
+        },
+        {
+          "name": "All in One 149 SEK",
+          "articleId": "35021"
+        },
+        {
+          "name": "All in One 199 SEK",
+          "articleId": "35022"
+        }
+      ]
+    }
+  ]
+}

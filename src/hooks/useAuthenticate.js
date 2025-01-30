@@ -41,10 +41,10 @@ export default function useAuthenticate() {
                         onPress: () => setErrorCount(errorCount - 2)
                     },
                     {
-                        text: "Få hjälp",
+                        text: "Få Snabbsupport",
                         onPress: () => {
                             setErrorCount(0)
-                            navigation.navigate('HELP')
+                            navigation.navigate('QUICK_SUPPORT')
                         }
                     },
 
@@ -67,6 +67,7 @@ export default function useAuthenticate() {
         data,
         error,
         loading,
-        setError
+        setError,
+        setLoading
     };
 }

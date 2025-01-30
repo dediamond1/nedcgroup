@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   Modal,
   ScrollView,
-  Dimensions
+  Dimensions,
+  Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { AppText } from '../src/components/appText';
@@ -29,13 +30,32 @@ const ANNOUNCEMENT_TYPES = {
     backgroundColor: '#e7f0ff',
     textColor: '#0c5460',
     iconName: 'newspaper-o',
-  }
+  },
 };
 
 const Announcement = ({ type, message, title, onDismiss, isLoading }) => {
   const announcementType = ANNOUNCEMENT_TYPES[type] || ANNOUNCEMENT_TYPES.info;
   const [showModal, setShowModal] = useState(type === 'news');
-  
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
+  if (keyboardVisible) {
+    return null; // Don't render when the keyboard is active
+  }
+
   // Full-screen modal for news type
   if (type === 'news') {
     return (
@@ -47,12 +67,16 @@ const Announcement = ({ type, message, title, onDismiss, isLoading }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: '#ffffff' }]}>
-            <Text style={[styles.modalTitle, { color: announcementType.textColor }]}>{title || 'Nyhet'}</Text>
+            <Text style={[styles.modalTitle, { color: announcementType.textColor }]}>
+              {title || 'Nyhet'}
+            </Text>
             <ScrollView contentContainerStyle={styles.modalMessageContainer}>
-              <Text style={[styles.modalMessage, { color: announcementType.textColor }]}>{message}</Text>
+              <Text style={[styles.modalMessage, { color: announcementType.textColor }]}>
+                {message}
+              </Text>
             </ScrollView>
             <TouchableOpacity onPress={() => setShowModal(false)} style={styles.closeButton}>
-            <AppText text={'Stäng'} />
+              <AppText text={'Stäng'} />
             </TouchableOpacity>
           </View>
         </View>
@@ -67,21 +91,30 @@ const Announcement = ({ type, message, title, onDismiss, isLoading }) => {
         <ActivityIndicator size="small" color={announcementType.textColor} />
       ) : (
         <>
-        <View style={styles.iconsContainer}>
-          <View style={styles.titleIconContainer}>
-          <Icon name={announcementType.iconName} size={24} color={announcementType.textColor} style={styles.icon} />
-          <AppText text={title} style={{fontSize: 18, fontWeight: 'bold', fontFamily: 'ComviqSansWebBold'}}/>
+          <View style={styles.iconsContainer}>
+            <View style={styles.titleIconContainer}>
+              <Icon
+                name={announcementType.iconName}
+                size={24}
+                color={announcementType.textColor}
+                style={styles.icon}
+              />
+              <AppText
+                text={title}
+                style={{ fontSize: 18, fontWeight: 'bold', fontFamily: 'ComviqSansWebBold' }}
+              />
+            </View>
+            {type !== 'info' && onDismiss && (
+              <TouchableOpacity onPress={onDismiss} style={styles.dismissButton}>
+                <Icon name="times" size={24} color={announcementType.textColor} />
+              </TouchableOpacity>
+            )}
           </View>
-          {type !== 'info' && onDismiss && (
-            <TouchableOpacity onPress={onDismiss} style={styles.dismissButton}>
-              <Icon name="times" size={24} color={announcementType.textColor} />
-            </TouchableOpacity>
-          )}
-        </View>
           <View style={styles.messageContainer}>
-            <Text style={[styles.message, { color: announcementType.textColor }]}>{message}</Text>
+            <Text style={[styles.message, { color: announcementType.textColor }]}>
+              {message}
+            </Text>
           </View>
-          
         </>
       )}
     </View>
@@ -96,13 +129,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)', // semi-transparent background
   },
   modalContent: {
-    width: width ,
+    width: width,
     height: height * 0.98,
     padding: 10,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  
   },
   modalTitle: {
     fontSize: 24,
@@ -110,8 +142,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   modalMessageContainer: {
- marginTop: 20,
-   
+    marginTop: 20,
     paddingHorizontal: 10,
   },
   modalMessage: {
@@ -123,9 +154,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     backgroundColor: 'red',
-    width: "100%",
+    width: '100%',
     borderRadius: 8,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   banner: {
     padding: 16,
@@ -135,16 +166,15 @@ const styles = StyleSheet.create({
   iconsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   titleIconContainer: {
     flexDirection: 'row',
-    alignItems: "center"
+    alignItems: 'center',
   },
   icon: {
     marginRight: 12,
   },
-
   message: {
     fontSize: 14,
     lineHeight: 24,

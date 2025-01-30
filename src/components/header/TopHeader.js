@@ -17,7 +17,7 @@ export const TopHeader = ({
   iconName = "arrow-left",
   textStyle,
   subTitle,
-  iconBackground = "#3dc5f5",
+  iconBackground = "#3b3687",
   loading,
   style
 }) => {
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 90,
     position: 'relative',
-    backgroundColor: "#3dc5f5",
+    backgroundColor: "#3b3687",
   },
   backBtn: {
     position: 'absolute',

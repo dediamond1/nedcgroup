@@ -11,6 +11,7 @@ import { TechDevAd } from '../../screens/ads/TechdevIntroScreen';
 import { TestingPrinter } from '../../helper/Printer';
 import { TopNavigationHistory } from '../historyNavigation/TopNavigationHistory';
 import NewsNavigations from '../newsNAvigations/NewsNavigations';
+import LycaNavigation from '../lyckaNavigations/LycaNavigation';
 
 const Stack = createStackNavigator();
 
@@ -22,10 +23,14 @@ export const AppSideNavigation = () => {
       screenOptions={{
         headerShown: false,
       }}
-      initialRouteName="HOME">
+      initialRouteName="INTRO">
       <Stack.Screen
         name="HOME_START"
         component={AppNav}
+      />
+      <Stack.Screen
+        name="LYCA_NAVIGATION"
+        component={LycaNavigation}
       />
       <Stack.Screen
         name="ALL_SIM_CARDS"

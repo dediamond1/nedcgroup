@@ -85,7 +85,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.9"
     }
     signingConfigs {
         debug {
@@ -123,6 +123,9 @@ dependencies {
     implementation 'androidx.core:core:1.9.0'
     implementation project(':react-native-html-to-pdf')
     implementation project(':react-native-fs')
+    implementation project(':react-native-splash-screen')
+    implementation project(':react-native-file-viewer')
+
 
 
     if (hermesEnabled.toBoolean()) {

@@ -1,6 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {BankIdScreen} from '../newRegSimcardScreens/BankIdScreen';
-
 import {RadioButton} from 'react-native-paper';
 import DeviceInfo from 'react-native-device-info';
 import axios from 'axios';
@@ -21,13 +20,14 @@ import {AppScreen} from '../../../../helper/AppScreen';
 import {baseUrl} from '../../../../constants/api';
 
 const axiosConf = token => {
-  const axiosConfig = axios.create({
-    baseURL: baseUrl,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  });
-  return {axiosConfig};
+  return {
+    axiosConfig: axios.create({
+      baseURL: baseUrl,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    }),
+  };
 };
 
 export const ConfirmNoneExistingScreen = ({route, navigation}) => {
@@ -41,8 +41,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
   const [loading, setLoading] = useState(false);
   const {user} = useContext(AuthContext);
   const {userInfo} = route.params || {};
-  const {email, street, postalCode, personalNumber, city, iccID} =
-    userInfo || {};
+  const {personalNumber, iccID} = userInfo || {};
 
   const idTypes = ['pass', 'BankId'];
 
@@ -60,12 +59,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
   const isMinor = () => {
     const birthYear = parseInt(personalNumber?.slice(0, 4));
     const currentYear = new Date().getFullYear();
-    const age = currentYear - birthYear;
-    if (age < 18) {
-      return true;
-    } else {
-      return false;
-    }
+    return currentYear - birthYear < 18;
   };
 
   const startBankId = async () => {
@@ -74,50 +68,33 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
       setBankIdText('START BANKID');
       const userIp = await DeviceInfo.getIpAddress();
       const {axiosConfig} = axiosConf(user);
-      const {data} = await axiosConfig.post(
-        '/api/simregistration/authenticate',
-        {
-          personalNumber: personalNumber,
-          endUserIp: userIp,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${user}`,
-          },
-        },
-      );
+      const {data} = await axiosConfig.post('/api/simregistration/authenticate', {
+        personalNumber,
+        endUserIp: userIp,
+      });
       if (data?.autoStartToken && data?.clientToken) {
-        setClientToken(data?.clientToken);
+        setClientToken(data.clientToken);
         setStartBankIdAuth(true);
       }
     } catch (error) {
-      console.log(error.message);
+      console.error('Error starting BankID:', error.message);
     }
   };
 
-  //bankId auth status
-  const getbankidStatus = async () => {
+  const getBankIdStatus = async () => {
     try {
       const {axiosConfig} = axiosConf(user);
-      const {data} = await axiosConfig.post(
-        '/api/simregistration/collect',
-        {
-          clientToken: clientToken,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${user}`,
-          },
-        },
-      );
+      const {data} = await axiosConfig.post('/api/simregistration/collect', {
+        clientToken,
+      });
       if (data?.message?.text) {
-        setBankIdText(data?.message?.text);
+        setBankIdText(data.message.text);
       }
       if (data?.status === 'complete') {
-        setOrderRef(data?.completionData?.orderRef);
+        setOrderRef(data.completionData.orderRef);
         setClientToken(null);
         setStartBankIdAuth(false);
-        await bankIdTwoFactor(data?.completionData?.orderRef);
+        await bankIdTwoFactor(data.completionData.orderRef);
       } else if (data?.response?.errorCode) {
         setClientToken(null);
         setError(true);
@@ -126,7 +103,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
         setBankIdText('STARTA BANKID');
       }
     } catch (error) {
-      console.log(error.message);
+      console.error('Error getting BankID status:', error.message);
     }
   };
 
@@ -135,85 +112,53 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
       setLoading(true);
       setError(false);
       const {axiosConfig} = axiosConf(user);
-
       const {data} = await axiosConfig.post('/api/simregistration/bankid', {
         ssn: personalNumber,
         icc: iccID,
-        bankIdOrderReference: orderRefr ? orderRefr : orderRef,
+        bankIdOrderReference: orderRefr || orderRef,
         usedByMinor: isMinor(),
         consents,
       });
-      console.log(data);
-      if (data?.data?.isRegistered === true) {
+      if (data?.data?.isRegistered === true || data?.status === true) {
         setSuccess(true);
-        setLoading(false);
-      }
-      if (data?.message === 'Request failed with status code 404') {
-        alert('Mobilnumret kunde inte hittas');
-        // navigation.goBack();
-        setSuccess(false);
-      }
-      if (data?.status === true) {
-        setLoading(false);
-        setSuccess(true);
+      } else if (data?.message === 'Request failed with status code 404') {
+        Alert.alert('OJJ', 'Mobilnumret kunde inte hittas');
       }
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      console.log(error.message);
+      console.error('Error in BankID two-factor:', error.message);
     }
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (clientToken && startBankIdAuth) {
-        getbankidStatus();
-      } else {
-        return;
-      }
-    }, 2000);
-    return () => clearTimeout(timer);
+    let timer;
+    if (clientToken && startBankIdAuth) {
+      timer = setInterval(getBankIdStatus, 2000);
+    }
+    return () => clearInterval(timer);
   }, [clientToken, startBankIdAuth]);
 
-  const idRegisteration = async () => {
+  const idRegistration = async () => {
     try {
       setLoading(true);
       const {axiosConfig} = axiosConf(user);
-      const response = await axiosConfig.post(
-        '/api/simregistration/physicalid',
-
-        {
-          ssn: personalNumber,
-          icc: iccID,
-          idType: 'IdCard',
-          usedByMinor: isMinor(),
-          consents,
-        },
-      );
-      console.log(response.data?.data);
-      if (response?.data?.data?.isRegistered === true) {
+      const response = await axiosConfig.post('/api/simregistration/physicalid', {
+        ssn: personalNumber,
+        icc: iccID,
+        idType: 'IdCard',
+        usedByMinor: isMinor(),
+        consents,
+      });
+      if (response?.data?.data?.isRegistered === true || response?.data?.status === true) {
         setSuccess(true);
-        setLoading(false);
-      }
-      if (
-        response?.data?.response?.userMessage ===
-        'Felaktig ICC. Måste vara 20 tecken långt'
-      ) {
-        alert('Felaktig ICC. Måste vara 20 tecken långt');
-        setSuccess(false);
-        navigation.goBack();
-      }
-      if (response?.data?.response?.userMessage?.length > 0) {
-        setLoading(false);
-        Alert.alert('OJJ!!', response?.data?.response?.userMessage);
-      }
-      if (response?.data?.status === true) {
-        setSuccess(true);
+      } else if (response?.data?.response?.userMessage) {
+        Alert.alert('OJJ!!', response.data.response.userMessage);
       }
       setLoading(false);
     } catch (error) {
-      console.log(error.message);
       setLoading(false);
+      console.error('Error in ID registration:', error.message);
     }
   };
 
@@ -227,6 +172,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
   if (startBankIdAuth) {
     return <BankIdScreen text={bankIdText} />;
   }
+
   return (
     <>
       {loading || error || success ? (
@@ -241,7 +187,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
               ? 'SIM-kortet är nu registrerat'
               : 'Registrerar...'
           }
-          onPressTryAgain={() => startBankId()}
+          onPressTryAgain={startBankId}
           onPressCancel={cancel}
         />
       ) : null}
@@ -253,6 +199,14 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
           onPress={() => navigation.goBack()}
         />
         <View style={styles.container}>
+          <AppText
+            style={styles.warningText}
+            text={'Om registrering av SIM-kort inte fungerar, kan du använda Comviqs webbplats för att registrera ditt SIM-kort:'}
+          />
+          <AppText
+            style={styles.urlText}
+            text={'https://www.comviq.se/registrera-kontantkort'}
+          />
           <View>
             <AppText
               text={'Personnummer'}
@@ -278,7 +232,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
             text={'Välj identifieringsmetod'}
           />
           <View>
-            {userId === 'BankId' && personalNumber?.length === 12 ? (
+            {userId === 'BankId' && personalNumber?.length === 12 && (
               <AppButton
                 image={require('../../../../../assets/images/bankid.png')}
                 text={'Starta BankID'}
@@ -289,20 +243,16 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
                   padding: 10,
                 }}
                 textStyle={{color: '#014f67'}}
-                onPress={() => {
-                  startBankId();
-                }}
+                onPress={startBankId}
               />
-            ) : (
-              userId === 'pass' &&
-              personalNumber?.length === 12 && (
-                <AppButton
-                  text={'Registrera med Körkort / ID-kort / Passport '}
-                  icon="smart-card"
-                  onPress={idRegisteration}
-                  style={{padding: 16}}
-                />
-              )
+            )}
+            {userId === 'pass' && personalNumber?.length === 12 && (
+              <AppButton
+                text={'Registrera med Körkort / ID-kort / Passport '}
+                icon="smart-card"
+                onPress={idRegistration}
+                style={{padding: 16}}
+              />
             )}
           </View>
           {idTypes.map((id, index) => (
@@ -340,5 +290,19 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
+  },
+  warningText: {
+    color: '#e2027b',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
+    lineHeight: 24,
+  },
+  urlText: {
+    color: '#014f67',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    textDecorationLine: 'underline',
   },
 });
