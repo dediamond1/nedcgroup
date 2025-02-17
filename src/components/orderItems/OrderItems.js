@@ -1,92 +1,101 @@
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { AppText } from '../appText';
-import { format } from 'date-fns';
+import { StyleSheet, View, TouchableOpacity } from "react-native"
+import { AppText } from "../appText"
+import { format } from "date-fns"
+import Icon from "react-native-vector-icons/Ionicons"
 
 export const OrderItems = ({ item, onPress, operator }) => {
-  const {
-    voucherNumber,
-    OrderDate,
-    voucherDescription,
-  } = item || {};
+  const { voucherNumber, OrderDate, voucherDescription } = item || {}
 
-  // Ensure OrderDate is not null or undefined
   const dateObj = new Date(OrderDate)
+  const dateFormat = "dd-MM-yyyy"
+  const timeFormat = "HH:mm"
 
-  // Define the format for date and time
-  const dateFormat = 'dd-MM-yyyy'; // Change this format as needed
-  const timeFormat = 'HH:mm'; // Change this format as needed
-
-  // Format the date and time
-  const formattedDate = dateObj ? format(dateObj, dateFormat) : '';
-  const formattedTime = dateObj ? format(dateObj, timeFormat) : '';
+  const formattedDate = dateObj ? format(dateObj, dateFormat) : ""
+  const formattedTime = dateObj ? format(dateObj, timeFormat) : ""
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      activeOpacity={0.7}
-      onPress={onPress}>
+    <TouchableOpacity style={styles.container} activeOpacity={0.7} onPress={onPress}>
       <View style={styles.content}>
         <View style={styles.voucherSection}>
           <AppText style={styles.voucherTitle} text={voucherDescription} />
-          <AppText style={styles.voucherNumber} text={voucherNumber} />
+          <View style={styles.voucherNumberContainer}>
+            <Icon name="barcode-outline" size={16} color="#fff" style={styles.icon} />
+            <AppText style={styles.voucherNumber} text={voucherNumber} />
+          </View>
         </View>
         <View style={styles.dateSection}>
-          <AppText style={styles.dateValue} text={formattedDate} />
-          <AppText style={styles.timeValue} text={`Tid: ${formattedTime}`} />
+          <View style={styles.dateContainer}>
+            <Icon name="calendar-outline" size={16} color="#fff" style={styles.icon} />
+            <AppText style={styles.dateValue} text={formattedDate} />
+          </View>
+          <View style={styles.timeContainer}>
+            <Icon name="time-outline" size={16} color="#fff" style={styles.icon} />
+            <AppText style={styles.timeValue} text={formattedTime} />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#3b3687',
+    backgroundColor: "#3b3687",
     marginVertical: 8,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
   content: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   voucherSection: {
     flex: 1,
   },
   voucherTitle: {
     fontSize: 16,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
+    color: "#fff",
+    fontFamily: "ComviqSansWebBold",
+    marginBottom: 5,
+  },
+  voucherNumberContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   voucherNumber: {
     fontSize: 14,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
+    color: "#fff",
+    fontFamily: "ComviqSansWebBold",
   },
   dateSection: {
-    textAlign: 'right',
+    alignItems: "flex-end",
   },
-  dateLabel: {
-    fontSize: 14,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   dateValue: {
     fontSize: 14,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
-    marginBottom: 2,
+    color: "#fff",
+    fontFamily: "ComviqSansWebBold",
   },
   timeValue: {
     fontSize: 14,
-    color: '#fff',
-    fontFamily: 'ComviqSansWebBold',
+    color: "#fff",
+    fontFamily: "ComviqSansWebBold",
   },
-});
+  icon: {
+    marginRight: 5,
+  },
+})
+

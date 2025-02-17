@@ -4,7 +4,7 @@ const itemKey = 'authToken';
 const bluetoothKey = 'bl-';
 const terminalKey = 'terminal';
 
-export const storeToken = async (authtoken: any): Promise<void> => {
+export const storeToken = async (authtoken) => {
   try {
     const jsonData = JSON.stringify(authtoken);
     console.log('jsonData', jsonData);
@@ -14,7 +14,7 @@ export const storeToken = async (authtoken: any): Promise<void> => {
   }
 };
 
-export const saveBluetooth = async (authtoken: any): Promise<void> => {
+export const saveBluetooth = async (authtoken) => {
   try {
     const jsonData = JSON.stringify(authtoken);
     console.log('jsonData', jsonData);
@@ -24,7 +24,7 @@ export const saveBluetooth = async (authtoken: any): Promise<void> => {
   }
 };
 
-export const removeBluetooth = async (): Promise<void> => {
+export const removeBluetooth = async ()=> {
   try {
     await AsyncStorage.removeItem(bluetoothKey);
   } catch (error) {
@@ -32,7 +32,7 @@ export const removeBluetooth = async (): Promise<void> => {
   }
 };
 
-export const getBluetooth = async (): Promise<string | null> => {
+export const getBluetooth = async () => {
   try {
     return await AsyncStorage.getItem(bluetoothKey);
   } catch (error) {
@@ -41,7 +41,7 @@ export const getBluetooth = async (): Promise<string | null> => {
   }
 };
 
-export const getToken = async (): Promise<string | null> => {
+export const getToken = async () => {
   try {
     return await AsyncStorage.getItem(itemKey);
   } catch (error) {
@@ -50,7 +50,7 @@ export const getToken = async (): Promise<string | null> => {
   }
 };
 
-export const removeToken = async (): Promise<void> => {
+export const removeToken = async () => {
   try {
     await AsyncStorage.removeItem(itemKey);
   } catch (error) {
@@ -58,7 +58,7 @@ export const removeToken = async (): Promise<void> => {
   }
 };
 
-export const storeTerminalId = async (termId: string): Promise<void> => {
+export const storeTerminalId = async (termId) => {
   try {
     await AsyncStorage.setItem(terminalKey, termId);
   } catch (error) {
@@ -66,7 +66,7 @@ export const storeTerminalId = async (termId: string): Promise<void> => {
   }
 };
 
-export const getTerminalId = async (): Promise<string | null> => {
+export const getTerminalId = async () => {
   try {
     return await AsyncStorage.getItem(terminalKey);
   } catch (error) {
