@@ -1,30 +1,42 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Alert, StyleSheet, View, TouchableOpacity, Text, Dimensions } from 'react-native';
-import { AppButton } from '../../components/button/AppButton';
-import { TopHeader } from '../../components/header/TopHeader';
-import { OrderItems } from '../../components/orderItems/OrderItems';
-import { CustomAlert } from '../../components/warningAlert/CustomAlert';
-import { baseUrl } from '../../constants/api';
-import { AuthContext } from '../../context/auth.context';
-import { AppScreen } from '../../helper/AppScreen';
-import { NormalLoader } from '../../../helper/Loader2';
+import React, {useContext, useState, useEffect} from 'react';
+import {
+  Alert,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+} from 'react-native';
+import {AppButton} from '../../components/button/AppButton';
+import {TopHeader} from '../../components/header/TopHeader';
+import {OrderItems} from '../../components/orderItems/OrderItems';
+import {CustomAlert} from '../../components/warningAlert/CustomAlert';
+import {baseUrl} from '../../constants/api';
+import {AuthContext} from '../../context/auth.context';
+import {AppScreen} from '../../helper/AppScreen';
+import {NormalLoader} from '../../../helper/Loader2';
 import * as Animatable from 'react-native-animatable';
-import { BottomSheet } from '../../components/BottomSheet';
-import { AnimatedStatus } from '../../../helper/AnimatedStatus';
-import { Receipt } from '../../../helper/Kvitto';
-import { BluetoothEscposPrinter, BluetoothManager } from '@brooons/react-native-bluetooth-escpos-printer';
-import { format } from 'date-fns';
-import { logo } from '../qrCode/logo';
+import {BottomSheet} from '../../components/BottomSheet';
+import {AnimatedStatus} from '../../../helper/AnimatedStatus';
+import {Receipt} from '../../../helper/Kvitto';
+import {
+  BluetoothEscposPrinter,
+  BluetoothManager,
+} from '@brooons/react-native-bluetooth-escpos-printer';
+import {format} from 'date-fns';
+import {logo} from '../qrCode/logo';
 import {logo as logoLyca} from '../lyca/logo';
 import axios from 'axios';
 import deviceManager from 'react-native-device-info';
-import { getBluetooth, saveBluetooth } from '../../helper/storage';
-import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
-import categories from '../../utils/category-subcategory.json'
-import { AppText } from '../../components/appText';
-const { width } = Dimensions.get('window');
+import {getBluetooth, saveBluetooth} from '../../helper/storage';
+import {useGetCompanyInfo} from '../../hooks/useGetCompanyInfo';
+import categories from '../../utils/category-subcategory.json';
+import {AppText} from '../../components/appText';
+const {width} = Dimensions.get('window');
+import {operatorConfig} from './voucherUtils'; // your util file
+import { halebopLogo, teliaLogo } from '../telia-halebop/teliaHalebopLogos';
 
-export const OrderDetails = ({ route, navigation }) => {
+export const OrderDetails = ({route, navigation}) => {
   const [showWarning, setShowWarning] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
@@ -34,12 +46,29 @@ export const OrderDetails = ({ route, navigation }) => {
   const [name, setName] = useState('');
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
-  const { data, companyInfo, operator } = route.params || {};
-  const { user } = useContext(AuthContext);
+  const {data, companyInfo, operator} = route.params || {};
+  const {user} = useContext(AuthContext);
 
+  const axiosConf = axios.create({
+        baseURL: baseUrl,
+        headers: {
+          'Content-type': 'application/json',
+          authorization: `Bearer ${user}`,
+        },
+      });
 
-  const { voucherNumber, OrderDate, serialNumber, voucherDescription, id, voucherAmount, ean, expireDate, title } = data || {};
-
+  const {
+    voucherNumber,
+    OrderDate,
+    serialNumber,
+    voucherDescription,
+    id,
+    voucherAmount,
+    ean,
+    expireDate,
+    title,
+    prebookId
+  } = data || {};
 
   useEffect(() => {
     const initBluetooth = async () => {
@@ -53,7 +82,6 @@ export const OrderDetails = ({ route, navigation }) => {
         const enabled = await BluetoothManager.checkBluetoothEnabled();
         if (!enabled) {
           await BluetoothManager.enableBluetooth();
-          
         }
 
         const blStorage = await getBluetooth();
@@ -77,7 +105,10 @@ export const OrderDetails = ({ route, navigation }) => {
         }
       } catch (error) {
         console.error('Bluetooth-initialiseringsfel:', error);
-        Alert.alert('Bluetooth-fel', 'Det gick inte att initiera Bluetooth. Försök igen.');
+        Alert.alert(
+          'Bluetooth-fel',
+          'Det gick inte att initiera Bluetooth. Försök igen.',
+        );
       }
     };
 
@@ -90,19 +121,60 @@ export const OrderDetails = ({ route, navigation }) => {
     setDate(format(orderDate, 'yyyy-MM-dd'));
   }, [OrderDate]);
 
+  const retunOrderTeliaHalebop = async () => {
+    try {
+      setShowWarning(true);
+      setLoading(true);
+
+      
+
+      const {data: resData} = await axiosConf.delete('/api/teliaOrder', {
+        data: {
+          voucherNumber,
+          OrderDate,
+          reason: 'retur',
+          serialNumber,
+          id,
+          prebookId,
+           operator: operator === "TELIA" ? "Telia" : "Halebop", // <--- backend expects this for TELIA & HALEBOP
+        },
+      });
+
+      console.log(resData);
+
+      if (resData.message === 'Order Returned.') {
+        setLoading(false);
+        setStatus('success');
+        setMessage('RETUR GODKÄND');
+      } else if (
+        resData?.data?.response?.errorInformation?.errors?.[0]
+          ?.statusDescription ===
+        'Cant cancel voucher because it was already barred'
+      ) {
+        setShowWarning(false);
+        setLoading(false);
+        setStatus('failed');
+        setMessage('VOUCHER REDAN ANVÄND!');
+      } else {
+        setShowWarning(false);
+        setLoading(false);
+        setStatus('failed');
+        setMessage('VOUCHER REDAN ANVÄND!');
+      }
+    } catch (error) {
+      setShowWarning(false);
+      setLoading(false);
+      console.log(error);
+      Alert.alert('Fel', 'Det gick inte att returnera ordern');
+    }
+  };
+
   const retunOrder = async () => {
     try {
       setShowWarning(true);
       setLoading(true);
-      const axiosConf = axios.create({
-        baseURL: baseUrl,
-        headers: {
-          'Content-type': 'application/json',
-          authorization: `Bearer ${user}`,
-        },
-      });
 
-      const { data: resData } = await axiosConf.delete('/api/order', {
+      const {data: resData} = await axiosConf.delete('/api/order', {
         data: {
           voucherNumber: voucherNumber,
           OrderDate: OrderDate,
@@ -112,12 +184,15 @@ export const OrderDetails = ({ route, navigation }) => {
         },
       });
 
+      console.log(resData);
+
       if (resData.message === 'Order Returned.') {
         setLoading(false);
         setStatus('success');
         setMessage('RETUR GODKÄND');
       } else if (
-        resData?.data?.response?.errorInformation?.errors?.[0]?.statusDescription ===
+        resData?.data?.response?.errorInformation?.errors?.[0]
+          ?.statusDescription ===
         'Cant cancel voucher because it was already barred'
       ) {
         setShowWarning(false);
@@ -150,116 +225,150 @@ export const OrderDetails = ({ route, navigation }) => {
       await BluetoothManager.connect(boundAddress);
       await BluetoothEscposPrinter.printerInit();
       await BluetoothEscposPrinter.printerLeftSpace(0);
-      await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
-      await BluetoothEscposPrinter.printPic(operator !== "LYCA"?  logo : logoLyca, { width: 300, left: 45 });
+      await BluetoothEscposPrinter.printerAlign(
+        BluetoothEscposPrinter.ALIGN.CENTER,
+      );
 
-      await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
+      // Logo handling
+      let logoToPrint = logo; // default
+      if (operator === 'LYCA') logoToPrint = logoLyca;
+      if (operator === 'TELIA') logoToPrint = teliaLogo;
+      if (operator === 'HALEBOP') logoToPrint = halebopLogo;
+      await BluetoothEscposPrinter.printPic(logoToPrint, {
+        width: 300,
+        left: 45,
+      });
+
+      // Title & description
+      await BluetoothEscposPrinter.printerAlign(
+        BluetoothEscposPrinter.ALIGN.CENTER,
+      );
       await BluetoothEscposPrinter.printText(`${title}`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
       await BluetoothEscposPrinter.printText(`${voucherDescription}`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText('kod', { widthtimes: 1 });
+      await BluetoothEscposPrinter.printText('kod', {widthtimes: 1});
       await BluetoothEscposPrinter.printText('\r\n', {});
 
+      // Voucher number
       await BluetoothEscposPrinter.printText(`${voucherNumber}`, {
         widthtimes: 1,
         fonttype: 1,
       });
       await BluetoothEscposPrinter.printText('\r\n', {});
-      operator === "LYCA" && await BluetoothEscposPrinter.printText(
-        `Tanka registrerat kontantkort   genom att ringa *101*koden#`,
-        { fonttype: 1 }
-      );
-      await BluetoothEscposPrinter.printText('\r\n', {});
 
-      await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
+      // Get operator-specific config
+      const config =
+        operatorConfig[operator] || operatorConfig['COMVIQ'];
+
+      // Recharge text
+      if (config.rechargeText) {
+        await BluetoothEscposPrinter.printText(
+          config.rechargeText(voucherNumber),
+          {fonttype: 1},
+        );
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+
+      // QR Code
+      await BluetoothEscposPrinter.printerAlign(
+        BluetoothEscposPrinter.ALIGN.CENTER,
+      );
       await BluetoothEscposPrinter.printQRCode(
-        operator !== "LYCA" ? `*110*${voucherNumber}#` :  `*101*${voucherNumber}#`,
+        config.qrCode(voucherNumber),
         170,
-        BluetoothEscposPrinter.ERROR_CORRECTION.L
+        BluetoothEscposPrinter.ERROR_CORRECTION.L,
       );
-      await BluetoothEscposPrinter.printText('skanna for att tanka', { fonttype: 1 });
-
+      await BluetoothEscposPrinter.printText('skanna för att tanka', {
+        fonttype: 1,
+      });
       await BluetoothEscposPrinter.printText('\r\n', {});
+
+      // Expire date
       const formatedDate = format(new Date(expireDate), 'yyyy-MM-dd');
-
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`koden ar giltig: ${formatedDate}`, {});
-      
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      operator === "LYCA" && await BluetoothEscposPrinter.printText(
-        `Vid hjalp kontakta var kundtjanst pa telefon 3322 eler besok var webbplats www.lycamobile.se`,
-        { fonttype: 1 }
+      await BluetoothEscposPrinter.printText(
+        `\r\nkoden är giltig: ${formatedDate}`,
+        {},
       );
-
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`Serienummer: ${serialNumber}`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
 
-      operator !== "LYCA" && await BluetoothEscposPrinter.printText(
-        `Tanka ditt kontantkort genom att trycka *110*koden# och lur eller skanna QR-koden ovan`,
-        { fonttype: 1 }
+      // Support info
+      if (config.support) {
+        await BluetoothEscposPrinter.printText(config.support, {fonttype: 1});
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+
+      // Serial number
+      await BluetoothEscposPrinter.printText(
+        `Serienummer: ${serialNumber}`,
+        {},
       );
-
-      
-      operator !== "LYCA" && await BluetoothEscposPrinter.printText('\r\n', {});
-      operator !== "LYCA" && await BluetoothEscposPrinter.printText(
-        `Kontrollera ditt saldo genom att trycka *111# och lur`,
-        { fonttype: 1 }
-      );
-
       await BluetoothEscposPrinter.printText('\r\n', {});
-      operator !== "LYCA" && await BluetoothEscposPrinter.printText(
-        `For fragor och villkor kontakta COMVIQs kundtjsnst på 212 eller 0772-21 21 21`,
-        { fonttype: 1 }
-      );
 
-      await BluetoothEscposPrinter.printText('\r\n', {});
+      // Balance check (if applicable)
+      if (config.balanceCheck) {
+        await BluetoothEscposPrinter.printText(config.balanceCheck, {
+          fonttype: 1,
+        });
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+
+      // Time & date
       await BluetoothEscposPrinter.printText(`${time}`, {});
       await BluetoothEscposPrinter.printText(` ${date}`, {});
-      await BluetoothEscposPrinter.printText('\r\n', {});
+      await BluetoothEscposPrinter.printText('\r\n\r\n', {});
 
+      // Company info
+      await BluetoothEscposPrinter.printText(
+        ` ${companyInfo?.manager?.name?.toUpperCase()}`,
+        {},
+      );
       await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(` ${companyInfo?.manager?.name?.toUpperCase()}`, {});
+      await BluetoothEscposPrinter.printText(
+        `${
+          companyInfo?.manager?.orgNumber?.toString()?.length > 6
+            ? companyInfo?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
+            : companyInfo?.manager?.orgNumber
+        }`,
+        {},
+      );
       await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`${companyInfo?.manager?.orgNumber?.toString()?.length > 6
-        ? companyInfo?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
-        : companyInfo?.manager?.orgNumber
-        }`, {});
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`Kopt datum och tid:`, {});
+      await BluetoothEscposPrinter.printText(`Köpt datum och tid:`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
       await BluetoothEscposPrinter.printText(`${time}`, {});
       await BluetoothEscposPrinter.printText(` ${date}`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
 
       // Find the EAN for the voucher
-      let voucherEan = '';
-      categories.category.forEach(category => {
-        category.subcategory.forEach(subcategory => {
-          if (subcategory.name === title) {
-            voucherEan = subcategory.ean;
-          }
-        });
-      });
+      // let voucherEan = '';
+      // categories.category.forEach(category => {
+      //   category.subcategory.forEach(subcategory => {
+      //     if (subcategory.name === title) {
+      //       voucherEan = subcategory.ean;
+      //     }
+      //   });
+      // });
 
-      // Print the barcode if EAN is found
-      if (voucherEan) {
-        await BluetoothEscposPrinter.printBarCode(
-          voucherEan,
-          BluetoothEscposPrinter.BARCODETYPE.EAN13,
-          3,
-          120,
-          0,
-          2
-        );
-      }
+      // // Print the barcode if EAN is found
+      // if (voucherEan) {
+      //   await BluetoothEscposPrinter.printBarCode(
+      //     voucherEan,
+      //     BluetoothEscposPrinter.BARCODETYPE.EAN13,
+      //     3,
+      //     120,
+      //     0,
+      //     2,
+      //   );
+      // }
 
       await BluetoothEscposPrinter.printText('\r\n\r\n\r\n', {});
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      Alert.alert('Fel', error.message || 'Det gick inte att skriva ut voucher');
+      Alert.alert(
+        'Fel',
+        error.message || 'Det gick inte att skriva ut voucher',
+      );
     }
   };
 
@@ -277,7 +386,7 @@ export const OrderDetails = ({ route, navigation }) => {
         voucherCode={voucherNumber}
         status={status}
         title={status === 'failed' ? 'INTE GODKÄND' : 'GODKÄND'}
-        message={message}
+        // message={message}
         onClose={() => {
           navigation.goBack();
         }}
@@ -293,26 +402,44 @@ export const OrderDetails = ({ route, navigation }) => {
         onPress={() => navigation.goBack()}
       />
 
-      {operator === "LYCA" && <View style={{ backgroundColor: "orange", padding: 10, alignItems: "center" }}>
-        <AppText text={"Ett Lyca-kort kan inte makuleras efter köp."} style={{ color: "#000" }} />
-      </View>}
-
+      {operator === 'LYCA' && (
+        <View
+          style={{
+            backgroundColor: 'orange',
+            padding: 10,
+            alignItems: 'center',
+          }}>
+          <AppText
+            text={'Ett Lyca-kort kan inte makuleras efter köp.'}
+            style={{color: '#000'}}
+          />
+        </View>
+      )}
 
       <View style={styles.container}>
-
         <OrderItems item={data} />
-        <View style={[styles.buttonContainer, { flexDirection: operator === "LYCA" ? "column" : "row" }]}>
-          {operator !== "LYCA" && <AppButton
-            text={'Makulera köp'}
-            style={styles.btn}
-            icon="history"
-            textStyle={styles.btnText}
-            onPress={() => setShowWarning(true)}
-          />}
+        <View
+          style={[
+            styles.buttonContainer,
+            {flexDirection: operator === 'LYCA' ? 'column' : 'row'},
+          ]}>
+          {operator !== 'LYCA' && (
+            <AppButton
+              text={'Makulera köp'}
+              style={styles.btn}
+              icon="history"
+              textStyle={styles.btnText}
+              onPress={() => setShowWarning(true)}
+            />
+          )}
 
           <AppButton
             text={'Skriv ut en kopia'}
-            style={[styles.btn, styles.printBtn, { width: operator === "LYCA" ? "100%" : "auto" }]}
+            style={[
+              styles.btn,
+              styles.printBtn,
+              {width: operator === 'LYCA' ? '100%' : 'auto'},
+            ]}
             icon="printer"
             textStyle={styles.btnText}
             onPress={printVoucher}
@@ -323,10 +450,19 @@ export const OrderDetails = ({ route, navigation }) => {
       {showWarning && (
         <BottomSheet
           title={'ÄR DU SÄKER ATT DU VILL MAKULERA VOUCHERN?'}
-          onPressAccept={() => retunOrder()}
-          onClose={() => {
-            setShowWarning(false);
+          onPressAccept={() => {
+            if (operator === 'COMVIQ') {
+              retunOrder();
+            } else if (operator === 'TELIA' || operator === 'HALEBOP') {
+              retunOrderTeliaHalebop();
+            } else {
+              Alert.alert(
+                'Ej tillgängligt',
+                `Retur stöds inte för ${operator}.`,
+              );
+            }
           }}
+          onClose={() => setShowWarning(false)}
           visible={showWarning}
         />
       )}

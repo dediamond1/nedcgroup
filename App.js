@@ -32,6 +32,7 @@ const App = () => {
   const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
   const [announcementError, setAnnouncementError] = useState(false);
   const [isAnnouncementPaused, setIsAnnouncementPaused] = useState(false);
+  const [teliaHalebop, setTeliaHalebop]= useState('')
 
   const {
     inActive,
@@ -196,6 +197,8 @@ const App = () => {
         setClosed,
         setInActive,
         getCompanyInfo,
+        teliaHalebop, 
+        setTeliaHalebop
       }}>
       <NavigationContainer>
         {user ? <AppSideNavigation /> : <AuthNavigation />}

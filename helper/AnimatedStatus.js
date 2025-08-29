@@ -1,267 +1,430 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import * as Animatable from 'react-native-animatable';
-//import FastImage from 'react-native-fast-image';
-import { TopHeader } from '../src/components/header/TopHeader';
-import { date } from 'yup';
-// import { generateBarcodeBase64 } from './BarcodeGenerator';
-
+import {TopHeader} from '../src/components/header/TopHeader';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-export const AnimatedStatus = ({ status, title, message, onClose, voucherCode, ean, voucherDescription, OrderDate }) => {
-    const [animationType, setAnimationType] = useState('bounceIn');
-    const [currentTime, setCurrentTime] = useState(date);
-    const [barcodeBase64, setBarcodeBase64] = useState();
+export const AnimatedStatus = ({
+  status,
+  title,
+  message,
+  onClose,
+  voucherCode,
+  ean,
+  voucherDescription,
+  OrderDate,
+}) => {
+  const [animationType, setAnimationType] = useState('bounceIn');
 
-    const backgroundColor = status === 'failed' ? '#E41B88' : '#3dc5f5';
+  const isSuccess = status !== 'failed';
 
+  // Clean color schemes without gradients
+  const colors = {
+    success: {
+      primary: '#667eea',
+      secondary: '#4facfe',
+      accent: '#7f97faff',
+      text: '#ffffff',
+      buttonBg: '#ffffff',
+      buttonText: '#667eea',
+      overlay: 'rgba(255, 255, 255, 0.15)',
+    },
+    failed: {
+      primary: '#ff416c',
+      secondary: '#ff6b9d',
+      accent: '#ee7998ff',
+      text: '#ffffff',
+      buttonBg: '#ffffff',
+      buttonText: '#ff416c',
+      overlay: 'rgba(255, 255, 255, 0.15)',
+    },
+  };
 
-    useEffect(() => {
-        fetch('http://worldtimeapi.org/api/timezone/Europe/Stockholm')
-            .then(response => response.json())
-            .then(data => setCurrentTime(new Date(data.datetime)))
-            .catch(error => console.error(error));
-    }, []);
+  const currentColors = isSuccess ? colors.success : colors.failed;
 
+  useEffect(() => {
+    setAnimationType(status === 'failed' ? 'shake' : 'bounceIn');
+  }, [status]);
 
+  const StatusIcon = () => (
+    <Animatable.View
+      animation={isSuccess ? 'pulse' : 'flash'}
+      iterationCount="infinite"
+      duration={2000}
+      style={styles.iconContainer}>
+      <View style={[styles.icon, {backgroundColor: currentColors.accent}]}>
+        <Text style={styles.iconText}>{isSuccess ? '✓' : '✗'}</Text>
+      </View>
+    </Animatable.View>
+  );
 
-    useEffect(() => {
-        if (status === 'failed') {
-            setAnimationType('shake');
+  const renderFloatingElements = () => {
+    const statusText = isSuccess ? 'GODKÄND' : 'INTE GODKÄND';
+    const elements = [];
 
-        } else {
-            setAnimationType('bounceIn');
-        }
-    }, [status]);
+    for (let i = 0; i < 5; i++) {
+      elements.push(
+        <Animatable.View
+          key={i}
+          animation="fadeInUp"
+          duration={2000}
+          delay={i * 300}
+          style={[
+            styles.floatingElement,
+            {
+              top: 120 + i * 90,
+              left: i % 2 === 0 ? 30 : windowWidth - 180,
+              opacity: 0.08 - i * 0.01,
+            },
+          ]}>
+          <Text style={[styles.floatingText, {color: currentColors.text}]}>
+            {statusText}
+          </Text>
+        </Animatable.View>,
+      );
+    }
 
+    return elements;
+  };
 
+  const ParticleBackground = () => (
+    <View style={styles.particleContainer}>
+      {[...Array(12)].map((_, i) => (
+        <Animatable.View
+          key={i}
+          animation="pulse"
+          duration={2000 + i * 150}
+          iterationCount="infinite"
+          style={[
+            styles.particle,
+            {
+              left: Math.random() * windowWidth,
+              top: Math.random() * windowHeight,
+              backgroundColor: currentColors.accent,
+              opacity: 0.1,
+              width: 3 + Math.random() * 4,
+              height: 3 + Math.random() * 4,
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
 
+  return (
+    <>
+      <Animatable.View
+        animation="fadeIn"
+        delay={900}
+        style={styles.closeButtonContainer}>
+        <TouchableOpacity
+          style={[styles.closeButton, {backgroundColor: currentColors.accent}]}
+          onPress={onClose}
+          activeOpacity={0.8}>
+          <Text style={styles.closeButtonText}>Stäng</Text>
+          <View style={styles.closeIconContainer}>
+            <View style={[styles.closeLine1, {backgroundColor: '#ffffff'}]} />
+            <View style={[styles.closeLine2, {backgroundColor: '#ffffff'}]} />
+          </View>
+        </TouchableOpacity>
+      </Animatable.View>
+      <View
+        style={[
+          styles.backgroundSolid,
+          {backgroundColor: currentColors.primary},
+        ]}
+      />
 
-    const formatDateTime = (dateTime) => {
+      <ParticleBackground />
 
-        const formatTime = (time) => {
-            const options = { hour: '2-digit', minute: '2-digit', hour12: false };
-            return time?.toLocaleTimeString('sv-US', options);
-        };
+      <TopHeader title={message} style={{backgroundColor: 'transparent'}} />
 
-        const formatDate = (date) => {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return date?.toLocaleDateString('en-US', options);
-        };
+      <Animatable.View
+        animation={animationType}
+        duration={800}
+        style={styles.container}>
+        <View style={[styles.card, {backgroundColor: currentColors.primary}]}>
+          {/* Clean overlay */}
+          <View
+            style={[
+              styles.cleanOverlay,
+              {backgroundColor: currentColors.overlay},
+            ]}
+          />
 
-        return {
-            year: new Date(OrderDate).getFullYear(),
-            time: formatTime(OrderDate),
-            date: formatDate(OrderDate),
-        };
-    };
+          <StatusIcon />
 
+          <Animatable.Text
+            animation="fadeInDown"
+            delay={300}
+            style={styles.title}>
+            {title}
+          </Animatable.Text>
 
-    const renderFadedTexts = () => {
-        const topTexts = status === 'failed' ? Array(3).fill('INTE GODKÄND') : Array(2).fill('GODKÄND');
-        const bottomTexts = status === 'failed' ? Array(3).fill('INTE GODKÄND') : Array(2).fill('GODKÄND');
-
-        const topTextElements = topTexts.map((text, index) => {
-            return (
-                <Animatable.Text
-                    key={`top_${index}`}
-                    animation="fadeIn"
-                    duration={1500}
-                    delay={index * 100}
-                    style={[styles.fadedText, { ...styles.topFadedText, color: status === 'failed' ? '#fecbe7' : '#90eebf', left: 90, fontSize: status === 'failed' ? 28 : 34, opacity: .2 }]}
-                >
-                    {text}
-                </Animatable.Text>
-            );
-        });
-
-        const bottomTextElements = bottomTexts.map((text, index) => {
-            return (
-                <Animatable.Text
-                    key={`bottom_${index}`}
-                    animation="fadeIn"
-                    duration={1500}
-                    delay={index * 100}
-                    style={[styles.fadedText, { ...styles.bottomFadedText, color: status === 'failed' ? '#fecbe7' : '#90eebf', fontSize: status === 'failed' ? 28 : 34, right: 90 }]}
-                >
-                    {text}
-                </Animatable.Text>
-            );
-        });
-
-        return (
-            <>
-                {topTextElements}
-                {bottomTextElements}
-            </>
-        );
-    };
-
-    return (
-        <>
-
-
-            <TopHeader title={message} style={{ backgroundColor }} />
-
-            <View style={[styles.container, { backgroundColor }]}>
-                <Text style={styles.title}>{title}</Text>
-                {/* <Text style={styles.message}>{message}</Text> */}
-                <View style={styles.voucherContainer}>
-                    <View style={styles.header}>
-                        <Text style={styles.storeName}>{voucherDescription ? voucherDescription : ''}</Text>
-                    </View>
-                    <View style={styles.content}>
-                        <Text style={styles.voucherCode}>Voucher nr:</Text>
-                        <Text style={styles.voucherCode}> {voucherCode ? voucherCode : ''}</Text>
-                    </View>
-                </View>
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        {
-                            backgroundColor: status === 'failed' ? '#F7D8E6' : '#77D6F8',
-                        },
-                    ]}
-                    onPress={onClose}
-                >
-                    <Text
-                        style={[
-                            styles.buttonText,
-                            { color: status === 'failed' ? '#e2027b' : '#fff' },
-                        ]}
-                    >
-                        OK
-                    </Text>
-                </TouchableOpacity>
+          <Animatable.View
+            animation="fadeInUp"
+            delay={500}
+            style={styles.voucherContainer}>
+            <View style={styles.voucherHeader}>
+              <View style={styles.decorativeLine} />
+              <Text style={styles.storeName}>
+                {voucherDescription || 'Voucher'}
+              </Text>
+              <View style={styles.decorativeLine} />
             </View>
-            {renderFadedTexts()}
-        </>
-    );
+
+            <View style={styles.voucherContent}>
+              <View style={styles.voucherRow}>
+                <Text style={styles.voucherLabel}>Voucher nr:</Text>
+                <Text style={styles.voucherCode}>{voucherCode || '---'}</Text>
+              </View>
+            </View>
+          </Animatable.View>
+
+          <Animatable.View
+            animation="bounceIn"
+            delay={700}
+            style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, {backgroundColor: currentColors.buttonBg}]}
+              onPress={onClose}
+              activeOpacity={0.8}>
+              <Text
+                style={[styles.buttonText, {color: currentColors.buttonText}]}>
+                ✓ OK
+              </Text>
+            </TouchableOpacity>
+          </Animatable.View>
+
+          {/* Enhanced Close Button */}
+          <Animatable.View
+            animation="fadeIn"
+            delay={900}
+            style={styles.closeButtonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.closeButton,
+                {backgroundColor: currentColors.accent},
+              ]}
+              onPress={onClose}
+              activeOpacity={0.8}>
+              <Text style={styles.closeButtonText}>Stäng</Text>
+              <View style={styles.closeIconContainer}>
+                <View
+                  style={[styles.closeLine1, {backgroundColor: '#ffffff'}]}
+                />
+                <View
+                  style={[styles.closeLine2, {backgroundColor: '#ffffff'}]}
+                />
+              </View>
+            </TouchableOpacity>
+          </Animatable.View>
+        </View>
+      </Animatable.View>
+
+      {renderFloatingElements()}
+    </>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 16,
-        borderRadius: 20,
-        alignSelf: 'center',
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: [{ translateX: -(windowWidth - 32) / 2 }, { translateY: -80 }],
-        width: windowWidth - 32,
-        elevation: 5,
-        zIndex: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginBottom: 10,
-        textAlign: 'center',
-        fontFamily: 'ComviqSansWebRegular',
-    },
-    message: {
-        fontSize: 17,
-        color: '#fff',
-        marginBottom: 16,
-        textAlign: 'center',
-        lineHeight: 24,
-        fontFamily: 'ComviqSansWebBold',
-    },
-    button: {
-        width: "100%",
-        marginTop: 5,
-        borderRadius: 8,
-        alignItems: 'center',
-        padding: 16,
-        justifyContent: 'center',
-    },
-    buttonText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    fadedText: {
-        position: 'absolute',
-        fontSize: 40,
-        elevation: 5,
-        opacity: 0.5, // Adjust the opacity value as needed
-        fontFamily: 'ComviqSansWebRegular',
-    },
-    topFadedText: {
-        top: 140,
-        left: 40,
-        elevation: 5,
-        fontFamily: 'ComviqSansWebRegular',
-        transform: [
-            { rotate: '-0deg' },
-        ],
-    },
-    bottomFadedText: {
-        bottom: 45,
-        right: 50,
-        fontFamily: 'ComviqSansWebRegular',
-        opacity: 0.1, // Adjust the opacity value as needed
-        transform: [
-            { rotate: '-0deg' },
-        ],
-    },
-    voucherContainer: {
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        padding: 10,
-        marginBottom: 16,
-        width: '100%', // Take full width
-    },
-    header: {
-        paddingBottom: 8,
-        borderBottomWidth: 1,
-        marginVertical: 5,
-        borderBottomColor: '#FFF',
-        width: '100%', // Take full width
-        alignItems: 'center',
-    },
-    storeName: {
-        fontSize: 18,
-        fontFamily: 'ComviqSansWebRegular',
-        fontWeight: 'bold',
-        color: '#FFF',
-    },
-    content: {
-        paddingTop: 8,
-        flexDirection: "row",
-        justifyContent: "space-between"
-    },
-    voucherCode: {
-        fontSize: 14,
-        color: '#fff',
-        fontFamily: 'ComviqSansWebRegular',
-        textTransform: "uppercase",
-        marginBottom: 8,
-    },
-    amount: {
-        fontSize: 17.2,
-        color: '#fff',
-        fontFamily: 'ComviqSansWebBold',
-        marginBottom: 8,
-        marginVertical: 8
-    },
-    date: {
-        fontSize: 14,
-        fontFamily: 'ComviqSansWebBold',
-        color: '#fff',
-    },
+  backgroundSolid: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1,
+  },
+  particleContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  particle: {
+    position: 'absolute',
+    borderRadius: 50,
+  },
+  container: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{translateX: -(windowWidth - 40) / 2}, {translateY: -200}],
+    width: windowWidth - 40,
+    zIndex: 10,
+  },
+  card: {
+    borderRadius: 24,
+    padding: 28,
+    alignItems: 'center',
+  },
+  cleanOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 24,
+  },
+  iconContainer: {
+    marginBottom: 20,
+    zIndex: 2,
+  },
+  icon: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText: {
+    fontSize: 42,
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 24,
+    textAlign: 'center',
+    fontFamily: 'ComviqSansWebRegular',
+    zIndex: 2,
+  },
+  voucherContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 18,
+    padding: 24,
+    marginBottom: 28,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    zIndex: 2,
+  },
+  voucherHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  decorativeLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    marginHorizontal: 15,
+  },
+  storeName: {
+    fontSize: 20,
+    fontFamily: 'ComviqSansWebRegular',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    textAlign: 'center',
+    paddingHorizontal: 15,
+  },
+  voucherContent: {
+    gap: 16,
+  },
+  voucherRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  voucherLabel: {
+    fontSize: 15,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontFamily: 'ComviqSansWebRegular',
+  },
+  voucherCode: {
+    fontSize: 17,
+    color: '#ffffff',
+    fontFamily: 'ComviqSansWebRegular',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  voucherDate: {
+    fontSize: 15,
+    color: '#ffffff',
+    fontFamily: 'ComviqSansWebRegular',
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    width: '100%',
+    zIndex: 2,
+  },
+  button: {
+    borderRadius: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    fontFamily: 'ComviqSansWebRegular',
+  },
+  floatingElement: {
+    position: 'absolute',
+    zIndex: 1,
+  },
+  floatingText: {
+    fontSize: 28,
+    fontFamily: 'ComviqSansWebRegular',
+    fontWeight: 'bold',
+    transform: [{rotate: '-12deg'}],
+  },
+  closeButtonContainer: {
+    top: 25,
+    padding: 10,
+    zIndex: 10,
+  },
+  closeButton: {
+    width: '100%',
+    height: 46,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    gap: 6,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    fontFamily: 'ComviqSansWebRegular',
+  },
+  closeIconContainer: {
+    width: 12,
+    height: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeLine1: {
+    position: 'absolute',
+    width: 12,
+    height: 1.5,
+    borderRadius: 1,
+    transform: [{rotate: '45deg'}],
+  },
+  closeLine2: {
+    position: 'absolute',
+    width: 12,
+    height: 1.5,
+    borderRadius: 1,
+    transform: [{rotate: '-45deg'}],
+  },
 });
-
-

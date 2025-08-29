@@ -12,6 +12,7 @@ import { TestingPrinter } from '../../helper/Printer';
 import { TopNavigationHistory } from '../historyNavigation/TopNavigationHistory';
 import NewsNavigations from '../newsNAvigations/NewsNavigations';
 import LycaNavigation from '../lyckaNavigations/LycaNavigation';
+import { TeliaNavigations } from '../telia/TeliaNavigations';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +32,10 @@ export const AppSideNavigation = () => {
       <Stack.Screen
         name="LYCA_NAVIGATION"
         component={LycaNavigation}
+      />
+      <Stack.Screen
+        name="TELIA_NAVIGATION"
+        component={TeliaNavigations}
       />
       <Stack.Screen
         name="ALL_SIM_CARDS"

@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useLayoutEffect, useContext, useCallback, useEffect } from "react"
-import { View, Alert, TextInput, StyleSheet, TouchableOpacity, ScrollView } from "react-native"
+import React, { useState, useLayoutEffect, useContext, useCallback } from "react"
+import { View, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { AppText } from "../../components/appText"
 import { AppButton } from "../../components/button/AppButton"
@@ -18,8 +18,9 @@ import { PrintModal } from "../../components/modals/PrintModal"
 import { format } from "date-fns"
 import { BluetoothEscposPrinter, BluetoothManager } from "@brooons/react-native-bluetooth-escpos-printer"
 import DeviceInfo from "react-native-device-info"
+import AlertManager from "../../utils/AlertManager"
+import { TextInput } from "react-native-gesture-handler"
 
-// Custom debounce function
 const useDebounce = (func, delay) => {
   const timeoutRef = React.useRef(null)
 
@@ -39,21 +40,18 @@ export const OrderHistory = ({ route }) => {
   const [orderHistory, setOrderHistory] = useState([])
   const [filteredOrderHistory, setFilteredOrderHistory] = useState([])
   const [loading, setLoading] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isPrintModalVisible, setIsPrintModalVisible] = useState(false)
   const [bleOpend, setBleOpen] = useState(false)
   const [boundAddress, setBoundAddress] = useState("")
   const [name, setName] = useState("")
-  const [pairedDs, setPairedDs] = useState([])
-  const [foundDs, setFoundDs] = useState([])
   const navigation = useNavigation()
   const { setInActive } = useContext(AuthContext)
   const { companyInfo, getCompanyInfo } = useGetCompanyInfo()
 
   const getAllOrders = useCallback(async () => {
     try {
-      setIsLoading(true)
+      setLoading(true)
       const jsontoken = await getToken()
       const token = JSON.parse(jsontoken)
       await getCompanyInfo()
@@ -61,34 +59,40 @@ export const OrderHistory = ({ route }) => {
       let url = `${baseUrl}/api/order`
       if (operator === "LYCA") {
         url = `${baseUrl}/api/lyca-order`
+      } else if (operator === "TELIA" || operator === "HALEBOP") {
+        url = `${baseUrl}/api/teliaOrder`
       }
 
       const response = await fetch(url, {
-        method: "GET",
+        method: operator === "TELIA" || operator === "HALEBOP" ? "POST" : "GET",
         headers: {
           authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
+        body: operator === "TELIA" || operator === "HALEBOP" ? JSON.stringify({
+          operator: operator === "TELIA" ? "Telia" : "Halebop"
+        }) : undefined
       })
 
       const data = await response.json()
       if (data?.message === "invalid token in the request.") {
-        Alert.alert("OBS...", "DU HAR BLIVIT UTLOGGAD")
+        AlertManager.show("OBS...", "DU HAR BLIVIT UTLOGGAD")
         await removeToken()
-      }
-      if (data?.message === "Company deativted because you have reached Credit Limit") {
+      } else if (data?.message === "Company deativted because you have reached Credit Limit") {
         setInActive(true)
       } else {
         setOrderHistory(data?.orderlist || [])
         setFilteredOrderHistory(data?.orderlist || [])
       }
-      setIsLoading(false)
     } catch (error) {
-      setIsLoading(false)
       console.error("Error fetching orders:", error)
+      AlertManager.show("Error", "Failed to fetch orders. Please try again.")
+    } finally {
+      setLoading(false)
     }
   }, [operator, getCompanyInfo, setInActive])
 
-  const handleSearch = (text) => {
+  const handleSearch = useCallback((text) => {
     setSearchQuery(text)
     const filtered = orderHistory.filter(
       (item) =>
@@ -96,47 +100,86 @@ export const OrderHistory = ({ route }) => {
         item.serialNumber.toLowerCase().includes(text.toLowerCase()),
     )
     setFilteredOrderHistory(filtered)
-  }
+  }, [orderHistory])
 
   const debouncedSearch = useDebounce(handleSearch, 300)
 
-  const resetSearch = () => {
+  const resetSearch = useCallback(() => {
     setSearchQuery("")
     setFilteredOrderHistory(orderHistory)
-  }
+  }, [orderHistory])
 
   useLayoutEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       getAllOrders()
     })
-    return () => {
-      unsubscribe()
-    }
+    return unsubscribe
   }, [navigation, getAllOrders])
 
-  const openPrintModal = () => {
-    if (filteredOrderHistory.length > 0) {
-      setIsPrintModalVisible(true)
-    } else {
-      Alert.alert("No data", "There is no order history to print.")
+  const initializeBluetooth = useCallback(async () => {
+    try {
+      const isAmu = await DeviceInfo.isEmulator()
+      if (isAmu) {
+        return Alert.alert('obs', "not real device")
+      }
+
+      let enabled = await BluetoothManager.checkBluetoothEnabled()
+      if (!enabled) {
+        enabled = await BluetoothManager.enableBluetooth()
+      }
+      setBleOpen(enabled)
+
+      if (enabled) {
+        const blStorage = await getBluetooth()
+        const alreadyPaired = JSON.parse(blStorage)
+        if (alreadyPaired?.length > 0) {
+          await BluetoothManager.connect(alreadyPaired[0]?.address)
+          setBoundAddress(alreadyPaired[0].address)
+          setName(alreadyPaired[0].name || "UNKNOWN")
+        } else {
+          const devices = await BluetoothManager.scanDevices()
+          const paired = typeof devices.paired === "object" ? devices.paired : JSON.parse(devices.paired)
+          if (paired.length > 0 && paired[0].name === "IposPrinter") {
+            await BluetoothManager.connect(paired[0]?.address)
+            await saveBluetooth(JSON.stringify([paired[0]]))
+            setBoundAddress(paired[0].address)
+            setName(paired[0].name || "UNKNOWN")
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error initializing Bluetooth:", error)
+      AlertManager.show("Error", "Failed to initialize Bluetooth. Please try again.")
     }
-  }
+  }, [])
 
-  const closePrintModal = () => {
+  const openPrintModal = useCallback(() => {
+    if (filteredOrderHistory.length > 0) {
+      initializeBluetooth().then(() => {
+        setIsPrintModalVisible(true)
+      })
+    } else {
+      AlertManager.show("No data", "There is no order history to print.")
+    }
+  }, [filteredOrderHistory, initializeBluetooth])
+
+  const closePrintModal = useCallback(() => {
     setIsPrintModalVisible(false)
-  }
+  }, [])
 
-  const handlePrint = async (option, date) => {
+  
+
+  const handlePrint = useCallback(async (option, date) => {
     try {
       const isRealDevice = await DeviceInfo.isEmulator().then((emulator) => !emulator)
 
       if (!isRealDevice) {
-        Alert.alert("Error", "Printing is not available on emulators. Please use a real device.")
+        AlertManager.show("Error", "Printing is not available on emulators. Please use a real device.")
         return
       }
 
       if (!boundAddress) {
-        Alert.alert("Error", "No printer connected. Please wait while we connect to the printer.")
+        AlertManager.show("Error", "No printer connected. Please wait while we connect to the printer.")
         return
       }
 
@@ -146,204 +189,106 @@ export const OrderHistory = ({ route }) => {
       )
 
       if (filteredOrders.length === 0) {
-        Alert.alert("No data", "There are no orders for the selected date.")
+        AlertManager.show("No data", "There are no orders for the selected date.")
         return
       }
 
       await BluetoothManager.connect(boundAddress)
 
-      await BluetoothEscposPrinter.printerAlign(
-        BluetoothEscposPrinter.ALIGN.CENTER,
-      );
+      await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
 
-      // Print header with operator information
-      await BluetoothEscposPrinter.printText(` ${operator === "LYCA" ? "LYCA" : "COMVIQ"}\n`, {
+      // Print operator information
+      await BluetoothEscposPrinter.printText(`${operator === 'LYCA' ? 'LYCA' : 'COMVIQ'}\n`, {
         fonttype: 1,
         widthtimes: 2,
         heigthtimes: 2,
-      })
+      });
       await BluetoothEscposPrinter.printText('\r\n', {});
-
-      await BluetoothEscposPrinter.printText(`Report for ${selectedDate}\n\n`, {})
-
+      
+      // Print report date
+      await BluetoothEscposPrinter.printText(`Report for ${selectedDate}\n\n`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
-
-      let totalAmount = 0
-
-      if (option === "total") {
-        totalAmount = filteredOrders.reduce((sum, order) => sum + Number(order.totalvoucherAmount), 0)
-        
-        await BluetoothEscposPrinter.printText(`Total:\n\n`, {
+      
+      let totalAmount = 0;
+      
+      if (option === 'total') {
+        // Calculate total amount
+        totalAmount = filteredOrders.reduce((sum, order) => sum + Number(order.totalvoucherAmount), 0);
+      
+        // Print total amount
+        await BluetoothEscposPrinter.printText('Total:\n\n', {
           widthtimes: 1,
           heigthtimes: 1,
-        })
+        });
         await BluetoothEscposPrinter.printText('\r\n', {});
-
         await BluetoothEscposPrinter.printText(`${totalAmount} Kr\n\n`, {
           widthtimes: 1,
           heigthtimes: 1,
-        })
+        });
         await BluetoothEscposPrinter.printText('\r\n', {});
         await BluetoothEscposPrinter.printText('\r\n', {});
-
       } else {
-        await BluetoothEscposPrinter.printText(`Full report:\n\n`, {
+        // Print full report
+        await BluetoothEscposPrinter.printText('Full report:\n\n', {
           widthtimes: 1,
           heigthtimes: 1,
-        })
-
+        });
+      
         for (const order of filteredOrders) {
           await BluetoothEscposPrinter.printText('\r\n', {});
-          await BluetoothEscposPrinter.printText(`Article ID: ${order.articleId}\n`, {})
-          await BluetoothEscposPrinter.printText(`Description: ${order.voucherDescription}\n`, {})
-          await BluetoothEscposPrinter.printText(`Amount: ${order.totalvoucherAmount} SEK\n`, {})
+          await BluetoothEscposPrinter.printText(`Article ID: ${order.articleId}\n`, {});
+          await BluetoothEscposPrinter.printText(`Description: ${order.voucherDescription}\n`, {});
+          await BluetoothEscposPrinter.printText(`Amount: ${order.totalvoucherAmount} SEK\n`, {});
           await BluetoothEscposPrinter.printText(
-            `Date: ${format(new Date(order.OrderDate), "yyyy-MM-dd HH:mm")}\n\n`,
-            {},
-          )
+            `Date: ${format(new Date(order.OrderDate), 'yyyy-MM-dd HH:mm')}\n\n`,
+            {}
+          );
           await BluetoothEscposPrinter.printText('\r\n', {});
-          totalAmount += Number(order.totalvoucherAmount)
+          totalAmount += Number(order.totalvoucherAmount);
         }
-
+      
         await BluetoothEscposPrinter.printText('\r\n', {});
-        await BluetoothEscposPrinter.printText(`Total:\n`, {
+        await BluetoothEscposPrinter.printText('Total:\n', {
           widthtimes: 1,
           heigthtimes: 1,
-        })
+        });
         await BluetoothEscposPrinter.printText('\r\n', {});
-
         await BluetoothEscposPrinter.printText(`${totalAmount} Kr\n\n`, {
           widthtimes: 1,
           heigthtimes: 1,
-        })
+        });
       }
+      
       await BluetoothEscposPrinter.printText('\r\n', {});
       await BluetoothEscposPrinter.printText('\r\n', {});
-
-
-      await BluetoothEscposPrinter.printText(`Want a report for ${operator === "LYCA" ? "COMVIQ" : "LYCA"}? please    go to ${operator === "LYCA" ? "COMVIQ" : "LYCA"} to generate it.\n`, {
-        align: BluetoothEscposPrinter.ALIGN.CENTER
-      });
+      
+      // Print footer message
+      await BluetoothEscposPrinter.printText(
+        `Want a report for ${operator === 'LYCA' ? 'COMVIQ' : 'LYCA'}? Please    go to ${
+          operator === 'LYCA' ? 'COMVIQ' : 'LYCA'
+        } to generate it.\n`,
+        {
+          align: BluetoothEscposPrinter.ALIGN.CENTER,
+        }
+      );
       
       await BluetoothEscposPrinter.printText('\r\n\n', {});
       await BluetoothEscposPrinter.printText('\r\n\n', {});
       await BluetoothEscposPrinter.printText('\r\n\n', {});
 
-
+      // AlertManager.show("Success", "The report was printed successfully")
     } catch (error) {
       console.error("Print error:", error)
-      Alert.alert("Error", "Failed to print the report. Please check the printer connection.")
+      AlertManager.show("Error", "Failed to print the report. Please check the printer connection.")
     } finally {
       closePrintModal()
     }
+  }, [operator, orderHistory, boundAddress, closePrintModal])
+
+  if (loading) {
+    return <NormalLoader loading={loading} subTitle="Loading order history..." />
   }
 
-  const aboutPrinter = async () => {
-    try {
-      let enabled = await BluetoothManager.checkBluetoothEnabled()
-      if (!enabled) {
-        await BluetoothManager.enableBluetooth()
-        enabled = true
-      }
-      setBleOpen(enabled)
-      setLoading(false)
-    } catch (error) {
-      console.error("Error checking/enabling Bluetooth:", error)
-    }
-  }
-
-  const scanForDevices = async () => {
-    try {
-      const devices = await BluetoothManager.scanDevices()
-      let paired = []
-      let found = []
-
-      if (typeof devices.paired === "object") {
-        paired = devices.paired
-      } else {
-        try {
-          paired = JSON.parse(devices.paired)
-        } catch (e) {
-          console.error("Error parsing paired devices:", e)
-        }
-      }
-
-      if (typeof devices.found === "object") {
-        found = devices.found
-      } else {
-        try {
-          found = JSON.parse(devices.found)
-        } catch (e) {
-          console.error("Error parsing found devices:", e)
-        }
-      }
-
-      setPairedDs(paired)
-      setFoundDs(found)
-    } catch (error) {
-      console.error("Error scanning for devices:", error)
-    }
-  }
-
-  useEffect(() => {
-    const initializeBluetooth = async () => {
-      const isAmu = DeviceInfo.isEmulatorSync()
-      if (isAmu) {
-        Alert.alert("ERROR", "This is NOT a real device!")
-      } else {
-        await aboutPrinter()
-        const blStorage = await getBluetooth()
-        const alreadyPaired = JSON.parse(blStorage)
-        if (alreadyPaired?.length > 0) {
-          BluetoothManager.connect(alreadyPaired[0]?.address)
-            .then(() => {
-              setLoading(false)
-              setBoundAddress(alreadyPaired[0].address)
-              setName(alreadyPaired[0].name || "UNKNOWN")
-            })
-            .catch((e) => {
-              setLoading(false)
-              console.error(e)
-            })
-        } else {
-          await scanForDevices()
-          if (pairedDs.length > 0 && pairedDs[0].name === "IposPrinter") {
-            BluetoothManager.connect(pairedDs[0]?.address)
-              .then(() => {
-                saveBluetooth(JSON.stringify([pairedDs[0]]))
-                  .then(() => {
-                    setLoading(false)
-                    setBoundAddress(pairedDs[0].address)
-                    setName(pairedDs[0].name || "UNKNOWN")
-                  })
-                  .catch((err) => console.log("error saving bluetooth", err))
-              })
-              .catch((e) => {
-                setLoading(false)
-                console.error(e)
-              })
-          }
-        }
-      }
-    }
-
-    initializeBluetooth()
-
-    return () => {
-      setLoading(false)
-      const isAmu = DeviceInfo.isEmulatorSync()
-      if (isAmu) {
-        Alert.alert("ERROR", "This is NOT a real device!")
-      } else {
-        aboutPrinter()
-      }
-    }
-  }, [scanForDevices]) // Fixed useEffect dependencies
-
-  if (isLoading) {
-    return <NormalLoader loading={isLoading} subTitle="Loading order history..." />
-  }
-else{
   return (
     <AppScreen style={styles.screen}>
       <TopHeader title={"Order History"} icon onPress={() => navigation.goBack()} />
@@ -372,7 +317,6 @@ else{
             <AppText text="Print report" style={styles.printButtonText} />
           </TouchableOpacity>
         </View>
-        {/* Bluetooth Status */}
         {!bleOpend && (
           <View style={styles.bluetoothStatus}>
             <Icon
@@ -381,7 +325,7 @@ else{
               color={bleOpend && boundAddress ? "#4CAF50" : "#FF9800"}
             />
             <AppText
-              text={bleOpend && boundAddress ? `Connected to: ${name || "UNKNOWN"}` : "Connecting to bluetooth..."}
+              text={bleOpend && boundAddress ? `Connected to: ${name || "UNKNOWN"}` : "Connecting to printer..."}
               style={styles.bluetoothStatusText}
             />
           </View>
@@ -391,7 +335,7 @@ else{
           <View style={styles.orderList}>
             {filteredOrderHistory.map((item) => (
               <OrderItems
-                key={item.id}
+                key={item._id}
                 item={item}
                 onPress={() => navigation.navigate("ORDER_DETAILS", { data: item, companyInfo: companyInfo, operator })}
               />
@@ -399,8 +343,7 @@ else{
           </View>
         ) : (
           <View style={styles.noHistoryContainer}>
-            <AppText text={"Ingen orderhistorik hittades."} style={styles.noHistoryText} />
-
+            <AppText text={"No order history found"} style={styles.noHistoryText} />
             <AppButton
               text={"Fetch order history"}
               icon="reload"
@@ -415,8 +358,6 @@ else{
       <PrintModal visible={isPrintModalVisible} onClose={closePrintModal} onPrint={handlePrint} />
     </AppScreen>
   )
-}
-  
 }
 
 const styles = StyleSheet.create({
@@ -479,7 +420,6 @@ const styles = StyleSheet.create({
   },
   bluetoothStatusText: {
     marginLeft: 10,
-    color: "#000",
     fontSize: 14,
     fontFamily: "ComviqSansWebBold",
   },
@@ -491,13 +431,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    width: "100%"
   },
   noHistoryText: {
     fontSize: 18,
     marginBottom: 20,
     textAlign: "center",
-    color: "#000"
   },
   buttonText: {
     color: "#ffffff",
@@ -507,4 +445,3 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 })
-

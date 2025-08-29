@@ -6,6 +6,9 @@ import Icon from "react-native-vector-icons/Ionicons"
 export const OrderItems = ({ item, onPress, operator }) => {
   const { voucherNumber, OrderDate, voucherDescription } = item || {}
 
+
+
+
   const dateObj = new Date(OrderDate)
   const dateFormat = "dd-MM-yyyy"
   const timeFormat = "HH:mm"

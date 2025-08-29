@@ -49,17 +49,10 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>ComviqSans-Bold_1197263553.otf</string>
 		<string>ComviqSansWebBold.ttf</string>
 		<string>ComviqSansWebRegular.ttf</string>
-		<string>Ubuntu-Bold.ttf</string>
-		<string>Ubuntu-BoldItalic.ttf</string>
-		<string>Ubuntu-Italic.ttf</string>
-		<string>Ubuntu-Light.ttf</string>
-		<string>Ubuntu-LightItalic.ttf</string>
-		<string>Ubuntu-Medium.ttf</string>
-		<string>Ubuntu-MediumItalic.ttf</string>
-		<string>Ubuntu-Regular.ttf</string>
+		<string>halebop.ttf</string>
+		<string>azo_sans-700.ttf</string>
 	</array>
 </dict>
 </plist>

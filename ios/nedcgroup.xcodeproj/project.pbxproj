@@ -14,26 +14,12 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		7699B88040F8A987B510C191 /* libPods-nedcgroup-nedcgroupTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-nedcgroup-nedcgroupTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		70011DB779AF49989ECE600F /* ComviqSans-Bold_1197263553.otf in Resources */ = {isa = PBXBuildFile; fileRef = E2BAEFD6A492488296FA3490 /* ComviqSans-Bold_1197263553.otf */; };
 		B8F890A4DDA54026BF592DC5 /* ComviqSansWebBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 580E2D52D7164D6D86922024 /* ComviqSansWebBold.ttf */; };
 		6738903AC9D0403E9F1B8206 /* ComviqSansWebRegular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E4542BC532E04A3182B5FC2C /* ComviqSansWebRegular.ttf */; };
-		FA9183970950457A8B90819C /* Ubuntu-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8E978835574449A8AC4E23AF /* Ubuntu-Bold.ttf */; };
-		27929232A6A34BFA893608BE /* Ubuntu-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 69D6645CBF234B1E9C7CF07A /* Ubuntu-BoldItalic.ttf */; };
-		5ADC36E7CD06415BB674F8CE /* Ubuntu-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A20FCB6B7CE240E4B9412E25 /* Ubuntu-Italic.ttf */; };
-		6D4B16CC3B764BBAA525D88E /* Ubuntu-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D1608900647543CF9D8F1027 /* Ubuntu-Light.ttf */; };
-		B8152D6A5F5C44D0A93B04E5 /* Ubuntu-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 335D5619FB984A4283969128 /* Ubuntu-LightItalic.ttf */; };
-		984406918A864644A9D2858A /* Ubuntu-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 18632360CF2243B3B19C0AA1 /* Ubuntu-Medium.ttf */; };
-		45475353D3264FA1A4CA85C5 /* Ubuntu-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 565DF99DFF9744209D49EA87 /* Ubuntu-MediumItalic.ttf */; };
-		CA19EC96E6404EA586D5A638 /* Ubuntu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A93D16E8F2514202BF92D8BA /* Ubuntu-Regular.ttf */; };
-		643CC7D7E75A4B198B8F2691 /* comviqSansBoldBACKUP.woff in Resources */ = {isa = PBXBuildFile; fileRef = 236B8AC571B74C43975B65A6 /* comviqSansBoldBACKUP.woff */; };
-		99B4BE3B123D4F778DAC7BD4 /* comviqSansRegularBACKUPwoff2 in Resources */ = {isa = PBXBuildFile; fileRef = 55B2E238C73D491188D8F8BF /* comviqSansRegularBACKUPwoff2 */; };
-		316F29101CBA43E1908C91AE /* ComviqSansWeb-Bold.eot in Resources */ = {isa = PBXBuildFile; fileRef = D3E875D0642840C8B6763C40 /* ComviqSansWeb-Bold.eot */; };
-		23FDA15D6BFF4C6C842F3830 /* ComviqSansWeb-Bold.woff in Resources */ = {isa = PBXBuildFile; fileRef = 6BF305B6D2CE45C4BA0A8DEB /* ComviqSansWeb-Bold.woff */; };
-		4525E0F5460E45038303D566 /* ComviqSansWeb-Bold.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = 85E26B3FA3B547D7AA800E12 /* ComviqSansWeb-Bold.woff2 */; };
-		2643DBD859B841DB9736B5C6 /* ComviqSansWeb-Regular.eot in Resources */ = {isa = PBXBuildFile; fileRef = D1B2C132FB134A4E9C0187ED /* ComviqSansWeb-Regular.eot */; };
-		90D1B2B4B1874160A8BAD46A /* ComviqSansWeb-Regular.woff in Resources */ = {isa = PBXBuildFile; fileRef = 3583A06BE27B4D6786025F56 /* ComviqSansWeb-Regular.woff */; };
-		CE72EC0829A04A0BA5EE4FD8 /* ComviqSansWeb-Regular.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = C484D421C2494FD4912053D8 /* ComviqSansWeb-Regular.woff2 */; };
-		54BEAB6E2A174FEC9677EA55 /* UFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 26CC06361E5A48B4846D83BF /* UFL.txt */; };
+		B22539809BF94BCEA86E4101 /* UFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = FF281400F7F04ACEA69E7DA2 /* UFL.txt */; };
+		1CA50C3DB49D4D7EA31DEF8E /* halebop.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = 749E73579CE54304911A2563 /* halebop.woff2 */; };
+		1A7C81FE366848CE8825BC66 /* halebop.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6424D7C408D24D24AB2094F8 /* halebop.ttf */; };
+		CC314A1E733741409BC61221 /* azo_sans-700.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4A24F4F34BEA4C70B8A9A2CC /* azo_sans-700.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,26 +51,12 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = nedcgroup/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-nedcgroup-nedcgroupTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-nedcgroup-nedcgroupTests.release.xcconfig"; path = "Target Support Files/Pods-nedcgroup-nedcgroupTests/Pods-nedcgroup-nedcgroupTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		E2BAEFD6A492488296FA3490 /* ComviqSans-Bold_1197263553.otf */ = {isa = PBXFileReference; name = "ComviqSans-Bold_1197263553.otf"; path = "../assets/fonts/ComviqSans-Bold_1197263553.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		580E2D52D7164D6D86922024 /* ComviqSansWebBold.ttf */ = {isa = PBXFileReference; name = "ComviqSansWebBold.ttf"; path = "../assets/fonts/ComviqSansWebBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		E4542BC532E04A3182B5FC2C /* ComviqSansWebRegular.ttf */ = {isa = PBXFileReference; name = "ComviqSansWebRegular.ttf"; path = "../assets/fonts/ComviqSansWebRegular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		8E978835574449A8AC4E23AF /* Ubuntu-Bold.ttf */ = {isa = PBXFileReference; name = "Ubuntu-Bold.ttf"; path = "../assets/fonts/Ubuntu-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		69D6645CBF234B1E9C7CF07A /* Ubuntu-BoldItalic.ttf */ = {isa = PBXFileReference; name = "Ubuntu-BoldItalic.ttf"; path = "../assets/fonts/Ubuntu-BoldItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		A20FCB6B7CE240E4B9412E25 /* Ubuntu-Italic.ttf */ = {isa = PBXFileReference; name = "Ubuntu-Italic.ttf"; path = "../assets/fonts/Ubuntu-Italic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		D1608900647543CF9D8F1027 /* Ubuntu-Light.ttf */ = {isa = PBXFileReference; name = "Ubuntu-Light.ttf"; path = "../assets/fonts/Ubuntu-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		335D5619FB984A4283969128 /* Ubuntu-LightItalic.ttf */ = {isa = PBXFileReference; name = "Ubuntu-LightItalic.ttf"; path = "../assets/fonts/Ubuntu-LightItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		18632360CF2243B3B19C0AA1 /* Ubuntu-Medium.ttf */ = {isa = PBXFileReference; name = "Ubuntu-Medium.ttf"; path = "../assets/fonts/Ubuntu-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		565DF99DFF9744209D49EA87 /* Ubuntu-MediumItalic.ttf */ = {isa = PBXFileReference; name = "Ubuntu-MediumItalic.ttf"; path = "../assets/fonts/Ubuntu-MediumItalic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		A93D16E8F2514202BF92D8BA /* Ubuntu-Regular.ttf */ = {isa = PBXFileReference; name = "Ubuntu-Regular.ttf"; path = "../assets/fonts/Ubuntu-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		236B8AC571B74C43975B65A6 /* comviqSansBoldBACKUP.woff */ = {isa = PBXFileReference; name = "comviqSansBoldBACKUP.woff"; path = "../assets/fonts/comviqSansBoldBACKUP.woff"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		55B2E238C73D491188D8F8BF /* comviqSansRegularBACKUPwoff2 */ = {isa = PBXFileReference; name = "comviqSansRegularBACKUPwoff2"; path = "../assets/fonts/comviqSansRegularBACKUPwoff2"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		D3E875D0642840C8B6763C40 /* ComviqSansWeb-Bold.eot */ = {isa = PBXFileReference; name = "ComviqSansWeb-Bold.eot"; path = "../assets/fonts/ComviqSansWeb-Bold.eot"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		6BF305B6D2CE45C4BA0A8DEB /* ComviqSansWeb-Bold.woff */ = {isa = PBXFileReference; name = "ComviqSansWeb-Bold.woff"; path = "../assets/fonts/ComviqSansWeb-Bold.woff"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		85E26B3FA3B547D7AA800E12 /* ComviqSansWeb-Bold.woff2 */ = {isa = PBXFileReference; name = "ComviqSansWeb-Bold.woff2"; path = "../assets/fonts/ComviqSansWeb-Bold.woff2"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		D1B2C132FB134A4E9C0187ED /* ComviqSansWeb-Regular.eot */ = {isa = PBXFileReference; name = "ComviqSansWeb-Regular.eot"; path = "../assets/fonts/ComviqSansWeb-Regular.eot"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		3583A06BE27B4D6786025F56 /* ComviqSansWeb-Regular.woff */ = {isa = PBXFileReference; name = "ComviqSansWeb-Regular.woff"; path = "../assets/fonts/ComviqSansWeb-Regular.woff"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		C484D421C2494FD4912053D8 /* ComviqSansWeb-Regular.woff2 */ = {isa = PBXFileReference; name = "ComviqSansWeb-Regular.woff2"; path = "../assets/fonts/ComviqSansWeb-Regular.woff2"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		26CC06361E5A48B4846D83BF /* UFL.txt */ = {isa = PBXFileReference; name = "UFL.txt"; path = "../assets/fonts/UFL.txt"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		FF281400F7F04ACEA69E7DA2 /* UFL.txt */ = {isa = PBXFileReference; name = "UFL.txt"; path = "../assets/fonts/UFL.txt"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		749E73579CE54304911A2563 /* halebop.woff2 */ = {isa = PBXFileReference; name = "halebop.woff2"; path = "../assets/fonts/halebop.woff2"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		6424D7C408D24D24AB2094F8 /* halebop.ttf */ = {isa = PBXFileReference; name = "halebop.ttf"; path = "../assets/fonts/halebop.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		4A24F4F34BEA4C70B8A9A2CC /* azo_sans-700.ttf */ = {isa = PBXFileReference; name = "azo_sans-700.ttf"; path = "../assets/fonts/azo_sans-700.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,26 +166,12 @@
 		DCD6363DEC5A4E028BE7CB24 /* Resources */ = {
 			isa = "PBXGroup";
 			children = (
-				E2BAEFD6A492488296FA3490 /* ComviqSans-Bold_1197263553.otf */,
 				580E2D52D7164D6D86922024 /* ComviqSansWebBold.ttf */,
 				E4542BC532E04A3182B5FC2C /* ComviqSansWebRegular.ttf */,
-				8E978835574449A8AC4E23AF /* Ubuntu-Bold.ttf */,
-				69D6645CBF234B1E9C7CF07A /* Ubuntu-BoldItalic.ttf */,
-				A20FCB6B7CE240E4B9412E25 /* Ubuntu-Italic.ttf */,
-				D1608900647543CF9D8F1027 /* Ubuntu-Light.ttf */,
-				335D5619FB984A4283969128 /* Ubuntu-LightItalic.ttf */,
-				18632360CF2243B3B19C0AA1 /* Ubuntu-Medium.ttf */,
-				565DF99DFF9744209D49EA87 /* Ubuntu-MediumItalic.ttf */,
-				A93D16E8F2514202BF92D8BA /* Ubuntu-Regular.ttf */,
-				236B8AC571B74C43975B65A6 /* comviqSansBoldBACKUP.woff */,
-				55B2E238C73D491188D8F8BF /* comviqSansRegularBACKUPwoff2 */,
-				D3E875D0642840C8B6763C40 /* ComviqSansWeb-Bold.eot */,
-				6BF305B6D2CE45C4BA0A8DEB /* ComviqSansWeb-Bold.woff */,
-				85E26B3FA3B547D7AA800E12 /* ComviqSansWeb-Bold.woff2 */,
-				D1B2C132FB134A4E9C0187ED /* ComviqSansWeb-Regular.eot */,
-				3583A06BE27B4D6786025F56 /* ComviqSansWeb-Regular.woff */,
-				C484D421C2494FD4912053D8 /* ComviqSansWeb-Regular.woff2 */,
-				26CC06361E5A48B4846D83BF /* UFL.txt */,
+				FF281400F7F04ACEA69E7DA2 /* UFL.txt */,
+				749E73579CE54304911A2563 /* halebop.woff2 */,
+				6424D7C408D24D24AB2094F8 /* halebop.ttf */,
+				4A24F4F34BEA4C70B8A9A2CC /* azo_sans-700.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -314,26 +272,12 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				70011DB779AF49989ECE600F /* ComviqSans-Bold_1197263553.otf in Resources */,
 				B8F890A4DDA54026BF592DC5 /* ComviqSansWebBold.ttf in Resources */,
 				6738903AC9D0403E9F1B8206 /* ComviqSansWebRegular.ttf in Resources */,
-				FA9183970950457A8B90819C /* Ubuntu-Bold.ttf in Resources */,
-				27929232A6A34BFA893608BE /* Ubuntu-BoldItalic.ttf in Resources */,
-				5ADC36E7CD06415BB674F8CE /* Ubuntu-Italic.ttf in Resources */,
-				6D4B16CC3B764BBAA525D88E /* Ubuntu-Light.ttf in Resources */,
-				B8152D6A5F5C44D0A93B04E5 /* Ubuntu-LightItalic.ttf in Resources */,
-				984406918A864644A9D2858A /* Ubuntu-Medium.ttf in Resources */,
-				45475353D3264FA1A4CA85C5 /* Ubuntu-MediumItalic.ttf in Resources */,
-				CA19EC96E6404EA586D5A638 /* Ubuntu-Regular.ttf in Resources */,
-				643CC7D7E75A4B198B8F2691 /* comviqSansBoldBACKUP.woff in Resources */,
-				99B4BE3B123D4F778DAC7BD4 /* comviqSansRegularBACKUPwoff2 in Resources */,
-				316F29101CBA43E1908C91AE /* ComviqSansWeb-Bold.eot in Resources */,
-				23FDA15D6BFF4C6C842F3830 /* ComviqSansWeb-Bold.woff in Resources */,
-				4525E0F5460E45038303D566 /* ComviqSansWeb-Bold.woff2 in Resources */,
-				2643DBD859B841DB9736B5C6 /* ComviqSansWeb-Regular.eot in Resources */,
-				90D1B2B4B1874160A8BAD46A /* ComviqSansWeb-Regular.woff in Resources */,
-				CE72EC0829A04A0BA5EE4FD8 /* ComviqSansWeb-Regular.woff2 in Resources */,
-				54BEAB6E2A174FEC9677EA55 /* UFL.txt in Resources */,
+				B22539809BF94BCEA86E4101 /* UFL.txt in Resources */,
+				1CA50C3DB49D4D7EA31DEF8E /* halebop.woff2 in Resources */,
+				1A7C81FE366848CE8825BC66 /* halebop.ttf in Resources */,
+				CC314A1E733741409BC61221 /* azo_sans-700.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

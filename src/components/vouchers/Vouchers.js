@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { AppScreen } from '../../helper/AppScreen';
@@ -13,37 +13,80 @@ export const Vouchers = () => {
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(""); // State to track errors
+  const [error, setError] = useState('');
   const { user } = useContext(AuthContext);
 
-  const getCategories = async () => {
+  const getCategories = useCallback(async () => {
     try {
       setIsLoading(true);
-      setError(""); // Reset error before fetching
+      setError('');
 
       const response = await fetch(`${baseUrl}/api/comviq-data`);
 
       if (!response.ok) {
-        throw new Error("Ett fel uppstod. Vänligen kontakta support: +46 793 394 031");
+        throw new Error('Ett fel uppstod. Vänligen kontakta support: +46 793 394 031');
       }
 
       const data = await response.json();
 
       if (!data?.comviqData) {
-        throw new Error("Ett fel uppstod. Vänligen kontakta support: +46 793 394 031");
+        throw new Error('Ett fel uppstod. Vänligen kontakta support: +46 793 394 031');
       }
 
-      setCategories(data.comviqData);
+      setCategories(data.comviqData?.category);
     } catch (error) {
       setError(error.message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     getCategories();
-  }, [navigation]);
+  }, [getCategories]);
+
+  const renderVoucherItem = ({ item }) => (
+    <VoucherItems
+      info={true}
+      item={item}
+      onPress={() =>
+        navigation.navigate('DETAILS', {
+          data: item.subcategory,
+          title: item.name,
+        })
+      }
+    />
+  );
+
+  const renderHeader = () => (
+    <View style={styles.buttonContainer}>
+      <AppButton 
+        textStyle={styles.buttonText} 
+        text="Registrera kontantkort" 
+        onPress={() => navigation.navigate('ALL_SIM_CARDS')} 
+        style={styles.button} 
+      />
+    </View>
+  );
+
+  const renderFooter = () => <View style={styles.footer} />;
+
+  if (error) {
+    return (
+      <AppScreen style={styles.screen}>
+        <TopHeader 
+          textStyle={styles.headerTitle} 
+          iconName="arrow-left" 
+          icon 
+          title='COMVIQ'
+          onPress={() => navigation.navigate('INTRO')} 
+        />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </AppScreen>
+    );
+  }
 
   return (
     <AppScreen style={styles.screen}>
@@ -51,48 +94,27 @@ export const Vouchers = () => {
         textStyle={styles.headerTitle} 
         iconName="arrow-left" 
         icon 
-        title={'COMVIQ'} 
+        title='COMVIQ'
         onPress={() => navigation.navigate('INTRO')} 
       />
 
-      {error ? (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : (
-        <FlatList
-          contentContainerStyle={styles.contextContainer}
-          showsVerticalScrollIndicator={false}
-          data={categories?.category}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <VoucherItems
-              info={true}
-              item={item}
-              onPress={() =>
-                navigation.navigate('DETAILS', {
-                  data: item.subcategory,
-                  title: item.name,
-                })
-              }
-            />
-          )}
-          ListHeaderComponent={() => (
-            <View style={styles.buttonContainer}>
-              <AppButton 
-                textStyle={styles.buttonText} 
-                text={"Registrera kontantkort"} 
-                onPress={() => navigation.navigate('ALL_SIM_CARDS')} 
-                style={styles.button} 
-              />
-            </View>
-          )}
-          ListFooterComponent={() => <View style={{ height: 70 }} />}
-        />
-      )}
+      <FlatList
+        contentContainerStyle={styles.contextContainer}
+        showsVerticalScrollIndicator={false}
+        data={categories}
+        keyExtractor={item => item.id.toString()}
+        renderItem={renderVoucherItem}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        ListEmptyComponent={
+          !isLoading && (
+            <Text style={styles.emptyText}>Inga kategorier tillgängliga</Text>
+          )
+        }
+      />
 
       <FloatingActionButton
-        icon={'arrow-left'}
+        icon='arrow-left'
         bgColor="#3b3687"
         size={70}
         onPress={() => navigation.navigate('INTRO')}
@@ -119,7 +141,9 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontFamily: 'ComviqSansWebBold',
   },
-  buttonContainer: {},
+  buttonContainer: {
+    marginBottom: 16,
+  },
   button: {
     textTransform: "uppercase",
     padding: 16,
@@ -140,13 +164,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
   },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#666',
+    marginTop: 20,
+  },
   loaderContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  },
+  footer: {
+    height: 70,
   },
 });

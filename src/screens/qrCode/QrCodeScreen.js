@@ -113,7 +113,6 @@ export const QrCodeScreen = ({ navigation, route }) => {
 
 
 
-    // console.log("companyInfo", companyInfo?.manager?.name);
     const saveOrder = async () => {
         try {
             setLoading2(true);
@@ -535,7 +534,7 @@ export const QrCodeScreen = ({ navigation, route }) => {
                 setLoading(false);
 
                 console.log('errrrr', er);
-                alert('error' + JSON.stringify(er));
+                // alert('error' + JSON.stringify(er));
             },
         );
     };

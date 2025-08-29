@@ -251,6 +251,8 @@ export default function Component({ route, navigation }) {
         "Authorization": `Bearer ${userToken}`
       }});
 
+      console.log("telia order",data)
+
       if (data?.message === 'Company deativted because you have reached Credit Limit') {
         setInActive(true);
       } else if (data?.message === 'invalid token in the request.') {
@@ -262,7 +264,7 @@ export default function Component({ route, navigation }) {
         await printVoucher({voucherNumber: Voucherdata?.data?.products[0]?.voucherNumber, serialNumber: Voucherdata?.data?.products[0]?.serialNumber});
       }
     } catch (error) {
-      console.error('Error saving order:', error);
+      console.log('Error saving order:', error);
       Alert.alert('Fel', 'Kunde inte spara ordern');
     } finally {
       setLoading(false);

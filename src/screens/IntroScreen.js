@@ -1,53 +1,225 @@
 "use client"
 
-import { useContext } from "react"
-import { Dimensions, StyleSheet, TouchableOpacity, View, ScrollView, Image, Alert } from "react-native"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import {
+  Dimensions,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  Image,
+  Alert,
+  Animated,
+  Platform,
+  StatusBar,
+} from "react-native"
 import { AppText } from "../components/appText"
 import { AppScreen } from "../helper/AppScreen"
 import AntDesign from "react-native-vector-icons/AntDesign"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import Ionicons from "react-native-vector-icons/Ionicons"
+import FontAwesome from "react-native-vector-icons/FontAwesome"
 import { TopHeader } from "../components/header/TopHeader"
 import { removeToken } from "../helper/storage"
 import { AuthContext } from "../context/auth.context"
-import Icon from "react-native-vector-icons/FontAwesome"
+import ReactNativeHapticFeedback from "react-native-haptic-feedback"
+import { useNavigation } from "@react-navigation/native"
 
-const iconSize = 20
+// Haptic feedback configuration
+const hapticOptions = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false,
+}
+
+const triggerHaptic = (type = "impactMedium") => {
+  ReactNativeHapticFeedback.trigger(type, hapticOptions)
+}
+
 const screenWidth = Dimensions.get("screen").width
-const itemWidth = (screenWidth - 30) / 2 // Space for two items side by side with some margin
+const CARD_SPACING = 16
+const cardWidth = (screenWidth - (CARD_SPACING * 3)) / 2
 
-const introContent = [
-  { title: "COMVIQ", link: "HOME_START" },
-  {
-    title: "LycaMobil",
-    link: "LYCA_NAVIGATION",
-    backgroundColor: "#fff",
-    img: require("../../assets/images/Lycamobile.png"),
-  },
-  {
-    title: "Registrera kontankort",
-    icon: <MaterialCommunityIcons name="sim" size={iconSize} color="#e2027b" />,
-    link: "ALL_SIM_CARDS",
-  },
-  {
-    title: "Orderhistoriken",
-    icon: <AntDesign name="reload1" size={iconSize} color="#e2027b" />,
-    link: "ORDER_HISTORY_NAV",
-  },
-  { title: "Nyheter", icon: <Icon name="newspaper-o" size={iconSize} color="#e2027b" />, link: "NEW_NAVIGATIONS" },
-  {
-    title: "Inställningar",
-    icon: <AntDesign name="setting" size={iconSize} color="#e2027b" />,
-    link: "APP_SETTINGS",
-  },
-  { title: "Logga ut", icon: <AntDesign name="logout" size={iconSize} color="#e2027b" />, link: "LOGOUT" },
-]
+// Data structure for better organization and flexibility
+const appContent = {
+  companies: [
+    {
+      id: 'comviq',
+      title: "COMVIQ",
+      link: "HOME_START",
+      backgroundColor: "#e2027b",
+      textColor: "#ffffff",
+      isFeatured: true,
+    },
+    {
+      id: 'lyca',
+      title: "LycaMobil",
+      link: "LYCA_NAVIGATION",
+      img: require("../../assets/images/Lycamobile.png"),
+      isFeatured: true,
+    },
+    {
+      id: 'telia',
+      title: "Telia",
+      link: "TELIA_NAVIGATION",
+      img: require("../../assets/images/telia.png"),
+      isFeatured: true,
+    },
+    {
+      id: 'halebop',
+      title: "Halebop",
+      link: "TELIA_NAVIGATION",
+      backgroundColor: "#9fdcdd",
+      customFont: "azo_sans-700",
+      img: require("../../assets/images/Haleboplogo.png"),
+      isFeatured: true,
+    },
+  ],
+  utilities: [
+    {
+      id: 'register-sim',
+      title: "Registrera SIM-kort",
+      icon: <MaterialCommunityIcons name="sim" size={22} color="#4a90e2" />,
+      link: "ALL_SIM_CARDS",
+    },
+    {
+      id: 'order-history',
+      title: "Orderhistorik",
+      icon: <AntDesign name="reload1" size={22} color="#4a90e2" />,
+      link: "ORDER_HISTORY_NAV",
+    },
+    {
+      id: 'news',
+      title: "Nyheter",
+      icon: <FontAwesome name="newspaper-o" size={22} color="#4a90e2" />,
+      link: "NEW_NAVIGATIONS",
+    },
+    {
+      id: 'settings',
+      title: "Inställningar",
+      icon: <AntDesign name="setting" size={22} color="#4a90e2" />,
+      link: "APP_SETTINGS",
+    },
+    {
+      id: 'logout',
+      title: "Logga ut",
+      icon: <AntDesign name="logout" size={22} color="#ff3b30" />,
+      link: "LOGOUT",
+      isDestructive: true,
+    },
+  ]
+}
 
-export default function IntroScreen({ navigation }) {
-  const { setUser } = useContext(AuthContext)
+// Memoized components for better performance
+const CompanyCard = React.memo(({ item, onPress }) => {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => onPress(item.link, item)}
+      style={[
+        styles.cardTouchable, 
+        item.backgroundColor ? { backgroundColor: item.backgroundColor } : {},
+      ]}
+    >
+      {item.img ? (
+        <Image source={item.img} style={styles.companyImage} resizeMode="contain" />
+      ) : (
+        <AppText
+          text={item.title}
+          style={[
+            styles.companyText,
+            item.customFont ? { fontFamily: item.customFont } : {},
+            item.textColor ? { color: item.textColor } : {},
+          ]}
+        />
+      )}
+    </TouchableOpacity>
+  )
+})
 
-  const handlePress = (route) => navigation.navigate(route)
+const MenuItem = React.memo(({ item, onPress, onLogout }) => {
+  const handlePress = () => {
+    if (item.link === "LOGOUT") {
+      onLogout()
+    } else {
+      onPress(item.link)
+    }
+  }
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={handlePress}
+      style={[
+        styles.menuItemTouchable,
+        item.isDestructive && styles.destructiveButton
+      ]}
+    >
+      <View style={styles.iconContainer}>
+        {item.icon}
+      </View>
+      <AppText 
+        text={item.title} 
+        style={[
+          styles.menuItemText,
+          item.isDestructive && styles.destructiveText
+        ]} 
+      />
+      {item.link !== "LOGOUT" && (
+        <Ionicons name="chevron-forward" size={18} color="#ccc" />
+      )}
+    </TouchableOpacity>
+  )
+})
+
+export default function IntroScreen() {
+
+  const navigation = useNavigation()
+  const { setUser, setTeliaHalebop } = useContext(AuthContext)
+  const [featuredCompanies, setFeaturedCompanies] = useState([])
+  const [otherCompanies, setOtherCompanies] = useState([])
+  
+  // Fix: Use useRef for the Animated.Value to prevent recreation on each render
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const translateY = useRef(new Animated.Value(20)).current
+
+  useEffect(() => {
+    // Separate featured and other companies
+    const featured = appContent.companies.filter(company => company.isFeatured)
+    const others = appContent.companies.filter(company => !company.isFeatured)
+    
+    setFeaturedCompanies(featured)
+    setOtherCompanies(others)
+    
+    // Animate on mount with sequence for better visual effect
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      })
+    ]).start()
+  }, [fadeAnim, translateY]) // Include the animated values in dependencies
+
+  const handlePress = (route, item) => {
+
+    console.log(item)
+  triggerHaptic("impactMedium")
+  if (item?.title === "Telia" || item?.title === "Halebop") {
+    setTeliaHalebop(item?.title)
+  }
+
+  navigation.navigate(`${route}`, { title: "Telia"})
+}
+
 
   const handleLogout = async () => {
+    triggerHaptic("notificationWarning")
+
     Alert.alert(
       "Logga ut",
       "Är du säker på att du vill logga ut?",
@@ -55,10 +227,12 @@ export default function IntroScreen({ navigation }) {
         {
           text: "Avbryt",
           style: "cancel",
+          onPress: () => triggerHaptic("impactLight"),
         },
         {
           text: "Logga ut",
           onPress: async () => {
+            triggerHaptic("impactHeavy")
             await removeToken()
             setUser(null)
           },
@@ -70,52 +244,63 @@ export default function IntroScreen({ navigation }) {
 
   return (
     <AppScreen style={styles.screen}>
-      <TopHeader title="NEDC GROUP AB" textStyle={styles.headerText} style={styles.topHeader} />
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.mainContent}>
-          {/* Side-by-side sections for "COMVIQ" and "LycaMobil" */}
-          <View style={styles.topRow}>
-            {introContent.slice(0, 2).map((intro, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handlePress(intro.link)}
-                style={[
-                  styles.sideBySideItem,
-                  {
-                    backgroundColor: intro.backgroundColor || "#e2027b",
-                    borderWidth: intro.img ? 2 : 0,
-                    borderColor: "#666",
-                  },
-                ]}
-              >
-                {intro.img ? (
-                  <Image source={intro.img} style={styles.introImage} resizeMode="contain" />
-                ) : (
-                  <AppText text={intro.title} style={[styles.topItemText, { fontSize: 32 }]} />
-                )}
-              </TouchableOpacity>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <TopHeader 
+        title="NEDC GROUP AB" 
+        textStyle={styles.headerText} 
+        style={styles.topHeader} 
+      />
+
+      <Animated.ScrollView 
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+        style={{ opacity: fadeAnim, transform: [{ translateY }] }}
+      >
+        {/* Featured Operators Section */}
+        <View style={styles.section}>
+          <AppText text="UTVALDA OPERATÖRER" style={styles.sectionTitle} />
+          <View style={styles.companiesGrid}>
+            {featuredCompanies.map(item => (
+              <CompanyCard 
+                key={item.id} 
+                item={item} 
+                onPress={()=> handlePress(item.link, item)} 
+              />
             ))}
           </View>
-
-          {/* List items with icons on the left and text on the right */}
-          {introContent.slice(2).map(
-            (intro, index) =>
-              intro.title !== "Techdev Cyber" && (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => (intro.link === "LOGOUT" ? handleLogout() : handlePress(intro.link))}
-                  style={[styles.listItem, intro.link === "LOGOUT" && styles.logoutButton]}
-                >
-                  <View style={styles.iconContainer}>{intro.icon}</View>
-                  <AppText
-                    text={intro.title}
-                    style={[styles.listItemText, intro.link === "LOGOUT" && { color: "#fff" }]}
-                  />
-                </TouchableOpacity>
-              ),
-          )}
         </View>
-      </ScrollView>
+
+        {/* Other Operators Section (if any) */}
+        {otherCompanies.length > 0 && (
+          <View style={styles.section}>
+            <AppText text="ANDRA OPERATÖRER" style={styles.sectionTitle} />
+            <View style={styles.companiesGrid}>
+              {otherCompanies.map(item => (
+                <CompanyCard 
+                  key={item.id} 
+                  item={item} 
+                  onPress={()=> handlePress(item.link, item)} 
+                />
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Utilities Section */}
+        <View style={styles.section}>
+          <AppText text="VERKTYG" style={styles.sectionTitle} />
+          <View style={styles.menuList}>
+            {appContent.utilities.map(item => (
+              <MenuItem 
+                key={item.id} 
+                item={item} 
+                onPress={handlePress}
+                onLogout={handleLogout}
+              />
+            ))}
+          </View>
+        </View>
+      </Animated.ScrollView>
     </AppScreen>
   )
 }
@@ -123,93 +308,126 @@ export default function IntroScreen({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#f8f9fa",
   },
   topHeader: {
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#ffffff",
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   headerText: {
-    fontSize: 25,
-    color: "#fff",
-    fontFamily: "ComviqSansWebBold",
+    fontSize: 20,
+    color: "#333",
+    fontWeight: "600",
   },
   scrollViewContent: {
-    padding: 10,
+    padding: 20,
+    paddingBottom: 32,
   },
-  mainContent: {
-    flex: 1,
+  section: {
+    marginBottom: 28,
   },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  sideBySideItem: {
-    width: itemWidth,
-    height: 80, // Set a fixed height for both items
-    padding: 15,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden", // Ensure the image doesn't overflow
-  },
-  introImage: {
-    width: "100%",
-    height: "100%",
-  },
-  fullWidthItem: {
-    width: "100%",
-    padding: 15,
-    backgroundColor: "#e2027b",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  topItemText: {
-    fontSize: 20,
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "ComviqSansWebBold",
+  sectionTitle: {
+    fontSize: 13,
+    color: "#6c757d",
+    fontWeight: "600",
+    letterSpacing: 0.8,
     textTransform: "uppercase",
+    marginBottom: 16,
+    marginLeft: 4,
   },
-  discountContainer: {
+  companiesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  cardTouchable: {
+    width: cardWidth,
+    height: cardWidth * 0.7, // Maintain aspect ratio
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    marginBottom: CARD_SPACING,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  companyImage: {
+    width: "80%",
+    height: "80%",
+  },
+  companyText: {
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
+    color: "#333",
+  },
+  menuList: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  menuItemTouchable: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
-  },
-  discountText: {
-    marginLeft: 5,
-    fontSize: 14,
-    fontFamily: "ComviqSansWebBold",
-    color: "#fff",
-  },
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 11,
-    marginVertical: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: "#ffffff",
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#f0f0f0",
+  },
+  destructiveButton: {
+    backgroundColor: "#fff8f8",
+  },
+  destructiveText: {
+    color: "#ff3b30",
+    fontWeight: "600",
   },
   iconContainer: {
-    width: 40,
+    width: 36,
+    height: 36,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 16,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
   },
-  listItemText: {
-    fontSize: 15,
-    color: "#000",
-    fontFamily: "ComviqSansWebBold",
-    marginLeft: 10,
-    textTransform: "uppercase",
-  },
-  logoutButton: {
-    backgroundColor: "#e2027b",
-    marginTop: 20,
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "500",
   },
 })
-
