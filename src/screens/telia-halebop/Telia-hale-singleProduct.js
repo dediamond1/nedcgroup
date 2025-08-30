@@ -233,7 +233,7 @@ const TeliaHalebopSingleProductScreen = () => {
     <SafeAreaView style={[styles.safeArea, {backgroundColor: teliaHalebop === "Telia" ? "#990AE3" : "#3b3687"}]}>
       <StatusBar barStyle="light-content" backgroundColor={teliaHalebop === "Telia" ? "#990AE3" : "#3b3687"} />
       <View style={styles.container}>
-                <TopHeader icon={true} onPress={()=> navigation.goBack()} iconBackground={teliaHalebop === "Telia" ? "#990AE3" : "#3b3687"} title={product.id} style={{ backgroundColor: teliaHalebop === "Telia" ? "#990AE3" : "#3b3687" }} />
+      <TopHeader icon={true} onPress={()=> navigation.goBack()} iconBackground={teliaHalebop === "Telia" ? "#990AE3" : "#3b3687"} title={product.id} style={{ backgroundColor: teliaHalebop === "Telia" ? "#990AE3" : "#3b3687" }} />
 
 
         <ScrollView style={styles.content}>
