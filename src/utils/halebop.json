@@ -1,0 +1,207 @@
+{
+    "brand": "Halebop",
+    "categories": [
+      {
+        "name": "Fastpris",
+        "products": [
+          {
+            "product": "Fastpris Mini 1 GB",
+            "price": 119,
+            "content": "200 samtalsminuter, 2000 SMS/MMS, 1 GB surf, Gäller i 30 dagar",
+            "englishcontent": "200 samtalsminuter, 2000 SMS/MMS, 1 GB surf, Galler i 30 dagar",
+            "data": "1 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": 200,
+              "smsMms": 2000,
+              "data": "1 GB"
+            }
+          },
+          {
+            "product": "Fastpris 5 GB",
+            "price": 159,
+            "content": "Fria samtal, Fria SMS/MMS, 5 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Fria samtal, Fria SMS/MMS, 5 GB surf, Galler i 30 dagar",
+            "data": "5 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "5 GB"
+            }
+          },
+          {
+            "product": "Fastpris 10 GB",
+            "price": 219,
+            "content": "Fria samtal, Fria SMS/MMS, 10 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Fria samtal, Fria SMS/MMS, 10 GB surf, Galler i 30 dagar",
+            "data": "10 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "10 GB"
+            }
+          },
+          {
+            "product": "Fastpris 20 GB",
+            "price": 279,
+            "content": "Fria samtal, Fria SMS/MMS, 20 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Fria samtal, Fria SMS/MMS, 20 GB surf, Galler i 30 dagar",
+            "data": "20 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "20 GB"
+            }
+          },
+          {
+            "product": "Fastpris 50 GB",
+            "price": 339,
+            "content": "Fria samtal, Fria SMS/MMS, 50 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Fria samtal, Fria SMS/MMS, 50 GB surf, Galler i 30 dagar",
+            "data": "50 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "50 GB"
+            }
+          },
+          {
+            "product": "Fastpris 100 GB",
+            "price": 399,
+            "content": "Fria samtal, Fria SMS/MMS, 100 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Fria samtal, Fria SMS/MMS, 100 GB surf, Galler i 30 dagar",
+            "data": "100 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "100 GB"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Surf",
+        "products": [
+          {
+            "product": "Surf 1 GB",
+            "price": 89,
+            "content": "1 GB surf, Gäller i 2 månader",
+            "englishcontent": "1 GB surf, Galler i 2 manader",
+            "data": "1 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "1 GB"
+            }
+          },
+          {
+            "product": "Surf 5 GB",
+            "price": 159,
+            "content": "5 GB surf, Gäller i 2 månader",
+            "englishcontent": "5 GB surf, Galler i 2 manader",
+            "data": "5 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "5 GB"
+            }
+          },
+          {
+            "product": "Surf 20 GB",
+            "price": 269,
+            "content": "20 GB surf, Gäller i 2 månader",
+            "englishcontent": "20 GB surf, Galler i 2 manader",
+            "data": "20 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "20 GB"
+            }
+          },
+          {
+            "product": "Obegränsad Surf Vecka",
+            "price": 199,
+            "content": "Obegränsad surf, Gäller i 7 dagar",
+            "englishcontent": "Unlimited surf, Galler i 7 dagar",
+            "data": "Unlimited",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "Unlimited"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Saldo",
+        "products": [
+          {
+            "product": "Saldo 100 kr",
+            "price": 100,
+            "content": "0,99 kr oppningsavgift, 0,99 kr per samtalsminut, 0,99 kr per SMS/MMS",
+            "englishcontent": "0.99 SEK opening fee, 0.99 SEK per call minute, 0.99 SEK per SMS/MMS",
+            "data": "N/A",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "N/A"
+            }
+          },
+          {
+            "product": "Saldo 200 kr",
+            "price": 200,
+            "content": "0,99 kr oppningsavgift, 0,99 kr per samtalsminut, 0,99 kr per SMS/MMS, 1 GB surf ingar",
+            "englishcontent": "0.99 SEK opening fee, 0.99 SEK per call minute, 0.99 SEK per SMS/MMS, 1 GB data included",
+            "data": "1 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "1 GB"
+            }
+          },
+          {
+            "product": "Saldo 300 kr",
+            "price": 300,
+            "content": "0,99 kr oppningsavgift, 0,99 kr per samtalsminut, 0,99 kr per SMS/MMS, 2 GB surf ingar",
+            "englishcontent": "0.99 SEK opening fee, 0.99 SEK per call minute, 0.99 SEK per SMS/MMS, 2 GB data included",
+            "data": "2 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "2 GB"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Periodkort",
+        "products": [
+          {
+            "product": "Periodkort 3 månader",
+            "price": 799,
+            "content": "Fria samtal, Fria SMS/MMS, 20 GB surf per månad, Gäller i 3 månader",
+            "englishcontent": "Free calls, Free SMS/MMS, 20 GB data per month, Valid for 3 months",
+            "data": "20 GB/Månad",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "20 GB/Månad"
+            }
+          },
+          {
+            "product": "Periodkort 6 månader",
+            "price": 1549,
+            "content": "Fria samtal, Fria SMS/MMS, 20 GB surf per månad, Gäller i 6 månader",
+            "englishcontent": "Free calls, Free SMS/MMS, 20 GB data per month, Valid for 6 months",
+            "data": "20 GB/Månad",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "20 GB/Månad"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  

@@ -1,0 +1,200 @@
+{
+    "brand": "Telia",
+    "categories": [
+      {
+        "name": "Fastpris",
+        "products": [
+          {
+            "product": "Fastpris Vecka 1 GB",
+            "price": 69,
+            "content": "Fria samtal, Fria SMS/MMS, 1 GB surf, Gäller i 7 dagar",
+            "englishcontent": "Free calls, Free SMS/MMS, 1 GB data, Valid for 7 days",
+            "data": "1 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "1 GB"
+            }
+          },
+          {
+            "product": "Fastpris Mini 2 GB",
+            "price": 149,
+            "content": "200 samtalsminuter, 2000 SMS/MMS, 2 GB surf, Gäller i 30 dagar",
+            "englishcontent": "200 call minutes, 2000 SMS/MMS, 2 GB data, Valid for 30 days",
+            "data": "2 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": 200,
+              "smsMms": 2000,
+              "data": "2 GB"
+            }
+          },
+          {
+            "product": "Fastpris 5 GB",
+            "price": 209,
+            "content": "Fria samtal, Fria SMS/MMS, 5 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Free calls, Free SMS/MMS, 5 GB data, Valid for 30 days",
+            "data": "5 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "5 GB"
+            }
+          },
+          {
+            "product": "Fastpris 10 GB",
+            "price": 259,
+            "content": "Fria samtal, Fria SMS/MMS, 10 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Free calls, Free SMS/MMS, 10 GB data, Valid for 30 days",
+            "data": "10 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "10 GB"
+            }
+          },
+          {
+            "product": "Fastpris 20 GB",
+            "price": 299,
+            "content": "Fria samtal, Fria SMS/MMS, 20 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Free calls, Free SMS/MMS, 20 GB data, Valid for 30 days",
+            "data": "20 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "20 GB"
+            }
+          },
+          {
+            "product": "Fastpris 50 GB",
+            "price": 349,
+            "content": "Fria samtal, Fria SMS/MMS, 50 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Free calls, Free SMS/MMS, 50 GB data, Valid for 30 days",
+            "data": "50 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "50 GB"
+            }
+          },
+          {
+            "product": "Fastpris 100 GB",
+            "price": 409,
+            "content": "Fria samtal, Fria SMS/MMS, 100 GB surf, Gäller i 30 dagar",
+            "englishcontent": "Free calls, Free SMS/MMS, 100 GB data, Valid for 30 days",
+            "data": "100 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "callMinutes": "Fria",
+              "smsMms": "Fria",
+              "data": "100 GB"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Surf",
+        "products": [
+          {
+            "product": "Surf 1 GB",
+            "price": 99,
+            "content": "1 GB surf, Gäller i 2 månader",
+            "englishcontent": "1 GB data, Valid for 2 months",
+            "data": "1 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "1 GB"
+            }
+          },
+          {
+            "product": "Surf 5 GB",
+            "price": 199,
+            "content": "5 GB surf, Gäller i 2 månader",
+            "englishcontent": "5 GB data, Valid for 2 months",
+            "data": "5 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "5 GB"
+            }
+          },
+          {
+            "product": "Surf 20 GB",
+            "price": 299,
+            "content": "20 GB surf, Gäller i 2 månader",
+            "englishcontent": "20 GB data, Valid for 2 months",
+            "data": "20 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "20 GB"
+            }
+          },
+          {
+            "product": "Obegränsad Surf Vecka",
+            "price": 249,
+            "content": "Obegränsad surf, Gäller i 7 dagar",
+            "englishcontent": "Unlimited data, Valid for 7 days",
+            "data": "Unlimited",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "Unlimited"
+            }
+          },
+          {
+            "product": "Obegränsad Surf Månad",
+            "price": 569,
+            "content": "Obegränsad surf, Gäller i 30 dagar",
+            "englishcontent": "Unlimited data, Valid for 30 days",
+            "data": "Unlimited",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "Unlimited"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Enkel",
+        "products": [
+          {
+            "product": "Enkel 100 kr",
+            "price": 100,
+            "content": "0,99 kr öppningsavgift, 1,99 kr per samtalsminut, 1,99 kr per SMS/MMS, 0,49 kr per MB",
+            "englishcontent": "0.99 SEK opening fee, 1.99 SEK per call minute, 1.99 SEK per SMS/MMS, 0.49 SEK per MB",
+            "data": "N/A",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "N/A"
+            }
+          },
+          {
+            "product": "Enkel 200 kr",
+            "price": 200,
+            "content": "0,99 kr öppningsavgift, 1,99 kr per samtalsminut, 1,99 kr per SMS/MMS, 1 GB surf ingår därefter 0,49 kr per MB",
+            "englishcontent": "0.99 SEK opening fee, 1.99 SEK per call minute, 1.99 SEK per SMS/MMS, 1 GB data included, thereafter 0.49 SEK per MB",
+            "data": "1 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "1 GB"
+            }
+          },
+          {
+            "product": "Enkel 300 kr",
+            "price": 300,
+            "content": "0,99 kr öppningsavgift, 1,99 kr per samtalsminut, 1,99 kr per SMS/MMS, 2 GB surf ingår därefter 0,49 kr per MB",
+            "englishcontent": "0.99 SEK opening fee, 1.99 SEK per call minute, 1.99 SEK per SMS/MMS, 2 GB data included, thereafter 0.49 SEK per MB",
+            "data": "2 GB",
+            "moms": "0%",
+            "moreInfo": {
+              "data": "2 GB"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  
