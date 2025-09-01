@@ -117,7 +117,7 @@ export const OrderDetails = ({route, navigation}) => {
 
   useEffect(() => {
     const orderDate = new Date(OrderDate);
-    setTime(format(orderDate, 'HH:MM'));
+    setTime(format(orderDate, 'HH:mm')); // Fixed: 'HH:mm' instead of 'HH:MM'
     setDate(format(orderDate, 'yyyy-MM-dd'));
   }, [OrderDate]);
 

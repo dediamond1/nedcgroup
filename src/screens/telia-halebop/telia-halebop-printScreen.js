@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { format } from 'date-fns';
 import { AuthContext } from '../../context/auth.context';
 import { TopHeader } from '../../components/header/TopHeader';
 import { BluetoothEscposPrinter, BluetoothManager } from '@brooons/react-native-bluetooth-escpos-printer';
@@ -9,6 +10,7 @@ import deviceManager from 'react-native-device-info';
 import { getBluetooth, saveBluetooth } from '../../helper/storage'; // Assuming these helpers exist
 import { halebopLogo, teliaLogo } from './teliaHalebopLogos';
 import { operatorConfig } from '../history/voucherUtils';
+import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
 
 const TeliaHalebopPrintScreen = () => {
   const route = useRoute();
@@ -18,12 +20,35 @@ const TeliaHalebopPrintScreen = () => {
 
   const COLOR = teliaHalebop === "Telia" ? "#990AE3" : "#3b3687";
 
+
   const operator = teliaHalebop === "Telia" ? "TELIA" : "HALEBOP"
 
   const [loading, setLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [boundAddress, setBoundAddress] = useState('');
   const [printerName, setPrinterName] = useState('');
+  const [currentTime, setCurrentTime] = useState('');
+  const [currentDate, setCurrentDate] = useState('');
+
+  // Extract data from route params
+  const title = product?.name || '';
+  const voucherDescription = product?.description || '';
+  const voucherNumber = voucherInfo?.voucherNumber || '';
+  const serialNumber = voucherInfo?.serialNumber || '';
+  const expireDate = voucherInfo?.expireDate || new Date(); // Use current date as fallback
+
+  // Get company info
+  const { companyInfo, getCompanyInfo } = useGetCompanyInfo();
+
+  useEffect(() => {
+    // Get company info on mount
+    getCompanyInfo();
+    
+    // Get current date/time
+    const now = new Date();
+    setCurrentTime(format(now, 'HH:mm'));
+    setCurrentDate(format(now, 'yyyy-MM-dd'));
+  }, [getCompanyInfo]);
 
   useEffect(() => {
     const initBluetooth = async () => {
@@ -51,6 +76,9 @@ const TeliaHalebopPrintScreen = () => {
           setBoundAddress(device.address);
           setPrinterName(device.name || 'OKÄND');
           setStatusText('Bluetooth redo.');
+          
+          // Auto-print when Bluetooth is ready and connected
+          await printVoucher();
         } else {
           setStatusText('Ingen sparad skrivare hittades. Vänligen para en skrivare i enhetens inställningar.');
           // Optionally, could add logic here to scan and list devices for user selection
@@ -73,7 +101,7 @@ const TeliaHalebopPrintScreen = () => {
       }
     };
 
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, [boundAddress]); // Include boundAddress dependency for cleanup function
 
   const handleDone = () => {
     // Navigate back to the main screen or appropriate screen
@@ -157,33 +185,33 @@ const printVoucher = async () => {
     }
 
     // Time & date
-    await BluetoothEscposPrinter.printText(`${time}`, {});
-    await BluetoothEscposPrinter.printText(` ${date}`, {});
+    await BluetoothEscposPrinter.printText(`${currentTime}`, {});
+    await BluetoothEscposPrinter.printText(` ${currentDate}`, {});
     await BluetoothEscposPrinter.printText('\r\n\r\n', {});
 
     // Company info
     await BluetoothEscposPrinter.printText(` ${companyInfo?.manager?.name?.toUpperCase()}`, {});
     await BluetoothEscposPrinter.printText('\r\n', {});
     await BluetoothEscposPrinter.printText(`${companyInfo?.manager?.orgNumber?.toString()?.length > 6
-      ? companyInfo?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
+      ? companyInfo?.manager?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
       : companyInfo?.manager?.orgNumber
       }`, {});
     await BluetoothEscposPrinter.printText('\r\n', {});
     await BluetoothEscposPrinter.printText(`Köpt datum och tid:`, {});
     await BluetoothEscposPrinter.printText('\r\n', {});
-    await BluetoothEscposPrinter.printText(`${time}`, {});
-    await BluetoothEscposPrinter.printText(` ${date}`, {});
+    await BluetoothEscposPrinter.printText(`${currentTime}`, {});
+    await BluetoothEscposPrinter.printText(` ${currentDate}`, {});
     await BluetoothEscposPrinter.printText('\r\n', {});
 
-    // Find the EAN for the voucher
-    let voucherEan = '';
-    categories.category.forEach(category => {
-      category.subcategory.forEach(subcategory => {
-        if (subcategory.name === title) {
-          voucherEan = subcategory.ean;
-        }
-      });
-    });
+    // Remove EAN lookup code since we're not using it
+    // let voucherEan = '';
+    // categories.category.forEach(category => {
+    //   category.subcategory.forEach(subcategory => {
+    //     if (subcategory.name === title) {
+    //       voucherEan = subcategory.ean;
+    //     }
+    //   });
+    // });
 
     // Print the barcode if EAN is found
     // if (voucherEan) {

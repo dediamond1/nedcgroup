@@ -18,6 +18,7 @@ import { AuthContext } from '../../context/auth.context';
 import { PincodeInput } from '../../../helper/PincodeInput';
 import { api } from '../../api/api';
 import { TopHeader } from '../../components/header/TopHeader';
+import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
 
 const TeliaHalebopSingleProductScreen = () => {
   const route = useRoute();
@@ -25,6 +26,7 @@ const TeliaHalebopSingleProductScreen = () => {
   const {product} = route.params || {};
   const buttonScale = new Animated.Value(1);
   const { teliaHalebop, user, setUser } = useContext(AuthContext);
+  const { setInActive } = useGetCompanyInfo(); // Use setInActive from hook
 
   
   const [loading, setLoading] = useState(false);
@@ -170,11 +172,12 @@ const TeliaHalebopSingleProductScreen = () => {
           onPress: () => setUser(null),
         }]);
       } else {
-        // On successful order save, navigate to the print screen
+        // On successful order save, navigate to the print screen with complete voucher data
         navigation.navigate('TeliaHalebopPrintScreen', {
           voucherInfo: {
             voucherNumber: voucherInfo.voucherNumber,
-            serialNumber: voucherInfo.serialNumber
+            serialNumber: voucherInfo.serialNumber,
+            expireDate: voucherInfo.expireDate // Add expireDate from voucher response
           },
           product: product
         });
