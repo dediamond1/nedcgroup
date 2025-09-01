@@ -23,7 +23,7 @@ import {
   BluetoothEscposPrinter,
   BluetoothManager,
 } from '@brooons/react-native-bluetooth-escpos-printer';
-import {format} from 'date-fns';
+import {addYears, format} from 'date-fns';
 import {logo} from '../qrCode/logo';
 import {logo as logoLyca} from '../lyca/logo';
 import axios from 'axios';
@@ -285,8 +285,10 @@ export const OrderDetails = ({route, navigation}) => {
       await BluetoothEscposPrinter.printText('\r\n', {});
 
       // Expire date
-      const formatedDate = format(new Date(expireDate), 'yyyy-MM-dd');
-      await BluetoothEscposPrinter.printText(
+const formatedDate = format(
+  new Date(expireDate ? expireDate : addYears(new Date(), 1)),
+  'yyyy-MM-dd'
+);      await BluetoothEscposPrinter.printText(
         `\r\nkoden är giltig: ${formatedDate}`,
         {},
       );

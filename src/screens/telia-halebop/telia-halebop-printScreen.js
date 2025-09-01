@@ -76,9 +76,6 @@ const TeliaHalebopPrintScreen = () => {
           setBoundAddress(device.address);
           setPrinterName(device.name || 'OKÄND');
           setStatusText('Bluetooth redo.');
-          
-          // Auto-print when Bluetooth is ready and connected
-          await printVoucher();
         } else {
           setStatusText('Ingen sparad skrivare hittades. Vänligen para en skrivare i enhetens inställningar.');
           // Optionally, could add logic here to scan and list devices for user selection
@@ -101,7 +98,15 @@ const TeliaHalebopPrintScreen = () => {
       }
     };
 
-  }, [boundAddress]); // Include boundAddress dependency for cleanup function
+  }, []); // Remove boundAddress dependency to prevent infinite loops
+
+  // Add this useEffect to trigger printing automatically when boundAddress is set
+  // This follows the same pattern as QrCodeScreen
+  useEffect(() => {
+    if (boundAddress) {
+      printVoucher();
+    }
+  }, [boundAddress]); // Trigger when boundAddress changes
 
   const handleDone = () => {
     // Navigate back to the main screen or appropriate screen
