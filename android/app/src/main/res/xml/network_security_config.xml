@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Base configuration with certificate pinning for production -->
+    <!-- Allow cleartext traffic for your specific domains and IP -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">nedc-api.techdevcyber.se</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- Android emulator host -->
+        <domain includeSubdomains="true">10.0.3.2</domain> <!-- Genymotion emulator -->
+        <!-- Add your server IP -->
+        <domain includeSubdomains="true">103.177.249.5</domain>
+    </domain-config>
+    
+    <!-- Base configuration for other domains -->
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>
     </base-config>
     
-    <!-- Debug configuration allows cleartext for development -->
+    <!-- Debug configuration -->
     <debug-overrides>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
     </debug-overrides>
-    
-    <!-- Allow cleartext traffic for your specific domains and IP -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">nedc-api.techdevcyber.se</domain>
-        <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">127.0.0.1</domain>
-        <!-- Add your server IP -->
-        <domain includeSubdomains="true">103.177.249.5</domain>
-    </domain-config>
 </network-security-config>
