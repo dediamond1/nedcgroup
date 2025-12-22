@@ -31,6 +31,7 @@ const TeliaHalebopPrintScreen = () => {
   const [currentDate, setCurrentDate] = useState('');
   const [operatorConfig, setOperatorConfig] = useState(null);
   const [hasPrinted, setHasPrinted] = useState(false);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
   // Extract data from route params
   const title = product?.name || '';
@@ -51,16 +52,25 @@ const TeliaHalebopPrintScreen = () => {
     setCurrentTime(format(now, 'HH:mm'));
     setCurrentDate(format(now, 'yyyy-MM-dd'));
 
-    // Load voucher config from API
+    // Load voucher config from API (only once on mount)
     const loadVoucherConfig = async () => {
-      // fetchVoucherConfig always returns a config (API or fallback)
-      const config = await fetchVoucherConfig();
-      if (config) {
-        setOperatorConfig(config);
+      // Prevent multiple simultaneous calls
+      if (isLoadingConfig || operatorConfig) {
+        return;
+      }
+      setIsLoadingConfig(true);
+      try {
+        // fetchVoucherConfig always returns a config (API or fallback)
+        const config = await fetchVoucherConfig();
+        if (config) {
+          setOperatorConfig(config);
+        }
+      } finally {
+        setIsLoadingConfig(false);
       }
     };
     loadVoucherConfig();
-  }, [getCompanyInfo]);
+  }, []); // Empty dependency array - run only once on mount
 
   useEffect(() => {
     const initBluetooth = async () => {
@@ -170,11 +180,18 @@ const printVoucher = async () => {
     await BluetoothEscposPrinter.printText('\r\n', {});
 
     // Get operator-specific config (formatted with voucher number)
-    // If config not loaded yet, fetch fallback synchronously
+    // If config not loaded yet, wait for it or use fallback
     let configToUse = operatorConfig;
-    if (!configToUse) {
-      console.warn('Operator config not loaded, using fallback');
+    if (!configToUse && !isLoadingConfig) {
+      console.warn('Operator config not loaded, fetching fallback');
       configToUse = await fetchVoucherConfig();
+    } else if (!configToUse && isLoadingConfig) {
+      // Wait a bit for config to load
+      await new Promise(resolve => setTimeout(resolve, 100));
+      configToUse = operatorConfig;
+      if (!configToUse) {
+        configToUse = await fetchVoucherConfig();
+      }
     }
     
     const config = getOperatorConfig(configToUse, operator, voucherNumber) || 
