@@ -11,6 +11,7 @@ import { getBluetooth, saveBluetooth } from '../../helper/storage';
 import { api } from '../../api/api';
 import { PincodeInput } from '../../../helper/PincodeInput';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
+import { fetchVoucherConfig, getOperatorConfig } from '../../utils/voucherConfig';
 
 export default function Component({ route, navigation }) {
   const { subcategory, categoryName } = route.params;
@@ -26,9 +27,26 @@ export default function Component({ route, navigation }) {
   const [bought, setBought] = useState(false);
   const [voucherInfo, setVoucherInfo] = useState({});
   const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [operatorConfig, setOperatorConfig] = useState(null);
 
   useEffect(() => {
     getCompanyInfo();
+  }, []);
+
+  useEffect(() => {
+    // Load voucher config from API (for LYCA)
+    const loadVoucherConfig = async () => {
+      try {
+        const config = await fetchVoucherConfig();
+        setOperatorConfig(config);
+      } catch (error) {
+        console.error('Error loading voucher config:', error);
+        // Fallback config is handled in fetchVoucherConfig
+        const fallbackConfig = await fetchVoucherConfig();
+        setOperatorConfig(fallbackConfig);
+      }
+    };
+    loadVoucherConfig();
   }, []);
 
   const handlePrintCode = () => {
@@ -163,18 +181,35 @@ export default function Component({ route, navigation }) {
       await BluetoothEscposPrinter.printText(`${subcategory?.InfoPos}`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
 
-      await BluetoothEscposPrinter.printText(
-        `Tanka registrerat kontantkort   genom att ringa *101*koden#`,
-        { fonttype: 1 }
-      );
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`koden ar giltig: 12 manader`, {});
+      // Get operator-specific config (formatted with voucher number)
+      if (!operatorConfig) {
+        Alert.alert('Fel', 'Voucher-konfiguration kunde inte laddas');
+        setLoading(false);
+        return;
+      }
+      
+      const config = getOperatorConfig(operatorConfig, 'LYCA', voucherNumber);
 
+      // Recharge text
+      if (config.rechargeText) {
+        await BluetoothEscposPrinter.printText(
+          config.rechargeText,
+          { fonttype: 1 }
+        );
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+      
+      await BluetoothEscposPrinter.printText(`koden ar giltig: 12 manader`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(
-        `Vid hjalp kontakta var kundtjanst pa telefon 3322 eler besok var webbplats www.lycamobile.se`,
-        { fonttype: 1 }
-      );
+
+      // Support info
+      if (config.support) {
+        await BluetoothEscposPrinter.printText(
+          config.support,
+          { fonttype: 1 }
+        );
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
 
       await BluetoothEscposPrinter.printText('\r\n', {});
       await BluetoothEscposPrinter.printText(`Serienummer: ${serialNumber}`, {});
@@ -182,7 +217,7 @@ export default function Component({ route, navigation }) {
 
       await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
       await BluetoothEscposPrinter.printQRCode(
-        `*101*${voucherInfo?.voucherNumber}#`,
+        config.qrCode,
         170,
         BluetoothEscposPrinter.ERROR_CORRECTION.L
       );

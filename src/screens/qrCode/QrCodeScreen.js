@@ -42,6 +42,7 @@ import axios from 'axios';
 import { NormalLoader } from '../../../helper/Loader2';
 import { PurchaseSuccess } from '../../../helper/SuccessScreen';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
+import { fetchVoucherConfig, getOperatorConfig } from '../../utils/voucherConfig';
 
 var { height, width } = Dimensions.get('window');
 
@@ -61,6 +62,7 @@ export const QrCodeScreen = ({ navigation, route }) => {
     const [year, setYear] = useState('')
     const [date, setDate] = useState('')
     const [debugMsg, setDebugMsg] = useState('');
+    const [operatorConfig, setOperatorConfig] = useState(null);
 
 
 
@@ -277,6 +279,22 @@ export const QrCodeScreen = ({ navigation, route }) => {
     }, [])
 
     useEffect(() => {
+        // Load voucher config from API (defaulting to COMVIQ for this screen)
+        const loadVoucherConfig = async () => {
+            try {
+                const config = await fetchVoucherConfig();
+                setOperatorConfig(config);
+            } catch (error) {
+                console.error('Error loading voucher config:', error);
+                // Fallback config is handled in fetchVoucherConfig
+                const fallbackConfig = await fetchVoucherConfig();
+                setOperatorConfig(fallbackConfig);
+            }
+        };
+        loadVoucherConfig();
+    }, [])
+
+    useEffect(() => {
         const isAmu = deviceManager.isEmulatorSync();
         if (isAmu) {
             Alert.alert('ERROR', 'This is NOT a real device!');
@@ -363,11 +381,19 @@ export const QrCodeScreen = ({ navigation, route }) => {
             });
             await BluetoothEscposPrinter.printText('\r\n', {});
 
+            // Get operator-specific config (defaulting to COMVIQ for this screen)
+            if (!operatorConfig) {
+                Alert.alert('Fel', 'Voucher-konfiguration kunde inte laddas');
+                return;
+            }
+            
+            const config = getOperatorConfig(operatorConfig, 'COMVIQ', voucherNumber);
+
             await BluetoothEscposPrinter.printerAlign(
                 BluetoothEscposPrinter.ALIGN.CENTER,
             );
             await BluetoothEscposPrinter.printQRCode(
-                `*110*${voucherNumber}#`,
+                config.qrCode,
                 170,
                 BluetoothEscposPrinter.ERROR_CORRECTION.L,
             );
@@ -391,29 +417,38 @@ export const QrCodeScreen = ({ navigation, route }) => {
             );
             await BluetoothEscposPrinter.printText('\r\n', {});
 
-            await BluetoothEscposPrinter.printText(
-                `Tanka ditt kontantkort genom att trycka *110*koden# och lur      eller skanna QR-koden uppe
-                `,
-                {
-                    fonttype: 1,
-                },
-            );
+            // Recharge text
+            if (config.rechargeText) {
+                await BluetoothEscposPrinter.printText(
+                    config.rechargeText,
+                    {
+                        fonttype: 1,
+                    },
+                );
+                await BluetoothEscposPrinter.printText('\r\n', {});
+            }
 
-            await BluetoothEscposPrinter.printText(
-                `Kontrollera ditt saldo genom att trycka *111# och lur
-                `,
-                {
-                    fonttype: 1,
-                },
-            );
+            // Balance check
+            if (config.balanceCheck) {
+                await BluetoothEscposPrinter.printText(
+                    config.balanceCheck,
+                    {
+                        fonttype: 1,
+                    },
+                );
+                await BluetoothEscposPrinter.printText('\r\n', {});
+            }
 
-            await BluetoothEscposPrinter.printText(
-                `For fragor och vilkor kontakta   COMVIQs kundtjanst på 212 eller 0772-21 21 21
-                `,
-                {
-                    fonttype: 1,
-                },
-            );
+            // Support info
+            if (config.support) {
+                await BluetoothEscposPrinter.printText(
+                    config.support,
+                    {
+                        fonttype: 1,
+                    },
+                );
+                await BluetoothEscposPrinter.printText('\r\n', {});
+            }
 
             await BluetoothEscposPrinter.printText(
                 ` ${companyInfo?.manager?.name?.toUpperCase()}`,

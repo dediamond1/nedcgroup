@@ -33,7 +33,7 @@ import {useGetCompanyInfo} from '../../hooks/useGetCompanyInfo';
 import categories from '../../utils/category-subcategory.json';
 import {AppText} from '../../components/appText';
 const {width} = Dimensions.get('window');
-import {operatorConfig} from './voucherUtils'; // your util file
+import {fetchVoucherConfig, getOperatorConfig} from '../../utils/voucherConfig';
 import { halebopLogo, teliaLogo } from '../telia-halebop/teliaHalebopLogos';
 
 export const OrderDetails = ({route, navigation}) => {
@@ -46,6 +46,7 @@ export const OrderDetails = ({route, navigation}) => {
   const [name, setName] = useState('');
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
+  const [operatorConfig, setOperatorConfig] = useState(null);
   const {data, companyInfo, operator} = route.params || {};
   const {user} = useContext(AuthContext);
 
@@ -113,6 +114,21 @@ export const OrderDetails = ({route, navigation}) => {
     };
 
     initBluetooth();
+  }, []);
+
+  useEffect(() => {
+    const loadVoucherConfig = async () => {
+      try {
+        const config = await fetchVoucherConfig();
+        setOperatorConfig(config);
+      } catch (error) {
+        console.error('Error loading voucher config:', error);
+        // Fallback config is handled in fetchVoucherConfig
+        const fallbackConfig = await fetchVoucherConfig();
+        setOperatorConfig(fallbackConfig);
+      }
+    };
+    loadVoucherConfig();
   }, []);
 
   useEffect(() => {
@@ -257,14 +273,20 @@ export const OrderDetails = ({route, navigation}) => {
       });
       await BluetoothEscposPrinter.printText('\r\n', {});
 
-      // Get operator-specific config
-      const config =
-        operatorConfig[operator] || operatorConfig['COMVIQ'];
+      // Get operator-specific config (formatted with voucher number)
+      if (!operatorConfig) {
+        Alert.alert('Fel', 'Voucher-konfiguration kunde inte laddas');
+        setLoading(false);
+        return;
+      }
+      
+      const config = getOperatorConfig(operatorConfig, operator, voucherNumber) || 
+                     getOperatorConfig(operatorConfig, 'COMVIQ', voucherNumber);
 
       // Recharge text
       if (config.rechargeText) {
         await BluetoothEscposPrinter.printText(
-          config.rechargeText(voucherNumber),
+          config.rechargeText,
           {fonttype: 1},
         );
         await BluetoothEscposPrinter.printText('\r\n', {});
@@ -275,7 +297,7 @@ export const OrderDetails = ({route, navigation}) => {
         BluetoothEscposPrinter.ALIGN.CENTER,
       );
       await BluetoothEscposPrinter.printQRCode(
-        config.qrCode(voucherNumber),
+        config.qrCode,
         170,
         BluetoothEscposPrinter.ERROR_CORRECTION.L,
       );
@@ -314,11 +336,6 @@ const formatedDate = format(
         });
         await BluetoothEscposPrinter.printText('\r\n', {});
       }
-
-      // Time & date
-      await BluetoothEscposPrinter.printText(`${time}`, {});
-      await BluetoothEscposPrinter.printText(` ${date}`, {});
-      await BluetoothEscposPrinter.printText('\r\n\r\n', {});
 
       // Company info
       await BluetoothEscposPrinter.printText(

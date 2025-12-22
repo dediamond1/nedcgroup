@@ -9,7 +9,7 @@ import { BluetoothEscposPrinter, BluetoothManager } from '@brooons/react-native-
 import deviceManager from 'react-native-device-info';
 import { getBluetooth, saveBluetooth } from '../../helper/storage'; // Assuming these helpers exist
 import { halebopLogo, teliaLogo } from './teliaHalebopLogos';
-import { operatorConfig } from '../history/voucherUtils';
+import { fetchVoucherConfig, getOperatorConfig } from '../../utils/voucherConfig';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
 
 const TeliaHalebopPrintScreen = () => {
@@ -29,6 +29,7 @@ const TeliaHalebopPrintScreen = () => {
   const [printerName, setPrinterName] = useState('');
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const [operatorConfig, setOperatorConfig] = useState(null);
 
   // Extract data from route params
   const title = product?.name || '';
@@ -48,6 +49,20 @@ const TeliaHalebopPrintScreen = () => {
     const now = new Date();
     setCurrentTime(format(now, 'HH:mm'));
     setCurrentDate(format(now, 'yyyy-MM-dd'));
+
+    // Load voucher config from API
+    const loadVoucherConfig = async () => {
+      try {
+        const config = await fetchVoucherConfig();
+        setOperatorConfig(config);
+      } catch (error) {
+        console.error('Error loading voucher config:', error);
+        // Fallback config is handled in fetchVoucherConfig
+        const fallbackConfig = await fetchVoucherConfig();
+        setOperatorConfig(fallbackConfig);
+      }
+    };
+    loadVoucherConfig();
   }, [getCompanyInfo]);
 
   useEffect(() => {
@@ -149,19 +164,26 @@ const printVoucher = async () => {
     });
     await BluetoothEscposPrinter.printText('\r\n', {});
 
-    // Get operator-specific config
-    const config = operatorConfig[operator] || operatorConfig["TELIA"];
+    // Get operator-specific config (formatted with voucher number)
+    if (!operatorConfig) {
+      Alert.alert('Fel', 'Voucher-konfiguration kunde inte laddas');
+      setLoading(false);
+      return;
+    }
+    
+    const config = getOperatorConfig(operatorConfig, operator, voucherNumber) || 
+                   getOperatorConfig(operatorConfig, 'TELIA', voucherNumber);
 
     // Recharge text
     if (config.rechargeText) {
-      await BluetoothEscposPrinter.printText(config.rechargeText(voucherNumber), { fonttype: 1 });
+      await BluetoothEscposPrinter.printText(config.rechargeText, { fonttype: 1 });
       await BluetoothEscposPrinter.printText('\r\n', {});
     }
 
     // QR Code
     await BluetoothEscposPrinter.printerAlign(BluetoothEscposPrinter.ALIGN.CENTER);
     await BluetoothEscposPrinter.printQRCode(
-      config.qrCode(voucherNumber),
+      config.qrCode,
       170,
       BluetoothEscposPrinter.ERROR_CORRECTION.L
     );
@@ -188,11 +210,6 @@ const printVoucher = async () => {
       await BluetoothEscposPrinter.printText(config.balanceCheck, { fonttype: 1 });
       await BluetoothEscposPrinter.printText('\r\n', {});
     }
-
-    // Time & date
-    await BluetoothEscposPrinter.printText(`${currentTime}`, {});
-    await BluetoothEscposPrinter.printText(` ${currentDate}`, {});
-    await BluetoothEscposPrinter.printText('\r\n\r\n', {});
 
     // Company info
     await BluetoothEscposPrinter.printText(` ${companyInfo?.manager?.name?.toUpperCase()}`, {});
