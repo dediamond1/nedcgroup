@@ -30,6 +30,7 @@ const TeliaHalebopPrintScreen = () => {
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [operatorConfig, setOperatorConfig] = useState(null);
+  const [hasPrinted, setHasPrinted] = useState(false);
 
   // Extract data from route params
   const title = product?.name || '';
@@ -114,10 +115,10 @@ const TeliaHalebopPrintScreen = () => {
   // Add this useEffect to trigger printing automatically when boundAddress is set
   // This follows the same pattern as QrCodeScreen
   useEffect(() => {
-    if (boundAddress) {
+    if (boundAddress && !hasPrinted && !loading) {
       printVoucher();
     }
-  }, [boundAddress]); // Trigger when boundAddress changes
+  }, [boundAddress, hasPrinted, loading]); // Trigger when boundAddress changes, but only once
 
   const handleDone = () => {
     // Navigate back to the main screen or appropriate screen
@@ -126,14 +127,22 @@ const TeliaHalebopPrintScreen = () => {
 
 
 const printVoucher = async () => {
+  // Prevent multiple simultaneous print calls
+  if (loading) {
+    console.log('Print already in progress, skipping...');
+    return;
+  }
+
   try {
     const isEmulator = await deviceManager.isEmulator();
     if (isEmulator) {
       Alert.alert('FEL', 'Detta är INTE en riktig enhet!');
+      setLoading(false);
       return;
     }
 
     setLoading(true);
+    setHasPrinted(true); // Mark that printing has been attempted
     await BluetoothManager.connect(boundAddress);
     await BluetoothEscposPrinter.printerInit();
     await BluetoothEscposPrinter.printerLeftSpace(0);
@@ -252,8 +261,11 @@ const printVoucher = async () => {
 
     await BluetoothEscposPrinter.printText('\r\n\r\n\r\n', {});
     setLoading(false);
+    setStatusText('Voucher utskriven!');
   } catch (error) {
+    console.error('Print error:', error);
     setLoading(false);
+    setHasPrinted(false); // Allow retry on error
     Alert.alert('Fel', error.message || 'Det gick inte att skriva ut voucher');
   }
 };
