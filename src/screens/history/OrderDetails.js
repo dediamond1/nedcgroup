@@ -304,7 +304,7 @@ export const OrderDetails = ({route, navigation}) => {
         170,
         BluetoothEscposPrinter.ERROR_CORRECTION.L,
       );
-      await BluetoothEscposPrinter.printText('skanna för att tanka', {
+      await BluetoothEscposPrinter.printText('skanna for att tanka', {
         fonttype: 1,
       });
       await BluetoothEscposPrinter.printText('\r\n', {});
@@ -314,7 +314,7 @@ const formatedDate = format(
   new Date(expireDate ? expireDate : addYears(new Date(), 1)),
   'yyyy-MM-dd'
 );      await BluetoothEscposPrinter.printText(
-        `\r\nkoden är giltig: ${formatedDate}`,
+        `\r\nkoden ar giltig: ${formatedDate}`,
         {},
       );
       await BluetoothEscposPrinter.printText('\r\n', {});
@@ -340,22 +340,26 @@ const formatedDate = format(
         await BluetoothEscposPrinter.printText('\r\n', {});
       }
 
-      // Company info
-      await BluetoothEscposPrinter.printText(
-        ` ${companyInfo?.manager?.name?.toUpperCase()}`,
-        {},
-      );
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(
-        `${
-          companyInfo?.manager?.orgNumber?.toString()?.length > 6
-            ? companyInfo?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
-            : companyInfo?.manager?.orgNumber
-        }`,
-        {},
-      );
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`Köpt datum och tid:`, {});
+      // Company info (only print if available)
+      if (companyInfo?.manager?.name) {
+        await BluetoothEscposPrinter.printText(
+          ` ${companyInfo.manager.name.toUpperCase()}`,
+          {},
+        );
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+      if (companyInfo?.manager?.orgNumber) {
+        await BluetoothEscposPrinter.printText(
+          `${
+            companyInfo.manager.orgNumber.toString().length > 6
+              ? companyInfo.manager.orgNumber.toString().slice(0, 6) + '-' + 'XXXX'
+              : companyInfo.manager.orgNumber
+          }`,
+          {},
+        );
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+      await BluetoothEscposPrinter.printText(`Kopt datum och tid:`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
       await BluetoothEscposPrinter.printText(`${time}`, {});
       await BluetoothEscposPrinter.printText(` ${date}`, {});

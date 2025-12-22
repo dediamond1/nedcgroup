@@ -15,7 +15,7 @@ import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
 const TeliaHalebopPrintScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { voucherInfo, product } = route.params || {};
+  const { voucherInfo, product, companyInfo: routeCompanyInfo } = route.params || {};
   const { teliaHalebop } = useContext(AuthContext);
 
   const COLOR = teliaHalebop === "Telia" ? "#990AE3" : "#3b3687";
@@ -40,12 +40,15 @@ const TeliaHalebopPrintScreen = () => {
   const serialNumber = voucherInfo?.serialNumber || '';
   const expireDate = voucherInfo?.expireDate || new Date(); // Use current date as fallback
 
-  // Get company info
-  const { companyInfo, getCompanyInfo } = useGetCompanyInfo();
+  // Get company info - prefer route params, fallback to hook
+  const { companyInfo: hookCompanyInfo, getCompanyInfo, loading: companyInfoLoading } = useGetCompanyInfo();
+  const companyInfo = routeCompanyInfo || hookCompanyInfo; // Use route params if available, otherwise use hook
 
   useEffect(() => {
-    // Get company info on mount
-    getCompanyInfo();
+    // Get company info on mount only if not provided via route params
+    if (!routeCompanyInfo) {
+      getCompanyInfo();
+    }
     
     // Get current date/time
     const now = new Date();
@@ -123,12 +126,14 @@ const TeliaHalebopPrintScreen = () => {
   }, []); // Remove boundAddress dependency to prevent infinite loops
 
   // Add this useEffect to trigger printing automatically when boundAddress is set
-  // This follows the same pattern as QrCodeScreen
+  // If companyInfo comes from route params, it's immediately available
+  // Otherwise wait for it to load via hook
   useEffect(() => {
-    if (boundAddress && !hasPrinted && !loading) {
+    const companyInfoReady = routeCompanyInfo || (!companyInfoLoading && companyInfo);
+    if (boundAddress && !hasPrinted && !loading && companyInfoReady) {
       printVoucher();
     }
-  }, [boundAddress, hasPrinted, loading]); // Trigger when boundAddress changes, but only once
+  }, [boundAddress, hasPrinted, loading, companyInfoLoading, companyInfo, routeCompanyInfo]); // Trigger when boundAddress changes and companyInfo is ready
 
   const handleDone = () => {
     // Navigate back to the main screen or appropriate screen
@@ -143,10 +148,21 @@ const printVoucher = async () => {
     return;
   }
 
+  // Wait for companyInfo to load if it's still loading (only if not from route params)
+  if (!routeCompanyInfo && (companyInfoLoading || !companyInfo)) {
+    console.log('Waiting for company info to load...');
+    // Wait a bit and retry
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (!companyInfo) {
+      // If still not loaded, fetch it
+      await getCompanyInfo();
+    }
+  }
+
   try {
     const isEmulator = await deviceManager.isEmulator();
     if (isEmulator) {
-      Alert.alert('FEL', 'Detta är INTE en riktig enhet!');
+      Alert.alert('FEL', 'Detta ar INTE en riktig enhet!');
       setLoading(false);
       return;
     }
@@ -216,12 +232,12 @@ const printVoucher = async () => {
       170,
       BluetoothEscposPrinter.ERROR_CORRECTION.L
     );
-    await BluetoothEscposPrinter.printText('skanna för att tanka', { fonttype: 1 });
+    await BluetoothEscposPrinter.printText('skanna for att tanka', { fonttype: 1 });
     await BluetoothEscposPrinter.printText('\r\n', {});
 
     // Expire date
     const formatedDate = format(new Date(expireDate), 'yyyy-MM-dd');
-    await BluetoothEscposPrinter.printText(`\r\nkoden är giltig: ${formatedDate}`, {});
+    await BluetoothEscposPrinter.printText(`\r\nkoden ar giltig: ${formatedDate}`, {});
     await BluetoothEscposPrinter.printText('\r\n', {});
 
     // Support info
@@ -240,15 +256,19 @@ const printVoucher = async () => {
       await BluetoothEscposPrinter.printText('\r\n', {});
     }
 
-    // Company info
-    await BluetoothEscposPrinter.printText(` ${companyInfo?.manager?.name?.toUpperCase()}`, {});
-    await BluetoothEscposPrinter.printText('\r\n', {});
-    await BluetoothEscposPrinter.printText(`${companyInfo?.manager?.orgNumber?.toString()?.length > 6
-      ? companyInfo?.manager?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
-      : companyInfo?.manager?.orgNumber
-      }`, {});
-    await BluetoothEscposPrinter.printText('\r\n', {});
-    await BluetoothEscposPrinter.printText(`Köpt datum och tid:`, {});
+    // Company info (only print if available)
+    if (companyInfo?.manager?.name) {
+      await BluetoothEscposPrinter.printText(` ${companyInfo.manager.name.toUpperCase()}`, {});
+      await BluetoothEscposPrinter.printText('\r\n', {});
+    }
+    if (companyInfo?.manager?.orgNumber) {
+      await BluetoothEscposPrinter.printText(`${companyInfo.manager.orgNumber.toString().length > 6
+        ? companyInfo.manager.orgNumber.toString().slice(0, 6) + '-' + 'XXXX'
+        : companyInfo.manager.orgNumber
+        }`, {});
+      await BluetoothEscposPrinter.printText('\r\n', {});
+    }
+    await BluetoothEscposPrinter.printText(`Kopt datum och tid:`, {});
     await BluetoothEscposPrinter.printText('\r\n', {});
     await BluetoothEscposPrinter.printText(`${currentTime}`, {});
     await BluetoothEscposPrinter.printText(` ${currentDate}`, {});

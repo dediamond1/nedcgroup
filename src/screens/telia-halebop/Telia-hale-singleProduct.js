@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../context/auth.context';
 import { PincodeInput } from '../../../helper/PincodeInput';
 import { api } from '../../api/api';
@@ -26,7 +26,7 @@ const TeliaHalebopSingleProductScreen = () => {
   const {product} = route.params || {};
   const buttonScale = new Animated.Value(1);
   const { teliaHalebop, user, setUser } = useContext(AuthContext);
-  const { setInActive } = useGetCompanyInfo(); // Use setInActive from hook
+  const { setInActive, companyInfo, getCompanyInfo } = useGetCompanyInfo(); // Use setInActive and companyInfo from hook
 
   
   const [loading, setLoading] = useState(false);
@@ -34,6 +34,11 @@ const TeliaHalebopSingleProductScreen = () => {
   const [statusText, setStatusText] = useState('');
   // Removed voucherInfo state as it's passed directly to the new screen
   // Removed showVoucherModal state
+  
+  // Fetch company info on mount
+  useEffect(() => {
+    getCompanyInfo();
+  }, []);
   
   console.log(product)
   const animateButton = (scaleValue) => {
@@ -179,7 +184,8 @@ const TeliaHalebopSingleProductScreen = () => {
             serialNumber: voucherInfo.serialNumber,
             expireDate: voucherInfo.expireDate // Add expireDate from voucher response
           },
-          product: product
+          product: product,
+          companyInfo: companyInfo // Pass companyInfo from parent screen
         });
       }
 

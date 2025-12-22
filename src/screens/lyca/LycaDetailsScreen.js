@@ -231,13 +231,18 @@ export default function Component({ route, navigation }) {
       await BluetoothEscposPrinter.printText('registrera sim-kort pa online    genom att skanna  ', { fonttype: 1 });
 
       await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(` ${companyInfo?.manager?.name?.toUpperCase()}`, {});
-      await BluetoothEscposPrinter.printText('\r\n', {});
-      await BluetoothEscposPrinter.printText(`${companyInfo?.manager?.orgNumber?.toString()?.length > 6
-        ? companyInfo?.orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
-        : companyInfo?.manager?.orgNumber
-      }`, {});
-      await BluetoothEscposPrinter.printText('\r\n', {});
+      // Company info (only print if available)
+      if (companyInfo?.manager?.name) {
+        await BluetoothEscposPrinter.printText(` ${companyInfo.manager.name.toUpperCase()}`, {});
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
+      if (companyInfo?.manager?.orgNumber) {
+        await BluetoothEscposPrinter.printText(`${companyInfo.manager.orgNumber.toString().length > 6
+          ? companyInfo.manager.orgNumber.toString().slice(0, 6) + '-' + 'XXXX'
+          : companyInfo.manager.orgNumber
+        }`, {});
+        await BluetoothEscposPrinter.printText('\r\n', {});
+      }
       await BluetoothEscposPrinter.printText(`Kopt datum och tid:`, {});
       await BluetoothEscposPrinter.printText('\r\n', {});
       await BluetoothEscposPrinter.printText(` ${new Date().getFullYear()}, ${new Date().getHours()}:${new Date().getMinutes()}`, {});

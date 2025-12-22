@@ -453,19 +453,25 @@ export const QrCodeScreen = ({ navigation, route }) => {
                 await BluetoothEscposPrinter.printText('\r\n', {});
             }
 
-            await BluetoothEscposPrinter.printText(
-                ` ${companyInfo?.manager?.name?.toUpperCase()}`,
-                {},
-            );
-            await BluetoothEscposPrinter.printText('\r\n', {});
-
-            await BluetoothEscposPrinter.printText(
-                `${orgNumber?.toString()?.length > 6
-                    ? orgNumber?.toString().slice(0, 6) + '-' + 'XXXX'
-                    : orgNumber
-                }`,
-                {},
-            );
+            // Company info (only print if available)
+            // Company info (only print if available)
+            if (companyInfo?.manager?.name) {
+                await BluetoothEscposPrinter.printText(
+                    ` ${companyInfo.manager.name.toUpperCase()}`,
+                    {},
+                );
+                await BluetoothEscposPrinter.printText('\r\n', {});
+            }
+            if (orgNumber) {
+                await BluetoothEscposPrinter.printText(
+                    `${orgNumber.toString().length > 6
+                        ? orgNumber.toString().slice(0, 6) + '-' + 'XXXX'
+                        : orgNumber
+                    }`,
+                    {},
+                );
+                await BluetoothEscposPrinter.printText('\r\n', {});
+            }
 
             await BluetoothEscposPrinter.printText('\r\n', {});
             const boughtDate = moment(
