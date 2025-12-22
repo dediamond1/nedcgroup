@@ -52,14 +52,10 @@ const TeliaHalebopPrintScreen = () => {
 
     // Load voucher config from API
     const loadVoucherConfig = async () => {
-      try {
-        const config = await fetchVoucherConfig();
+      // fetchVoucherConfig always returns a config (API or fallback)
+      const config = await fetchVoucherConfig();
+      if (config) {
         setOperatorConfig(config);
-      } catch (error) {
-        console.error('Error loading voucher config:', error);
-        // Fallback config is handled in fetchVoucherConfig
-        const fallbackConfig = await fetchVoucherConfig();
-        setOperatorConfig(fallbackConfig);
       }
     };
     loadVoucherConfig();
@@ -165,14 +161,21 @@ const printVoucher = async () => {
     await BluetoothEscposPrinter.printText('\r\n', {});
 
     // Get operator-specific config (formatted with voucher number)
-    if (!operatorConfig) {
+    // If config not loaded yet, fetch fallback synchronously
+    let configToUse = operatorConfig;
+    if (!configToUse) {
+      console.warn('Operator config not loaded, using fallback');
+      configToUse = await fetchVoucherConfig();
+    }
+    
+    const config = getOperatorConfig(configToUse, operator, voucherNumber) || 
+                   getOperatorConfig(configToUse, 'TELIA', voucherNumber);
+    
+    if (!config) {
       Alert.alert('Fel', 'Voucher-konfiguration kunde inte laddas');
       setLoading(false);
       return;
     }
-    
-    const config = getOperatorConfig(operatorConfig, operator, voucherNumber) || 
-                   getOperatorConfig(operatorConfig, 'TELIA', voucherNumber);
 
     // Recharge text
     if (config.rechargeText) {

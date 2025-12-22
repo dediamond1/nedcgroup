@@ -7,13 +7,37 @@ import { api } from '../api/api';
 export const fetchVoucherConfig = async () => {
   try {
     const response = await api.get('/api/voucher-config');
-    if (response.ok && response.data?.success) {
-      return response.data.data;
+    
+    // Log response for debugging
+    console.log('Voucher config API response:', {
+      ok: response.ok,
+      status: response.status,
+      hasData: !!response.data,
+      dataStructure: response.data ? Object.keys(response.data) : null
+    });
+    
+    // Check multiple conditions - be more lenient with response structure
+    if (response.status === 200) {
+      // If response has success flag and data
+      if (response.data?.success && response.data?.data) {
+        return response.data.data;
+      }
+      // If response.data is directly the config object (fallback structure)
+      if (response.data && typeof response.data === 'object' && response.data.COMVIQ) {
+        return response.data;
+      }
     }
-    throw new Error('Failed to fetch voucher config');
+    
+    // If response exists but structure is wrong, log and use fallback
+    console.warn('Voucher config API response format unexpected, using fallback:', {
+      status: response.status,
+      ok: response.ok,
+      data: response.data
+    });
+    return getFallbackConfig();
   } catch (error) {
     console.error('Error fetching voucher config:', error);
-    // Return fallback config if API fails
+    // Always return fallback config if API fails
     return getFallbackConfig();
   }
 };
