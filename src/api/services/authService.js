@@ -144,15 +144,35 @@ export const getProfile = async () => {
  * Passwordless login — request an email code (step 1).
  * @param {string} email
  */
-export const requestLoginCode = async (email) =>
-  api.post('/api/auth/request-code', { email });
+export const requestLoginCode = async (email) => {
+  try {
+    const response = await api.post('/api/auth/request-code', { email });
+    if (response.ok) {
+      return handleApiSuccess(response);
+    }
+    return handleApiError(response);
+  } catch (error) {
+    console.error('Request code service error:', error);
+    return handleApiError(error);
+  }
+};
 
 /**
  * Passwordless login — verify the emailed code (step 2) → final token.
  * @param {{ email: string, code: string }} payload
  */
-export const verifyLoginCode = async ({ email, code }) =>
-  api.post('/api/auth/verify-code', { email, code });
+export const verifyLoginCode = async ({ email, code }) => {
+  try {
+    const response = await api.post('/api/auth/verify-code', { email, code });
+    if (response.ok) {
+      return handleApiSuccess(response);
+    }
+    return handleApiError(response);
+  } catch (error) {
+    console.error('Verify code service error:', error);
+    return handleApiError(error);
+  }
+};
 
 export default {
   login,

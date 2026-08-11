@@ -3,6 +3,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
+  ScrollView,
   View,
   StyleSheet,
   Platform,
@@ -73,11 +74,13 @@ export const LoginScreen = () => {
   const isEmailValid = EMAIL_RE.test(email);
 
   const sendCode = async () => {
+    if (sendingCode) return; // guard against double-taps
     if (!isEmailValid) {
       setCodeError('Ange rätt e-post');
       return;
     }
     setCodeError('');
+    Keyboard.dismiss();
     setSendingCode(true);
     const resultAction = await dispatch(requestLoginCode({ email: email.trim() }));
     setSendingCode(false);
@@ -152,9 +155,14 @@ export const LoginScreen = () => {
           <TopHeader title={'LOGGA IN'} />
           <KeyboardAvoidingView
             style={styles.contentContainer}
-            keyboardVerticalOffset={90}
-            behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+            behavior={Platform.OS === 'ios' ? 'height' : undefined}
           >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+            >
             <AppText
               text={'E-post'}
               style={{ color: '#000', fontSize: 17, fontFamily: 'ComviqSansWebBold' }}
@@ -328,6 +336,7 @@ export const LoginScreen = () => {
                 />
               </Pressable>
             </View>
+            </ScrollView>
           </KeyboardAvoidingView>
         </AppScreen>
       </TouchableWithoutFeedback>
@@ -341,7 +350,11 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   contentContainer: {
+    flex: 1,
     padding: 16,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   errText: {
     color: colors.primary.main,
