@@ -24,14 +24,16 @@ const NewsScreen = ({ navigation }) => {
     setLoading(true);
     setError(false);
     try {
-      const response = await fetch(`${baseUrl}/api/announcement`);
+      const response = await fetch(`${baseUrl}/api/announcements`);
       if (!response.ok) {
         throw new Error('Kunde inte hämta nyheter');
       }
       const data = await response.json();
+      // API returns { announcements: [...] } — accept both shapes
+      const list = Array.isArray(data) ? data : (data?.announcements ?? []);
       // Filter out expired announcements
       const now = new Date();
-      const validNews = data.filter(
+      const validNews = list.filter(
         announcement => new Date(announcement.expirationDate) >= now && announcement.type === 'news'
       );
       setNews(validNews);

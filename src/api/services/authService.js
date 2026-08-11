@@ -59,6 +59,31 @@ export const verifyPinCode = async ({ email, password, pinCode }) => {
 };
 
 /**
+ * Confirm PIN code for checkout operations
+ * @param {string} pinCode - PIN code to confirm
+ * @param {Object} headers - Optional request headers (e.g. Authorization)
+ * @returns {Promise} API response with standardized format
+ */
+export const confirmPinCode = async (pinCode, headers) => {
+  try {
+    const response = await api.post(
+      AUTH_ROUTES.CONFIRM_PIN,
+      { pincode: pinCode },
+      headers ? { headers } : undefined
+    );
+
+    if (response.ok) {
+      return handleApiSuccess(response);
+    }
+
+    return handleApiError(response);
+  } catch (error) {
+    console.error('Confirm PIN service error:', error);
+    return handleApiError(error);
+  }
+};
+
+/**
  * Logout user from the system
  * @returns {Promise} API response with standardized format
  */
@@ -118,6 +143,7 @@ export const getProfile = async () => {
 export default {
   login,
   verifyPinCode,
+  confirmPinCode,
   logoutUser,
   refreshToken,
   getProfile,

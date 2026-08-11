@@ -70,7 +70,7 @@ const TeliaHalebopSingleProductScreen = () => {
       setLoading(true);
       setStatusText('Verifierar pinkoden...');
 
-      const response = await api.post('/api/manager/confirmpinCheck', {
+      const response = await api.post('/api/auth/confirm-pin', {
         pincode: pinCode,
       }, {
         headers: {

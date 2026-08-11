@@ -19,6 +19,7 @@ const initialState = {
   isLoading: false,
   error: null,
   requiresPin: false,
+  inActive: false,
 };
 
 /**
@@ -79,6 +80,14 @@ const authSlice = createSlice({
     },
 
     /**
+     * Set company/account inactive state
+     * (credit limit reached, company deactivated)
+     */
+    setInActive: (state, action) => {
+      state.inActive = !!action.payload;
+    },
+
+    /**
      * Complete logout process
      */
     logout: (state) => {
@@ -105,6 +114,7 @@ export const {
   setToken,
   setUser,
   setRequiresPin,
+  setInActive,
   logout,
   resetAuth,
 } = authSlice.actions;
@@ -154,6 +164,13 @@ export const selectError = (state) => state.auth.error;
  * @returns {boolean} Whether PIN verification is required
  */
 export const selectRequiresPin = (state) => state.auth.requiresPin;
+
+/**
+ * Select company inactive state
+ * @param {Object} state - Redux state
+ * @returns {boolean} Whether the company/account is inactive
+ */
+export const selectInActive = (state) => state.auth.inActive;
 
 /**
  * Select complete auth state

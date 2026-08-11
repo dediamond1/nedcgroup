@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Provider, useDispatch } from 'react-redux';
 import SplashScreen from 'react-native-splash-screen';
 import Crashes from 'appcenter-crashes';
 import { Alert, BackHandler } from 'react-native';
@@ -7,7 +8,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { AppSideNavigation } from './src/navigations/Home/HomeNavigation';
 import { AuthNavigation } from './src/navigations/auth/AuthNavigation';
 import { AuthContext } from './src/context/auth.context';
-import { getToken } from './src/helper/storage';
 import { NoNetwork } from './helper/NoNetwork';
 import { ClosedShop } from './helper/Closed';
 import { AccountStatus } from './src/helper/AccountStatus';
@@ -19,11 +19,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseUrl } from './src/constants/api';
 import DeviceInfo from 'react-native-device-info';
 import { api } from './src/api/api';
+import { store } from './src/redux/store';
+import { loadStoredToken } from './src/redux/features/auth/authActions';
+import { useAuth } from './src/context/auth.context';
 
-const App = () => {
+const AppInner = () => {
   const netInfo = useNetInfo();
-  const [user, setUser] = useState(null);
-  const [authLoad, setAuthLoad] = useState(false);
+  const [authLoad, setAuthLoad] = useState(true);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [updateUrl, setUpdateUrl] = useState('');
   const [latestVersion, setLatestVersion] = useState('');
@@ -34,11 +36,13 @@ const App = () => {
   const [isAnnouncementPaused, setIsAnnouncementPaused] = useState(false);
   const [teliaHalebop, setTeliaHalebop]= useState('')
 
+  // Auth state is owned by the RTK authSlice — the AuthContext below is a thin bridge.
+  const { user, inActive, setUser, setInActive } = useAuth();
+  const dispatch = useDispatch();
+
   const {
-    inActive,
     loading,
     companyInfo,
-    setInActive,
     getCompanyInfo,
     setClosed,
     closed,
@@ -55,7 +59,7 @@ const App = () => {
         setUpdateUrl(data.updateUrl);
         const currentVersion = DeviceInfo.getVersion();
         setCurrentVersion(currentVersion);
-  
+
         if (data.latestVersion !== currentVersion) {
           setUpdateVisible(true);
         } else {
@@ -132,26 +136,28 @@ const App = () => {
   const accountIsActive = async () => {
     try {
       setAuthLoad(true);
-      const jsontoken = await getToken();
-      const token = JSON.parse(jsontoken);
-      setUser(token);
+      // Re-hydrate the token from AsyncStorage and re-check company status
+      await dispatch(loadStoredToken());
+      await getCompanyInfo();
       setAuthLoad(false);
     } catch (error) {
       console.log(error);
+      setAuthLoad(false);
     }
   };
 
   useEffect(() => {
     checkForAppCrash();
-    accountIsActive();
     SplashScreen.hide();
     BackHandler.addEventListener('hardwareBackPress', () => true);
     fetchLatestVersion();
+    dispatch(loadStoredToken()).finally(() => setAuthLoad(false));
 
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', () => true);
     };
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // Fetch announcements after update modal is handled
@@ -226,5 +232,11 @@ const App = () => {
     </AuthContext.Provider>
   );
 };
+
+const App = () => (
+  <Provider store={store}>
+    <AppInner />
+  </Provider>
+);
 
 export default App;

@@ -3,13 +3,15 @@
  * All API endpoints should be defined here for maintainability
  */
 
-// Authentication routes
+// Authentication routes (Next.js API)
 export const AUTH_ROUTES = {
-  LOGIN: '/api/manager/login',
-  PIN_CHECK: '/api/manager/pinCheck',
+  LOGIN: '/api/auth/login',
+  PIN_CHECK: '/api/auth/pin-check',
+  CONFIRM_PIN: '/api/auth/confirm-pin',
+  RESET_PASSWORD: '/api/auth/reset-password',
   LOGOUT: '/api/manager/logout',
   REFRESH_TOKEN: '/api/manager/refresh',
-  PROFILE: '/api/manager/profile',
+  PROFILE: '/api/auth/me',
 };
 
 // User management routes
@@ -39,7 +41,7 @@ export const PRODUCT_ROUTES = {
 export const COMPANY_ROUTES = {
   GET_INFO: '/api/company/info',
   UPDATE_SETTINGS: '/api/company/settings',
-  GET_ANNOUNCEMENTS: '/api/announcement',
+  GET_ANNOUNCEMENTS: '/api/announcements',
 };
 
 // System and utility routes

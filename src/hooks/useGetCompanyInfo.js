@@ -1,17 +1,30 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Alert } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { api } from "../api/api";
-import { AuthContext } from "../context/auth.context";
+import { useAuth } from "../context/auth.context";
 import { getToken, removeToken } from "../helper/storage";
+import {
+  selectInActive,
+  setInActive as setInActiveAction,
+} from "../redux/features/auth/authSlice";
 
-
+/**
+ * Company info hook.
+ * `inActive` is owned by the RTK authSlice (single source of truth) — this hook
+ * reads it via selector and dispatches updates. `companyInfo`/`closed` remain
+ * local to the hook (not auth state).
+ */
 export const useGetCompanyInfo = () => {
     const [userToken, setToken] = useState(null);
     const [closed, setClosed] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [inActive, setInActive] = useState();
-    const [companyInfo, setCompanyInfo] = useState()
+    const [companyInfo, setCompanyInfo] = useState();
 
+    const dispatch = useDispatch();
+    const inActive = useSelector(selectInActive);
+    const setInActive = (value) => dispatch(setInActiveAction(value));
+    const { setUser } = useAuth();
 
     const getCompanyInfo = async () => {
         setLoading(true);

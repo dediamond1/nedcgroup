@@ -28,22 +28,26 @@ export const login = createAsyncThunk(
         throw new Error(response.error || 'Login failed');
       }
 
-      // Check if PIN verification is required
-      if (response.data?.message === 'login verified. Provide token in next request. ') {
+      // STEP-1 login: the backend answers with a "login verified" message and a
+      // step-1 token. The app ALWAYS routes login through PIN verification
+      // (PINSCREEN) — a login response never completes authentication by itself,
+      // so we never setToken here (matches the pre-redux hook behavior).
+      const message = (response.data?.message || '').toLowerCase();
+      if (message.includes('login verified') || message.includes('provide token')) {
         dispatch(setRequiresPin(true));
         return { requiresPin: true, email, password };
       }
 
-      // Handle successful login with token
+      // Backend sent a token without the PIN-required message — the app still
+      // asks for the PIN before authenticating (current hook behavior).
       if (response.data?.token) {
-        await storeToken(response.data.token);
-        dispatch(setToken(response.data.token));
+        dispatch(setRequiresPin(true));
+        return { requiresPin: true, token: response.data.token, email, password };
+      }
 
-        if (response.data.user) {
-          dispatch(setUser(response.data.user));
-        }
-
-        return response.data;
+      // Soft-error responses (HTTP 200 with a backend error message, no token)
+      if (response.data?.message) {
+        throw new Error(response.data.message);
       }
 
       throw new Error('Invalid login response');
@@ -86,6 +90,11 @@ export const verifyPin = createAsyncThunk(
         return response.data;
       }
 
+      // Soft-error responses (HTTP 200 with a backend error message, no token)
+      if (response.data?.message) {
+        throw new Error(response.data.message);
+      }
+
       throw new Error('Invalid PIN verification response');
     } catch (error) {
       console.error('PIN verification action error:', error);
@@ -93,6 +102,30 @@ export const verifyPin = createAsyncThunk(
       return rejectWithValue(error.message);
     } finally {
       dispatch(setLoading(false));
+    }
+  }
+);
+
+/**
+ * Async thunk for checkout PIN confirmation (confirm-pin endpoint)
+ * Returns the RAW service response so the caller can switch on the backend
+ * messages ('Pin code is Correct', invalid/expired token, credit limit reached).
+ * Navigation and alert handling stay in the calling hook/screen.
+ */
+export const confirmPin = createAsyncThunk(
+  'auth/confirmPin',
+  async ({ pinCode }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().auth.token;
+      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+
+      const response = await authService.confirmPinCode(pinCode, headers);
+
+      // Return the raw response — the hook switches on response.data.message
+      return response;
+    } catch (error) {
+      console.error('Confirm PIN action error:', error);
+      return rejectWithValue(error.message || 'Confirm PIN failed');
     }
   }
 );
@@ -243,6 +276,7 @@ export const clearAuthError = () => (dispatch) => {
 export default {
   login,
   verifyPin,
+  confirmPin,
   logout,
   refreshToken,
   loadStoredToken,

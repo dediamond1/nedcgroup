@@ -60,7 +60,7 @@ const QuickSupportScreen = ({ navigation }) => {
 
   const handleResetPassword = async (email) => {
     try {
-      await api.post('/api/manager/reset-password', { email: email?.toLowerCase() });
+      await api.post('/api/auth/reset-password', { email: email?.toLowerCase() });
     } catch (error) {
       Alert.alert(
         language === 'sv' ? 'Fel' : 'خطأ',
