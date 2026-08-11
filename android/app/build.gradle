@@ -26,6 +26,10 @@ react {
     // debuggableVariants = ["liteDebug", "prodDebug"]
 
     /* Bundling */
+    //   Debug APKs must be standalone (no Metro on the target device):
+    //   embed the JS bundle instead of loading it from the packager.
+    debuggableVariants = []
+
     //   A list containing the node command and its flags. Default is just 'node'.
     // nodeExecutableAndArgs = ["node"]
     //
@@ -73,6 +77,15 @@ def enableProguardInReleaseBuilds = true
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
+
+// Legacy com.android.support artifacts collide with androidx.core (duplicate
+// android.support.v4.* classes) — the bluetooth printer module pulls
+// support-v4:27.0.0, others pull support-compat:26.1.0. androidx ships those
+// exact classes, so all modules link fine without the legacy group.
+// Keeps Jetifier off — the AAR transform needs >1.5GB heap (OOM on this host).
+configurations.all {
+    exclude group: 'com.android.support'
+}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
