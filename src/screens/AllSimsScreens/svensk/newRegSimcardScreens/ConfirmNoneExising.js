@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {BankIdScreen} from '../newRegSimcardScreens/BankIdScreen';
 import {RadioButton} from 'react-native-paper';
 import DeviceInfo from 'react-native-device-info';
-import axios from 'axios';
 import {
   View,
   Keyboard,
@@ -11,25 +10,17 @@ import {
   Alert,
 } from 'react-native';
 
-import {useSelector} from 'react-redux';
 import {AppText} from '../../../../components/appText';
-import {selectToken} from '../../../../redux/features/auth/authSlice';
 import {AppButton} from '../../../../components/button/AppButton';
 import {TopHeader} from '../../../../components/header/TopHeader';
 import {Status} from '../../../../../helper/Status';
 import {AppScreen} from '../../../../helper/AppScreen';
-import {baseUrl} from '../../../../constants/api';
-
-const axiosConf = token => {
-  return {
-    axiosConfig: axios.create({
-      baseURL: baseUrl,
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    }),
-  };
-};
+import {
+  useAuthenticateMutation,
+  useCollectMutation,
+  useBankidMutation,
+  usePhysicalidMutation,
+} from '../../../../redux/api/simApi';
 
 export const ConfirmNoneExistingScreen = ({route, navigation}) => {
   const [success, setSuccess] = useState(false);
@@ -40,7 +31,11 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
   const [userId, setUserId] = useState();
   const [orderRef, setOrderRef] = useState();
   const [loading, setLoading] = useState(false);
-  const user = useSelector(selectToken);
+
+  const [authenticate] = useAuthenticateMutation();
+  const [collect] = useCollectMutation();
+  const [bankid] = useBankidMutation();
+  const [physicalid] = usePhysicalidMutation();
   const {userInfo} = route.params || {};
   const {personalNumber, iccID} = userInfo || {};
 
@@ -68,8 +63,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
       setOrderRef(null);
       setBankIdText('START BANKID');
       const userIp = await DeviceInfo.getIpAddress();
-      const {axiosConfig} = axiosConf(user);
-      const {data} = await axiosConfig.post('/api/simregistration/authenticate', {
+      const {data} = await authenticate({
         personalNumber,
         endUserIp: userIp,
       });
@@ -84,8 +78,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
 
   const getBankIdStatus = async () => {
     try {
-      const {axiosConfig} = axiosConf(user);
-      const {data} = await axiosConfig.post('/api/simregistration/collect', {
+      const {data} = await collect({
         clientToken,
       });
       if (data?.message?.text) {
@@ -112,8 +105,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
     try {
       setLoading(true);
       setError(false);
-      const {axiosConfig} = axiosConf(user);
-      const {data} = await axiosConfig.post('/api/simregistration/bankid', {
+      const {data} = await bankid({
         ssn: personalNumber,
         icc: iccID,
         bankIdOrderReference: orderRefr || orderRef,
@@ -143,8 +135,7 @@ export const ConfirmNoneExistingScreen = ({route, navigation}) => {
   const idRegistration = async () => {
     try {
       setLoading(true);
-      const {axiosConfig} = axiosConf(user);
-      const response = await axiosConfig.post('/api/simregistration/physicalid', {
+      const response = await physicalid({
         ssn: personalNumber,
         icc: iccID,
         idType: 'IdCard',

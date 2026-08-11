@@ -15,29 +15,24 @@ import { useGetCompanyInfo } from './src/hooks/useGetCompanyInfo';
 import UpdateNotification from './helper/UpdateNotification';
 import Announcement from './helper/Announcement';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { baseUrl } from './src/constants/api';
 import DeviceInfo from 'react-native-device-info';
-import { api } from './src/api/api';
 import { store } from './src/redux/store';
 import { loadStoredToken } from './src/redux/features/auth/authActions';
-import { selectToken, selectInActive, selectTeliaHalebop } from './src/redux/features/auth/authSlice';
+import { selectToken, selectInActive } from './src/redux/features/auth/authSlice';
+import { useLatestVersionQuery, useAnnouncementsQuery } from './src/redux/api/supportApi';
 
 const AppInner = () => {
   const netInfo = useNetInfo();
   const [authLoad, setAuthLoad] = useState(true);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [updateUrl, setUpdateUrl] = useState('');
-  const [latestVersion, setLatestVersion] = useState('');
   const [currentVersion, setCurrentVersion] = useState('');
   const [announcement, setAnnouncement] = useState(null);
-  const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
-  const [announcementError, setAnnouncementError] = useState(false);
   const [isAnnouncementPaused, setIsAnnouncementPaused] = useState(false);
 
   // All auth state is owned by the RTK authSlice — single source of truth.
   const user = useSelector(selectToken);
   const inActive = useSelector(selectInActive);
-  const teliaHalebop = useSelector(selectTeliaHalebop);
   const dispatch = useDispatch();
 
   const {
@@ -48,59 +43,12 @@ const AppInner = () => {
     closed,
   } = useGetCompanyInfo();
 
-  const fetchLatestVersion = async () => {
-    try {
-      const {data} = await api.get(`/api/latest-version`);
-      console.log("data", data)
-      if (data?.message === "No version information available") {
-        return
-      }else{
-        setLatestVersion(data.latestVersion);
-        setUpdateUrl(data.updateUrl);
-        const currentVersion = DeviceInfo.getVersion();
-        setCurrentVersion(currentVersion);
-
-        if (data.latestVersion !== currentVersion) {
-          setUpdateVisible(true);
-        } else {
-          // If the version is up-to-date, immediately fetch announcements
-          fetchAnnouncement();
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching the latest version:', error);
-    }
-  };
-
-  const fetchAnnouncement = async () => {
-    setLoadingAnnouncement(true);
-    setAnnouncementError(false);
-    try {
-      const response = await fetch(`${baseUrl}/api/announcements`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      const announcements = Array.isArray(data) ? data : data?.announcements ?? [];
-
-      // Filter out announcements with type "new"
-      const filteredAnnouncements = announcements.filter(
-        announcement => announcement.type !== 'news' && new Date(announcement.expirationDate) >= new Date()
-      );
-      
-      if (filteredAnnouncements.length > 0) {
-        const lastAnnouncementId = await AsyncStorage.getItem('lastAnnouncementId');
-        if (filteredAnnouncements[0]._id !== lastAnnouncementId) {
-          setAnnouncement(filteredAnnouncements[0]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching the announcement:', error);
-      setAnnouncementError(true);
-    } finally {
-      setLoadingAnnouncement(false);
-    }
-  };
+  // Version check + announcements flow through the RTK Query support API.
+  const { data: versionData } = useLatestVersionQuery();
+  const { data: announcementsData, isLoading: announcementsLoading } = useAnnouncementsQuery(
+    undefined,
+    { skip: updateVisible }
+  );
 
   const handleDismissAnnouncement = async () => {
     try {
@@ -151,7 +99,6 @@ const AppInner = () => {
     checkForAppCrash();
     SplashScreen.hide();
     BackHandler.addEventListener('hardwareBackPress', () => true);
-    fetchLatestVersion();
     dispatch(loadStoredToken()).finally(() => setAuthLoad(false));
 
     return () => {
@@ -160,14 +107,42 @@ const AppInner = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Version check: show the update modal when a newer version exists.
   useEffect(() => {
-    // Fetch announcements after update modal is handled
-    if (!updateVisible) {
-      fetchAnnouncement();
+    if (!versionData || versionData.message === "No version information available") {
+      return;
     }
-  }, [updateVisible]);
+    setUpdateUrl(versionData.updateUrl);
+    const deviceVersion = DeviceInfo.getVersion();
+    setCurrentVersion(deviceVersion);
+    if (versionData.latestVersion !== deviceVersion) {
+      setUpdateVisible(true);
+    }
+  }, [versionData]);
 
-  // Ensure announcements are not fetched again if update notification is visible and of type "new"
+  // Announcements: filter + dismiss-once via lastAnnouncementId.
+  useEffect(() => {
+    if (!announcementsData) return;
+    const announcements = Array.isArray(announcementsData)
+      ? announcementsData
+      : announcementsData?.announcements ?? [];
+
+    // Filter out announcements with type "new"
+    const filteredAnnouncements = announcements.filter(
+      announcement => announcement.type !== 'news' && new Date(announcement.expirationDate) >= new Date()
+    );
+
+    if (filteredAnnouncements.length > 0) {
+      AsyncStorage.getItem('lastAnnouncementId').then((lastAnnouncementId) => {
+        if (filteredAnnouncements[0]._id !== lastAnnouncementId) {
+          setAnnouncement(filteredAnnouncements[0]);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [announcementsData]);
+
+  // Ensure announcements are not shown while the update modal is visible.
   useEffect(() => {
     if (updateVisible) {
       setAnnouncement(null);
@@ -215,7 +190,7 @@ const AppInner = () => {
               handleDismissAnnouncement();
               setIsAnnouncementPaused(false);
             }}
-            isLoading={loadingAnnouncement}
+            isLoading={announcementsLoading}
           />
         )}
       </NavigationContainer>

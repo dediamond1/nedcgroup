@@ -15,7 +15,6 @@
  *                     primary.main, also used for Lyca icons/loaders)
  */
 import { format } from 'date-fns';
-import { api } from '../../api/api';
 import { logo as lycaLogo } from '../../screens/lyca/logo';
 import { teliaLogo, halebopLogo } from '../../screens/telia-halebop/teliaHalebopLogos';
 
@@ -37,11 +36,10 @@ const lycaCheckout = {
     readyStatusText: '',
     errorStatusText: null,
   },
-  // Fetch the voucher for the selected product (GET for lyca).
-  fetchVoucher: async (subcategory) => {
-    const { data } = await api.get(
-      `/api/lycamobile/categories/${subcategory.articleId}/products`,
-    );
+  // Build the voucher-fetch request for the given item (RTK Query arg).
+  voucherRequest: (subcategory) => subcategory.articleId,
+  // Normalize the voucher-fetch response (alerts preserved from the legacy screen).
+  voucherFromResponse: (data, subcategory) => {
     if (
       data?.error === `No vouchers available for category ${subcategory?.articleId}.`
     ) {
@@ -101,22 +99,18 @@ const teliaHalebopCheckout = (key, label) => ({
   }),
   loadVoucherConfig: false, // the print screen owns voucher-config loading for telia/halebop
   initBluetooth: false, // bluetooth is initialised on the print screen
-  fetchVoucher: async (product, authToken) => {
-    const voucherResponse = await api.post(
-      '/api/telia/vouchers',
-      { id: product.id, value: product.price },
-      { headers: { Authorization: `Bearer ${authToken}` } },
-    );
-    if (!voucherResponse?.data?.success) {
+  voucherRequest: (product) => ({ id: product.id, value: product.price }),
+  voucherFromResponse: (data) => {
+    if (!data?.success) {
       return {
         ok: false,
         closeOtp: false,
         statusText: null,
         alertTitle: 'Fel',
-        alert: voucherResponse?.data?.message || 'Kunde inte hämta voucher.',
+        alert: data?.message || 'Kunde inte hämta voucher.',
       };
     }
-    return { ok: true, voucher: voucherResponse.data };
+    return { ok: true, voucher: data };
   },
   orderCreate: {
     route: '/api/teliaOrder/create',
@@ -242,10 +236,6 @@ export const OPERATOR_CONFIGS = {
       endpoint: LYCA_CATEGORIES_ROUTE,
       authTokenSource: null,
       parseCategories: (data) => Object.keys(data?.categories),
-      fetchProducts: async (categoryName) => {
-        const { data } = await api.get(LYCA_CATEGORIES_ROUTE);
-        return data?.categories?.[categoryName] || [];
-      },
       detailRoute: 'LYCADETAILS',
       detailParams: (item, categoryName) => ({ subcategory: item, categoryName }),
       headerTitle: 'Lyca mobile',

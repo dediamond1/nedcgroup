@@ -25,23 +25,40 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
-import { selectToken, logout } from '../../redux/features/auth/authSlice';
+import { logout } from '../../redux/features/auth/authSlice';
+import { confirmPin } from '../../redux/features/auth/authActions';
+import {
+  useTeliaVouchersMutation,
+  useLazyLycaReserveQuery,
+  useTeliaOrderCreateMutation,
+  useLycaOrderCreateMutation,
+} from '../../redux/api/checkoutApi';
+import { useVoucherConfigQuery } from '../../redux/api/catalogApi';
+import { resolveVoucherConfig } from '../../utils/voucherConfig';
 import { TopHeader } from '../header/TopHeader';
 import { PincodeInput } from '../../../helper/PincodeInput';
-import { api } from '../../api/api';
-import { fetchVoucherConfig } from '../../utils/voucherConfig';
 import { initBluetoothPrinter, printVoucher } from './operatorPrint';
 
 const OperatorCheckout = ({ config, item }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const user = useSelector(selectToken);
-  const { setInActive, companyInfo, getCompanyInfo, userToken } = useGetCompanyInfo();
+  const { setInActive, companyInfo, getCompanyInfo } = useGetCompanyInfo();
 
   const checkout = config.checkout;
   const print = config.print;
+
+  const isTelia = config.key === 'telia' || config.key === 'halebop';
+  const [teliaVouchers] = useTeliaVouchersMutation();
+  const [lycaReserve] = useLazyLycaReserveQuery();
+  const [teliaOrderCreate] = useTeliaOrderCreateMutation();
+  const [lycaOrderCreate] = useLycaOrderCreateMutation();
+  const { data: voucherConfigData } = useVoucherConfigQuery(undefined, {
+    skip: !checkout.loadVoucherConfig,
+  });
+  // Normalize the voucher-config response (data.data | direct object | fallback).
+  const resolvedVoucherConfig = resolveVoucherConfig(voucherConfigData);
   const color = checkout.layout === 'receipt' ? config.colors.secondary : config.colors.primary;
 
   const [loading, setLoading] = useState(false);
@@ -50,7 +67,6 @@ const OperatorCheckout = ({ config, item }) => {
   const [boundAddress, setBoundAddress] = useState('');
   const [voucherInfo, setVoucherInfo] = useState({});
   const [showVoucherModal, setShowVoucherModal] = useState(false);
-  const [voucherConfigData, setVoucherConfigData] = useState(null);
 
   useEffect(() => {
     getCompanyInfo();
@@ -73,10 +89,8 @@ const OperatorCheckout = ({ config, item }) => {
 
   useEffect(() => {
     if (!checkout.loadVoucherConfig) return;
-    (async () => {
-      const configData = await fetchVoucherConfig();
-      if (configData) setVoucherConfigData(configData);
-    })();
+    // voucher config flows through the RTK Query cache (useVoucherConfigQuery)
+    // — resolved in the render below via resolveVoucherConfig.
   }, []);
 
   const handleOtpSubmit = (pinCode) => {
@@ -92,11 +106,12 @@ const OperatorCheckout = ({ config, item }) => {
       setLoading(true);
       setStatusText('Verifierar pinkoden...');
 
-      const response = await api.post('/api/auth/confirm-pin', {
-        pincode: pinCode,
-      }, {
-        headers: { Authorization: `Bearer ${user}` },
-      });
+      const resultAction = await dispatch(confirmPin({ pinCode }));
+      if (resultAction.type.endsWith('/rejected')) {
+        Alert.alert('Error', 'Ett fel uppstod. Försök igen.');
+        return;
+      }
+      const response = resultAction.payload;
 
       switch (response?.data?.message) {
         case checkout.deactivationMessage:
@@ -130,10 +145,17 @@ const OperatorCheckout = ({ config, item }) => {
     try {
       setLoading(true);
 
-      // The order-create header token differs per operator (historical behaviour).
-      const authToken = checkout.authTokenSource === 'userToken' ? userToken : user;
+      // Fetch the voucher through the RTK Query checkout API (auth header is
+      // injected automatically from the store — no per-call token plumbing).
+      const voucherResult = isTelia
+        ? checkout.voucherFromResponse(
+            (await teliaVouchers(checkout.voucherRequest(item)).unwrap().catch(() => null))?.data
+          )
+        : checkout.voucherFromResponse(
+            (await lycaReserve(checkout.voucherRequest(item)).unwrap().catch(() => null))?.data,
+            item,
+          );
 
-      const voucherResult = await checkout.fetchVoucher(item, authToken);
       if (!voucherResult.ok) {
         if (voucherResult.closeOtp) setShowOtpInput(false);
         if (voucherResult.statusText) setStatusText(voucherResult.statusText);
@@ -144,9 +166,11 @@ const OperatorCheckout = ({ config, item }) => {
       const voucher = voucherResult.voucher;
 
       setStatusText('Sparar order...');
-      const { data } = await api.post(checkout.orderCreate.route, checkout.orderCreate.body(item, voucher), {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const orderBody = checkout.orderCreate.body(item, voucher);
+      const orderRes = isTelia
+        ? await teliaOrderCreate(orderBody)
+        : await lycaOrderCreate(orderBody);
+      const data = orderRes?.data;
 
       if (data?.message === checkout.deactivationMessage) {
         setInActive(true);
@@ -165,7 +189,7 @@ const OperatorCheckout = ({ config, item }) => {
           item,
           voucherInfo: { voucherNumber: voucher.voucherNumber, serialNumber: voucher.serialNumber },
           companyInfo,
-          voucherConfigData,
+          voucherConfigData: resolvedVoucherConfig,
           boundAddress,
           onStatus: setStatusText,
         });

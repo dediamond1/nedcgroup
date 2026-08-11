@@ -6,14 +6,3 @@
 export const baseUrl = 'http://64.112.124.208:3100';
 // export const baseUrl = 'http://192.168.1.96:3004';
 
-export const apiHelper = async ({ endpoint = '/', options }) => {
-  try {
-    const response = await fetch(`${baseUrl}${endpoint}`, options);
-    const data = await response.json();
-    return {
-      data,
-    };
-  } catch (error) {
-    console.log(error);
-  }
-};

@@ -4,7 +4,7 @@ import { AppText } from '../../components/appText';
 import { AppScreen } from '../../helper/AppScreen';
 import { TopHeader } from '../../components/header/TopHeader';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { api } from '../../api/api';
+import { useLycaCategoriesQuery } from '../../redux/api/catalogApi';
 
 const { width, height } = Dimensions.get('window');
 
@@ -40,14 +40,16 @@ export default function MainLyca({ navigation }) {
 
   const [categoryName, setCategoryName] = useState()
 
+  const { data: categoriesData, isLoading, isError } = useLycaCategoriesQuery();
+
   const getSubCategories = async (cid) => {
     setLoading(true);
     setError(null); // Reset error state before fetching
     try {
       setCategoryName(cid)
-      const { data } = await api.get(`/api/lycamobile/categories/`);
-      if (data?.categories[cid]?.length > 0) {
-        setSelectedCategory(data.categories[cid]);
+      const subCategories = categoriesData?.categories?.[cid] || [];
+      if (subCategories.length > 0) {
+        setSelectedCategory(subCategories);
         setModalVisible(true);
       } else {
         setError('Inga produkter hittades. Kontakta support: +46793394031');
@@ -69,28 +71,24 @@ export default function MainLyca({ navigation }) {
     setInfoModalVisible(true);
   };
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    setError(null); // Reset error state before fetching
-    try {
-      const { data } = await api.get('/api/lycamobile/categories/');
-      setCategory(Object.keys(data?.categories));
-    } catch (error) {
-      console.log(error);
-      setError('Något gick fel. Kontakta support: +46793394031');
-    } finally {
-      setLoading(false);
-    }
+  const navigateToDetails = (item) => {
+    setModalVisible(false);
+    navigation.navigate('LYCADETAILS', { subcategory: item, categoryName });
   };
 
-const navigateToDetails = (item)=> {
-  setModalVisible(false)
-  navigation.navigate('LYCADETAILS', { subcategory: item, categoryName })
-}
-   
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (categoriesData) {
+      setCategory(Object.keys(categoriesData?.categories || {}));
+      setError(null);
+    }
+  }, [categoriesData]);
+
+  useEffect(() => {
+    setLoading(isLoading);
+    if (isError) {
+      setError('Något gick fel. Kontakta support: +46793394031');
+    }
+  }, [isLoading, isError]);
 
   const renderSubcategoryItem = ({ item }) => (
     <TouchableOpacity style={styles.subcategoryItem} onPress={()=>navigateToDetails(item) }>

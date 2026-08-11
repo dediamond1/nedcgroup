@@ -3,7 +3,6 @@ import {BankIdScreen} from '../newRegSimcardScreens/BankIdScreen';
 import {RadioButton} from 'react-native-paper';
 
 import DeviceInfo from 'react-native-device-info';
-import axios from 'axios';
 import {
   View,
   Keyboard,
@@ -14,18 +13,16 @@ import {
 } from 'react-native';
 
 import {Status} from '../../../../../helper/Status';
-import {useSelector} from 'react-redux';
-import {selectToken} from '../../../../redux/features/auth/authSlice';
 import {AppScreen} from '../../../../helper/AppScreen';
 import {AppText} from '../../../../components/appText';
 import {AppButton} from '../../../../components/button/AppButton';
 import {TopHeader} from '../../../../components/header/TopHeader';
-import {baseUrl} from '../../../../constants/api';
-// import { TopHeader } from "../../../../components/header/TopHeader";
-
-const axiosConfig = axios.create({
-  baseURL: baseUrl,
-});
+import {
+  useAuthenticateMutation,
+  useCollectMutation,
+  useBankidTwoFactorMutation,
+  usePhysicalidTwoFactorMutation,
+} from '../../../../redux/api/simApi';
 
 export const ConfirmScreen = ({route, navigation}) => {
   const [success, setSuccess] = useState(false);
@@ -37,7 +34,10 @@ export const ConfirmScreen = ({route, navigation}) => {
   const [orderRef, setOrderRef] = useState();
   const [loading, setLoading] = useState(false);
 
-  const user = useSelector(selectToken);
+  const [authenticate] = useAuthenticateMutation();
+  const [collect] = useCollectMutation();
+  const [bankidTwoFactor] = useBankidTwoFactorMutation();
+  const [physicalidTwoFactor] = usePhysicalidTwoFactorMutation();
 
   const {userInfo} = route.params || {};
   const {email, street, postalCode, PhoneNumber, city, number, smsCode} =
@@ -61,24 +61,14 @@ export const ConfirmScreen = ({route, navigation}) => {
       setBankIdText('START BANKID');
 
       const userIp = await DeviceInfo.getIpAddress();
-      const {data} = await axiosConfig.post(
-        '/api/simregistration/authenticate',
-        {
-          personalNumber: PhoneNumber,
-          endUserIp: userIp,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${user}`,
-          },
-        },
-      );
+      const {data} = await authenticate({
+        personalNumber: PhoneNumber,
+        endUserIp: userIp,
+      });
       if (data?.autoStartToken && data?.clientToken) {
         setClientToken(data?.clientToken);
         setStartBankIdAuth(true);
       }
-
-      console.log(data);
     } catch (error) {
       console.log(error.message);
     }
@@ -87,17 +77,9 @@ export const ConfirmScreen = ({route, navigation}) => {
   //bankId auth status
   const getbankidStatus = async () => {
     try {
-      const {data} = await axiosConfig.post(
-        '/api/simregistration/collect',
-        {
-          clientToken: clientToken,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${user}`,
-          },
-        },
-      );
+      const {data} = await collect({
+        clientToken: clientToken,
+      });
       if (data?.message?.text) {
         setBankIdText(data?.message?.text);
       }
@@ -125,25 +107,15 @@ export const ConfirmScreen = ({route, navigation}) => {
     try {
       setLoading(true);
       setError(false);
-      const response = await fetch(
-        `${baseUrl}/api/simregistration/bankid/twofactor`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            authorization: `Bearer ${user}`,
-          },
-          body: JSON.stringify({
-            ssn: PhoneNumber,
-            msisdn: number,
-            smsCode: smsCode,
-            bankIdOrderReference: orderRefr ? orderRefr : orderRef,
-            usedByMinor: false,
-            consents,
-          }),
-        },
-      );
-      const resData = await response.json();
+      const result = await bankidTwoFactor({
+        ssn: PhoneNumber,
+        msisdn: number,
+        smsCode: smsCode,
+        bankIdOrderReference: orderRefr ? orderRefr : orderRef,
+        usedByMinor: false,
+        consents,
+      });
+      const resData = result.data;
 
       if (resData?.response?.userMessage === 'Felaktig SMS-kod') {
         alert('Felaktig SMS-kod');
@@ -166,7 +138,6 @@ export const ConfirmScreen = ({route, navigation}) => {
       }
       setLoading(false);
       // setStartRegister(false)
-      console.log(resData);
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -176,21 +147,13 @@ export const ConfirmScreen = ({route, navigation}) => {
   const saveInformation = async () => {
     try {
       setLoading(true);
-      const {data} = await axiosConfig.post(
-        '/api/simregistration/physicalid/twofactor',
-        {
-          ssn: PhoneNumber,
-          msisdn: number,
-          smsCode: smsCode,
-          idType: 'IdCard',
-          consents,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${user}`,
-          },
-        },
-      );
+      const {data} = await physicalidTwoFactor({
+        ssn: PhoneNumber,
+        msisdn: number,
+        smsCode: smsCode,
+        idType: 'IdCard',
+        consents,
+      });
 
       if (data?.response?.userMessage === 'Felaktig SMS-kod') {
         Alert.alert('OBS', 'Felaktig SMS-kod');

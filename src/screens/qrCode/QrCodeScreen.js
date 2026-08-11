@@ -24,13 +24,11 @@ import {
 } from '@brooons/react-native-bluetooth-escpos-printer'
 import { AppText } from '../../components/appText';
 import { AppButton } from '../../components/button/AppButton';
-import { apiHelper, baseUrl } from '../../constants/api';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectToken, setInActive } from '../../redux/features/auth/authSlice';
+import { useDispatch } from 'react-redux';
+import { setInActive } from '../../redux/features/auth/authSlice';
 import {
     getBluetooth,
-    getToken,
-    removeBluetooth,
+    removeToken,
     saveBluetooth,
 } from '../../helper/storage';
 import deviceManager from 'react-native-device-info';
@@ -38,11 +36,12 @@ import { Status } from '../../../helper/Status';
 import { TopHeader } from '../../components/header/TopHeader';
 import { Loading } from '../../../helper/Loading';
 import { logo } from './logo';
-import axios from 'axios';
 import { NormalLoader } from '../../../helper/Loader2';
 import { PurchaseSuccess } from '../../../helper/SuccessScreen';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
-import { fetchVoucherConfig, getOperatorConfig } from '../../utils/voucherConfig';
+import { resolveVoucherConfig, getOperatorConfig } from '../../utils/voucherConfig';
+import { useCreateComviqOrderMutation } from '../../redux/api/ordersApi';
+import { useVoucherConfigQuery } from '../../redux/api/catalogApi';
 
 var { height, width } = Dimensions.get('window');
 
@@ -67,8 +66,9 @@ export const QrCodeScreen = ({ navigation, route }) => {
 
 
     const dispatch = useDispatch();
-    const user = useSelector(selectToken);
     const { setClosed } = useGetCompanyInfo();
+    const [createComviqOrder] = useCreateComviqOrderMutation();
+    const { data: voucherConfigData } = useVoucherConfigQuery();
 
     const { data, moreInfo, title, compInformation, companyInfo } =
         route.params || {};
@@ -118,15 +118,8 @@ export const QrCodeScreen = ({ navigation, route }) => {
     const saveOrder = async () => {
         try {
             setLoading2(true);
-            const axiosConf = axios.create({
-                baseURL: baseUrl,
-                headers: {
-                    'Content-type': 'application/json',
-                    authorization: `Bearer ${user}`,
-                },
-            });
 
-            const { data } = await axiosConf.post('/api/order', {
+            const data = await createComviqOrder({
                 serialNumber: serialNumber,
                 voucherNumber: voucherNumber,
                 expireDate: expireDate,
@@ -135,7 +128,7 @@ export const QrCodeScreen = ({ navigation, route }) => {
                 voucherAmount: voucherAmount,
                 voucherCurrency: voucherCurrency,
                 employeeId: id ? id : null,
-            });
+            }).unwrap();
             console.log(data);
 
             if (
@@ -279,16 +272,11 @@ export const QrCodeScreen = ({ navigation, route }) => {
     }, [])
 
     useEffect(() => {
-    // Load voucher config from API (defaulting to COMVIQ for this screen)
-    const loadVoucherConfig = async () => {
-      // fetchVoucherConfig always returns a config (API or fallback)
-      const config = await fetchVoucherConfig();
-      if (config) {
-        setOperatorConfig(config);
-      }
-    };
-    loadVoucherConfig();
-    }, [])
+    // Resolve voucher config from the RTK Query cache (defaulting to COMVIQ for this screen)
+    if (voucherConfigData) {
+      setOperatorConfig(resolveVoucherConfig(voucherConfigData));
+    }
+    }, [voucherConfigData])
 
     useEffect(() => {
         const isAmu = deviceManager.isEmulatorSync();
@@ -378,11 +366,11 @@ export const QrCodeScreen = ({ navigation, route }) => {
             await BluetoothEscposPrinter.printText('\r\n', {});
 
             // Get operator-specific config (defaulting to COMVIQ for this screen)
-            // If config not loaded yet, fetch fallback synchronously
+            // If config not loaded yet, resolve fallback synchronously
             let configToUse = operatorConfig;
             if (!configToUse) {
                 console.warn('Operator config not loaded, using fallback');
-                configToUse = await fetchVoucherConfig();
+                configToUse = resolveVoucherConfig(voucherConfigData);
             }
             
             const config = getOperatorConfig(configToUse, 'COMVIQ', voucherNumber);

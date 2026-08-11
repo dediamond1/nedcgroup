@@ -14,15 +14,14 @@ import {
 import Icon from "react-native-vector-icons/Ionicons"
 import { TopHeader } from "../../components/header/TopHeader"
 import { useNavigation } from "@react-navigation/native"
-import { api } from "../../api/api"
 import { useSelector } from "react-redux"
-import { selectTeliaHalebop, selectToken } from "../../redux/features/auth/authSlice"
+import { selectTeliaHalebop } from "../../redux/features/auth/authSlice"
+import { useTeliaProductsQuery } from "../../redux/api/catalogApi"
 
 const { width, height } = Dimensions.get("window")
 
 const TeliaCategoryScreen = ({route}) => {
   const teliaHalebop = useSelector(selectTeliaHalebop)
-  const user = useSelector(selectToken)
 
   const navigation = useNavigation()
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -33,27 +32,15 @@ const TeliaCategoryScreen = ({route}) => {
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false)
   const backdropOpacity = useRef(new Animated.Value(0)).current
 
-  
-
-  const getTeliaProducts = async () => {
-    try {
-      setLoading(true)
-      const url = teliaHalebop === "Telia" ? "/api/telia/products/local/telia" : "/api/telia/products/local/halebop"
-      const { data } = await api.get(url, {}, {
-        headers: {"Authorization": `Bearer ${user}`}
-      })
-      setTeliaProducts(data?.length ? data : [])
-    } catch (error) {
-      console.log(error)
-      setTeliaProducts([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { data: teliaProductsData, isLoading, isError } = useTeliaProductsQuery()
 
   useEffect(() => {
-    getTeliaProducts()
-  }, [teliaHalebop])
+    setTeliaProducts(teliaProductsData?.length ? teliaProductsData : [])
+  }, [teliaProductsData])
+
+  useEffect(() => {
+    setLoading(isLoading)
+  }, [isLoading])
 
   const openBottomSheet = useCallback((category) => {
     setSelectedCategory(category)

@@ -5,15 +5,13 @@ import { AppButton } from '../../components/button/AppButton';
 import { AppIconButton } from '../../components/button/AppIconButton';
 import { TopHeader } from '../../components/header/TopHeader';
 import { VoucherItems } from '../../components/vouchers/voucherItems/VoucherItems';
-import { baseUrl } from '../../constants/api';
 import { AppScreen } from '../../helper/AppScreen';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectToken, setInActive, logout } from '../../redux/features/auth/authSlice';
+import { useDispatch } from 'react-redux';
+import { setInActive, logout } from '../../redux/features/auth/authSlice';
 import * as Animatable from 'react-native-animatable';
-import axios from 'axios';
 import { NormalLoader } from '../../../helper/Loader2';
 import { removeToken } from '../../helper/storage';
-import { api } from '../../api/api';
+import { catalogApi } from '../../redux/api/catalogApi';
 
 export const SeconDetails = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -22,7 +20,7 @@ export const SeconDetails = ({ route, navigation }) => {
   const [quantity, setQuantity] = useState(1);
 
   const dispatch = useDispatch();
-  const user = useSelector(selectToken);
+  const [getArticle] = catalogApi.useLazyArticleQuery();
 
   const handleIncrement = () => {
     setQuantity(quantity + 1);
@@ -36,28 +34,19 @@ export const SeconDetails = ({ route, navigation }) => {
   const getDetails = async () => {
     try {
       setLoading(true);
-      const response = await api.get(
-        `/api/category/artical/${data?.articalId}`,
-        {},
-        {
-          headers: {
-            authorization: `Bearer ${user}`,
-          },
+      const result = await getArticle(data?.articalId);
 
-        },
-      );
-
-      console.log(response?.data);
-      if (!response.ok) {
+      console.log(result?.data);
+      if (result?.error) {
         setLoading(false)
         return setShowItem(false)
       }
       if (
-        response?.data?.message === 'Company deativted because you have reached Credit Limit'
+        result?.data?.message === 'Company deativted because you have reached Credit Limit'
       ) {
         dispatch(setInActive(true));
       }
-      if (response?.data?.message === 'invalid token in the request.') {
+      if (result?.data?.message === 'invalid token in the request.') {
         await removeToken()
         Alert.alert('OBS', "Du har blivit utloggad, vänligen logga in igen", [{
           text: "Logga in igen",
@@ -66,9 +55,9 @@ export const SeconDetails = ({ route, navigation }) => {
         setLoading(false);
       }
 
-      if (response?.data?.data?.body?.data) {
+      if (result?.data?.data?.body?.data) {
         navigation.navigate('PINCODEOTP', {
-          data: response?.data?.data?.body?.data,
+          data: result?.data?.data?.body?.data,
           title: title,
           moreInfo: data,
         })
@@ -80,7 +69,7 @@ export const SeconDetails = ({ route, navigation }) => {
     } catch (error) {
       console.log(error.message);
       setShowItem(false)
-      setLoading(false);
+      setLoading(false)
     }
   };
 

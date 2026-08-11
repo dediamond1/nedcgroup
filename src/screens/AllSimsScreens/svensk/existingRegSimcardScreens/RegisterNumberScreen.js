@@ -11,19 +11,17 @@ import * as Yup from 'yup';
 import { DrawerActions } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
 
-import { baseUrl } from '../../../../constants/api';
-import { useSelector } from 'react-redux';
-import { selectToken } from '../../../../redux/features/auth/authSlice';
 import { AppScreen } from '../../../../helper/AppScreen';
 import { AppText } from '../../../../components/appText';
 import { AppInput } from '../../../../components/input/AppInput';
 import { AppButton } from '../../../../components/button/AppButton';
 import { TopHeader } from '../../../../components/header/TopHeader';
+import { useSmschallengeMutation } from '../../../../redux/api/simApi';
 
 export const RegisterNumberScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
-  const user = useSelector(selectToken);
+  const [smschallenge] = useSmschallengeMutation();
 
   const validationSchema = Yup.object().shape({
     phoneNumber: Yup.string()
@@ -37,20 +35,11 @@ export const RegisterNumberScreen = ({ navigation }) => {
     setLoading(true);
     const clientIp = await DeviceInfo.getIpAddress();
 
-    const response = await fetch(`${baseUrl}/api/simregistration/smschallenge`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${user}`,
-      },
-      body: JSON.stringify({
-        msisdn: phoneNumber,
-        clientIp,
-      }),
+    const result = await smschallenge({
+      msisdn: phoneNumber,
+      clientIp,
     });
-
-    const resData = await response.json();
-    console.log('Response:', resData);
+    const resData = result.data;
 
     // Check for backend-declared error
     if (resData?.error) {

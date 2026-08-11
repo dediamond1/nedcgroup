@@ -1,45 +1,18 @@
-import { api } from '../api/api';
-
 /**
- * Fetches voucher configuration from the API
- * @returns {Promise<Object>} Operator configuration object
+ * Resolves the voucher configuration from the RTK Query cache.
+ * The API may return { success, data } or the config object directly;
+ * on unexpected shapes it falls back to the bundled defaults (below).
+ * @param {Object|null} data - Raw response body from useVoucherConfigQuery
+ * @returns {Object} Operator configuration object
  */
-export const fetchVoucherConfig = async () => {
-  try {
-    const response = await api.get('/api/voucher-config');
-    
-    // Log response for debugging
-    console.log('Voucher config API response:', {
-      ok: response.ok,
-      status: response.status,
-      hasData: !!response.data,
-      dataStructure: response.data ? Object.keys(response.data) : null
-    });
-    
-    // Check multiple conditions - be more lenient with response structure
-    if (response.status === 200) {
-      // If response has success flag and data
-      if (response.data?.success && response.data?.data) {
-        return response.data.data;
-      }
-      // If response.data is directly the config object (fallback structure)
-      if (response.data && typeof response.data === 'object' && response.data.COMVIQ) {
-        return response.data;
-      }
-    }
-    
-    // If response exists but structure is wrong, log and use fallback
-    console.warn('Voucher config API response format unexpected, using fallback:', {
-      status: response.status,
-      ok: response.ok,
-      data: response.data
-    });
-    return getFallbackConfig();
-  } catch (error) {
-    console.error('Error fetching voucher config:', error);
-    // Always return fallback config if API fails
-    return getFallbackConfig();
+export const resolveVoucherConfig = (data) => {
+  if (data?.success && data?.data) {
+    return data.data;
   }
+  if (data && typeof data === 'object' && data.COMVIQ) {
+    return data;
+  }
+  return getFallbackConfig();
 };
 
 /**

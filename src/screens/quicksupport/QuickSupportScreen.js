@@ -12,12 +12,13 @@ import { AppScreen } from '../../helper/AppScreen';
 import { TopHeader } from '../../components/header/TopHeader';
 import ForgotPasswordModal from '../../components/modals/ForgotPasswordModal';
 import ContactSupportModal from '../../components/modals/ContactSupportModal'; // Import the new modal
-import { api } from '../../api/api'; // Import your API utility
+import { useResetPasswordMutation } from '../../redux/api/supportApi';
 
 const QuickSupportScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [contactModalVisible, setContactModalVisible] = useState(false); // State for contact modal
   const [language, setLanguage] = useState('sv'); // Language state ('sv' for Swedish, 'ar' for Arabic)
+  const [resetPassword] = useResetPasswordMutation();
 
   const supportOptions = [  
     {
@@ -60,7 +61,7 @@ const QuickSupportScreen = ({ navigation }) => {
 
   const handleResetPassword = async (email) => {
     try {
-      await api.post('/api/auth/reset-password', { email: email?.toLowerCase() });
+      await resetPassword(email?.toLowerCase());
     } catch (error) {
       Alert.alert(
         language === 'sv' ? 'Fel' : 'خطأ',

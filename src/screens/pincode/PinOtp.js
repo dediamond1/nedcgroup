@@ -60,9 +60,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  pincodeContainer: {
-    marginBottom: 20,
-  },
   pincodeRow: {
     flexDirection: 'row',
     justifyContent: 'center',

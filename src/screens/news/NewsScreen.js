@@ -10,8 +10,8 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { baseUrl } from '../../constants/api'; // Adjust the import according to your folder structure
 import { TopHeader } from '../../components/header/TopHeader';
+import { useAnnouncementsQuery } from '../../redux/api/supportApi';
 
 const NewsScreen = ({ navigation }) => {
   const [news, setNews] = useState([]);
@@ -19,16 +19,16 @@ const NewsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
 
+  const { data, isLoading, isError, refetch } = useAnnouncementsQuery();
+
   // Fetch all news announcements
-  const fetchNews = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const response = await fetch(`${baseUrl}/api/announcements`);
-      if (!response.ok) {
-        throw new Error('Kunde inte hämta nyheter');
-      }
-      const data = await response.json();
+  useEffect(() => {
+    setLoading(isLoading);
+    if (isError) {
+      setError(true);
+      return;
+    }
+    if (data !== undefined) {
       // API returns { announcements: [...] } — accept both shapes
       const list = Array.isArray(data) ? data : (data?.announcements ?? []);
       // Filter out expired announcements
@@ -37,22 +37,14 @@ const NewsScreen = ({ navigation }) => {
         announcement => new Date(announcement.expirationDate) >= now && announcement.type === 'news'
       );
       setNews(validNews);
-    } catch (error) {
-      console.error('Fel vid hämtning av nyheter:', error);
-      setError(true);
-    } finally {
-      setLoading(false);
+      setError(false);
     }
-  };
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
+  }, [data, isLoading, isError]);
 
   // Refresh news list
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchNews();
+    await refetch();
     setRefreshing(false);
   };
 
@@ -86,7 +78,7 @@ const NewsScreen = ({ navigation }) => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Kunde inte ladda nyheter. Försök igen senare.</Text>
-        <TouchableOpacity onPress={fetchNews} style={styles.retryButton}>
+        <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
           <Text style={styles.retryText}>Försök igen</Text>
         </TouchableOpacity>
       </View>

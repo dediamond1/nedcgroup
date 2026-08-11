@@ -12,7 +12,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 import { TopHeader } from '../../components/header/TopHeader';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
-import { fetchVoucherConfig } from '../../utils/voucherConfig';
+import { useVoucherConfigQuery } from '../../redux/api/catalogApi';
+import { resolveVoucherConfig } from '../../utils/voucherConfig';
 import { BluetoothManager } from '@brooons/react-native-bluetooth-escpos-printer';
 import { initBluetoothPrinter, printVoucher } from '../../components/operator/operatorPrint';
 import { getOperatorConfig } from '../../components/operator/operatorConfigs';
@@ -30,29 +31,16 @@ const TeliaHalebopPrintScreen = () => {
   const [loading, setLoading] = useState(false);
   const [statusText, setStatusText] = useState('');
   const [boundAddress, setBoundAddress] = useState('');
-  const [voucherConfigData, setVoucherConfigData] = useState(null);
   const [hasPrinted, setHasPrinted] = useState(false);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+
+  const { data: voucherConfigRaw } = useVoucherConfigQuery();
+  const voucherConfigData = resolveVoucherConfig(voucherConfigRaw);
 
   const { companyInfo: hookCompanyInfo, getCompanyInfo, loading: companyInfoLoading } = useGetCompanyInfo();
   const companyInfo = routeCompanyInfo || hookCompanyInfo;
 
   useEffect(() => {
     if (!routeCompanyInfo) getCompanyInfo();
-  }, []);
-
-  useEffect(() => {
-    const loadVoucherConfig = async () => {
-      if (isLoadingConfig || voucherConfigData) return;
-      setIsLoadingConfig(true);
-      try {
-        const configData = await fetchVoucherConfig();
-        if (configData) setVoucherConfigData(configData);
-      } finally {
-        setIsLoadingConfig(false);
-      }
-    };
-    loadVoucherConfig();
   }, []);
 
   useEffect(() => {
@@ -73,13 +61,13 @@ const TeliaHalebopPrintScreen = () => {
     };
   }, []);
 
-  // Auto-print when bluetooth is bound and company info is available.
+  // Auto-print when bluetooth is bound, voucher config + company info are ready.
   useEffect(() => {
     const companyInfoReady = routeCompanyInfo || (!companyInfoLoading && companyInfo);
-    if (boundAddress && !hasPrinted && !loading && companyInfoReady) {
+    if (boundAddress && voucherConfigData && !hasPrinted && !loading && companyInfoReady) {
       doPrint();
     }
-  }, [boundAddress, hasPrinted, loading, companyInfoLoading, companyInfo, routeCompanyInfo]);
+  }, [boundAddress, hasPrinted, loading, companyInfoLoading, companyInfo, routeCompanyInfo, voucherConfigData]);
 
   const handleDone = () => navigation.navigate('INTRO');
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { AppScreen } from '../../helper/AppScreen';
@@ -6,45 +6,33 @@ import { FloatingActionButton } from '../button/FloatingActionButton';
 import { TopHeader } from '../header/TopHeader';
 import { VoucherItems } from './voucherItems/VoucherItems';
 import { AppButton } from '../button/AppButton';
-import { baseUrl } from '../../constants/api';
-import { useSelector } from 'react-redux';
-import { selectToken } from '../../redux/features/auth/authSlice';
+import { useComviqDataQuery } from '../../redux/api/catalogApi';
 
 export const Vouchers = () => {
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const user = useSelector(selectToken);
 
-  const getCategories = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-
-      const response = await fetch(`${baseUrl}/api/comviq-data`);
-
-      if (!response.ok) {
-        throw new Error('Ett fel uppstod. Vänligen kontakta support: +46 793 394 031');
-      }
-
-      const data = await response.json();
-
-      if (!data?.comviqData) {
-        throw new Error('Ett fel uppstod. Vänligen kontakta support: +46 793 394 031');
-      }
-
-      setCategories(data.comviqData?.category);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const { data, isLoading: isFetching, isError } = useComviqDataQuery();
 
   useEffect(() => {
-    getCategories();
-  }, [getCategories]);
+    if (data) {
+      if (!data?.comviqData) {
+        setError('Ett fel uppstod. Vänligen kontakta support: +46 793 394 031');
+      } else {
+        setCategories(data.comviqData?.category);
+        setError('');
+      }
+    }
+  }, [data]);
+
+  useEffect(() => {
+    setIsLoading(isFetching);
+    if (isError) {
+      setError('Ett fel uppstod. Vänligen kontakta support: +46 793 394 031');
+    }
+  }, [isFetching, isError]);
 
   const renderVoucherItem = ({ item }) => (
     <VoucherItems

@@ -1,78 +1,78 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { api } from "../api/api";
-import { getToken, removeToken } from "../helper/storage";
+import { removeToken } from "../helper/storage";
 import {
+  selectToken,
   selectInActive,
   setInActive as setInActiveAction,
   logout,
 } from "../redux/features/auth/authSlice";
+import { useGetCompanyInfoQuery } from "../redux/api/companyApi";
 
 /**
- * Company info hook.
- * `inActive` is owned by the RTK authSlice (single source of truth) — this hook
- * reads it via selector and dispatches updates. `companyInfo`/`closed` remain
- * local to the hook (not auth state).
+ * Company info hook — data flows through the RTK Query companyApi
+ * (no direct fetch here). `inActive`/`token` are owned by the authSlice;
+ * `companyInfo` comes from the query cache; `closed` is local UI state.
+ * The surface (companyInfo, loading, getCompanyInfo, userToken, ...) is
+ * unchanged so every consumer keeps working.
  */
 export const useGetCompanyInfo = () => {
-    const [userToken, setToken] = useState(null);
-    const [closed, setClosed] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [companyInfo, setCompanyInfo] = useState();
+  const [closed, setClosed] = useState(false);
 
-    const dispatch = useDispatch();
-    const inActive = useSelector(selectInActive);
-    const setInActive = (value) => dispatch(setInActiveAction(value));
+  const dispatch = useDispatch();
+  const token = useSelector(selectToken);
+  const inActive = useSelector(selectInActive);
+  const setInActive = (value) => dispatch(setInActiveAction(value));
 
-    const getCompanyInfo = async () => {
-        setLoading(true);
-        const jsontoken = await getToken();
-        const token = JSON.parse(jsontoken);
-        setToken(token);
-        if (token) {
-            const response = await api.get('/api/manager/details', {}, {
-                headers: {
-                    authorization: `Bearer ${token}`,
-                }
-            })
+  const {
+    data: companyInfo,
+    isLoading,
+    refetch,
+    error,
+  } = useGetCompanyInfoQuery(undefined, {
+    skip: !token,
+  });
 
-            if (response?.data?.message === 'invalid token in the request.') {
-                Alert.alert('OBS', "Du har blivit utloggad, vänligen logga in igen", [{
-                    text: "Logga in igen",
-                    onPress: () => dispatch(logout())
-                }])
-                await removeToken();
-                setToken(null)
-            }
-            if (
-                response?.data?.manager?.IsActive === false ||
-                response?.data?.message ===
-                'Company deativted because you have reached Credit Limit'
-            ) {
-                setInActive(true);
-                setLoading(false);
-            } else {
-                setCompanyInfo(response?.data)
-                setLoading(false);
-                setInActive(false);
-            }
-            setLoading(false);
-        } else {
-            setLoading(false);
-            return null;
-        }
-        setLoading(false);
-    };
-    return {
-        loading,
-        inActive,
-        getCompanyInfo,
-        setToken,
-        userToken,
-        closed,
-        setClosed,
-        setInActive,
-        companyInfo
+  // Invalid-token handling (preserved from the legacy hook — requireAuth 401).
+  useEffect(() => {
+    if (error?.data?.message !== "invalid token in the request.") {
+      return;
     }
-}
+    Alert.alert("OBS", "Du har blivit utloggad, vänligen logga in igen", [
+      {
+        text: "Logga in igen",
+        onPress: () => dispatch(logout()),
+      },
+    ]);
+    removeToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
+
+  // Deactivation / credit-limit handling (preserved from the legacy hook).
+  useEffect(() => {
+    if (!companyInfo) return;
+    if (
+      companyInfo.manager?.IsActive === false ||
+      companyInfo.message ===
+        "Company deativted because you have reached Credit Limit"
+    ) {
+      setInActive(true);
+    } else {
+      setInActive(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyInfo]);
+
+  return {
+    loading: isLoading,
+    inActive,
+    getCompanyInfo: refetch,
+    setToken: () => {},
+    userToken: token,
+    closed,
+    setClosed,
+    setInActive,
+    companyInfo,
+  };
+};

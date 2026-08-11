@@ -1,17 +1,16 @@
 "use client"
 
-import React, { useState, useLayoutEffect, useCallback } from "react"
+import React, { useState, useEffect, useLayoutEffect, useCallback } from "react"
 import { View, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { AppText } from "../../components/appText"
 import { AppButton } from "../../components/button/AppButton"
 import { TopHeader } from "../../components/header/TopHeader"
 import { OrderItems } from "../../components/orderItems/OrderItems"
-import { baseUrl } from "../../constants/api"
 import { AppScreen } from "../../helper/AppScreen"
 import { useDispatch } from "react-redux"
 import { setInActive } from "../../redux/features/auth/authSlice"
-import { getToken, removeToken, getBluetooth, saveBluetooth } from "../../helper/storage"
+import { removeToken, getBluetooth, saveBluetooth } from "../../helper/storage"
 import { NormalLoader } from "../../../helper/Loader2"
 import { useGetCompanyInfo } from "../../hooks/useGetCompanyInfo"
 import Icon from "react-native-vector-icons/Ionicons"
@@ -21,6 +20,7 @@ import { BluetoothEscposPrinter, BluetoothManager } from "@brooons/react-native-
 import DeviceInfo from "react-native-device-info"
 import AlertManager from "../../utils/AlertManager"
 import { TextInput } from "react-native-gesture-handler"
+import { useListOrdersQuery, useListLycaOrdersQuery, useListTeliaOrdersQuery } from "../../redux/api/ordersApi"
 
 const useDebounce = (func, delay) => {
   const timeoutRef = React.useRef(null)
@@ -40,7 +40,6 @@ export const OrderHistory = ({ route }) => {
   const { operator } = route?.params
   const [orderHistory, setOrderHistory] = useState([])
   const [filteredOrderHistory, setFilteredOrderHistory] = useState([])
-  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [isPrintModalVisible, setIsPrintModalVisible] = useState(false)
   const [bleOpend, setBleOpen] = useState(false)
@@ -50,48 +49,57 @@ export const OrderHistory = ({ route }) => {
   const dispatch = useDispatch()
   const { companyInfo, getCompanyInfo } = useGetCompanyInfo()
 
-  const getAllOrders = useCallback(async () => {
-    try {
-      setLoading(true)
-      const jsontoken = await getToken()
-      const token = JSON.parse(jsontoken)
-      await getCompanyInfo()
+  const isLyca = operator === "LYCA"
+  const isTeliaOrHalebop = operator === "TELIA" || operator === "HALEBOP"
+  const teliaOperator = operator === "TELIA" ? "Telia" : "Halebop"
 
-      let url = `${baseUrl}/api/order`
-      if (operator === "LYCA") {
-        url = `${baseUrl}/api/lyca-order`
-      } else if (operator === "TELIA" || operator === "HALEBOP") {
-        url = `${baseUrl}/api/teliaOrder`
+  const {
+    data: comviqData,
+    isLoading: comviqLoading,
+    error: comviqError,
+    refetch: comviqRefetch,
+  } = useListOrdersQuery(undefined, { skip: isLyca || isTeliaOrHalebop })
+  const {
+    data: lycaData,
+    isLoading: lycaLoading,
+    error: lycaError,
+    refetch: lycaRefetch,
+  } = useListLycaOrdersQuery(undefined, { skip: !isLyca })
+  const {
+    data: teliaData,
+    isLoading: teliaLoading,
+    error: teliaError,
+    refetch: teliaRefetch,
+  } = useListTeliaOrdersQuery(teliaOperator, { skip: !isTeliaOrHalebop })
+
+  const data = comviqData ?? lycaData ?? teliaData
+  const error = comviqError ?? lycaError ?? teliaError
+  const loading = comviqLoading || lycaLoading || teliaLoading
+  const refetch = isLyca ? lycaRefetch : isTeliaOrHalebop ? teliaRefetch : comviqRefetch
+
+  const getAllOrders = useCallback(() => {
+    getCompanyInfo()
+    refetch()
+  }, [getCompanyInfo, refetch])
+
+  useEffect(() => {
+    const body = data || error?.data
+    if (!body) {
+      if (error) {
+        AlertManager.show("Error", "Failed to fetch orders. Please try again.")
       }
-
-      const response = await fetch(url, {
-        method: operator === "TELIA" || operator === "HALEBOP" ? "POST" : "GET",
-        headers: {
-          authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: operator === "TELIA" || operator === "HALEBOP" ? JSON.stringify({
-          operator: operator === "TELIA" ? "Telia" : "Halebop"
-        }) : undefined
-      })
-
-      const data = await response.json()
-      if (data?.message === "invalid token in the request.") {
-        AlertManager.show("OBS...", "DU HAR BLIVIT UTLOGGAD")
-        await removeToken()
-      } else if (data?.message === "Company deativted because you have reached Credit Limit") {
-        dispatch(setInActive(true))
-      } else {
-        setOrderHistory(data?.orderlist || [])
-        setFilteredOrderHistory(data?.orderlist || [])
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error)
-      AlertManager.show("Error", "Failed to fetch orders. Please try again.")
-    } finally {
-      setLoading(false)
+      return
     }
-  }, [operator, getCompanyInfo, dispatch])
+    if (body?.message === "invalid token in the request.") {
+      AlertManager.show("OBS...", "DU HAR BLIVIT UTLOGGAD")
+      removeToken()
+    } else if (body?.message === "Company deativted because you have reached Credit Limit") {
+      dispatch(setInActive(true))
+    } else {
+      setOrderHistory(body?.orderlist || [])
+      setFilteredOrderHistory(body?.orderlist || [])
+    }
+  }, [data, error, dispatch])
 
   const handleSearch = useCallback((text) => {
     setSearchQuery(text)

@@ -11,10 +11,7 @@ import {AppButton} from '../../components/button/AppButton';
 import {TopHeader} from '../../components/header/TopHeader';
 import {OrderItems} from '../../components/orderItems/OrderItems';
 import {CustomAlert} from '../../components/warningAlert/CustomAlert';
-import {baseUrl} from '../../constants/api';
 import {AppScreen} from '../../helper/AppScreen';
-import {useSelector} from 'react-redux';
-import {selectToken} from '../../redux/features/auth/authSlice';
 import {NormalLoader} from '../../../helper/Loader2';
 import * as Animatable from 'react-native-animatable';
 import {BottomSheet} from '../../components/BottomSheet';
@@ -27,15 +24,16 @@ import {
 import {addYears, format} from 'date-fns';
 import {logo} from '../qrCode/logo';
 import {logo as logoLyca} from '../lyca/logo';
-import axios from 'axios';
 import deviceManager from 'react-native-device-info';
 import {getBluetooth, saveBluetooth} from '../../helper/storage';
 import {useGetCompanyInfo} from '../../hooks/useGetCompanyInfo';
 import categories from '../../utils/category-subcategory.json';
 import {AppText} from '../../components/appText';
 const {width} = Dimensions.get('window');
-import {fetchVoucherConfig, getOperatorConfig} from '../../utils/voucherConfig';
+import {resolveVoucherConfig, getOperatorConfig} from '../../utils/voucherConfig';
 import { halebopLogo, teliaLogo } from '../telia-halebop/teliaHalebopLogos';
+import { useDeleteOrderMutation, useDeleteTeliaOrderMutation } from '../../redux/api/ordersApi';
+import { useVoucherConfigQuery } from '../../redux/api/catalogApi';
 
 export const OrderDetails = ({route, navigation}) => {
   const [showWarning, setShowWarning] = useState(false);
@@ -49,15 +47,9 @@ export const OrderDetails = ({route, navigation}) => {
   const [date, setDate] = useState('');
   const [operatorConfig, setOperatorConfig] = useState(null);
   const {data, companyInfo, operator} = route.params || {};
-  const user = useSelector(selectToken);
-
-  const axiosConf = axios.create({
-        baseURL: baseUrl,
-        headers: {
-          'Content-type': 'application/json',
-          authorization: `Bearer ${user}`,
-        },
-      });
+  const [deleteTeliaOrder] = useDeleteTeliaOrderMutation();
+  const [deleteOrder] = useDeleteOrderMutation();
+  const {data: voucherConfigData} = useVoucherConfigQuery();
 
   const {
     voucherNumber,
@@ -118,15 +110,11 @@ export const OrderDetails = ({route, navigation}) => {
   }, []);
 
   useEffect(() => {
-    const loadVoucherConfig = async () => {
-      // fetchVoucherConfig always returns a config (API or fallback)
-      const config = await fetchVoucherConfig();
-      if (config) {
-        setOperatorConfig(config);
-      }
-    };
-    loadVoucherConfig();
-  }, []);
+    // Resolve voucher config from the RTK Query cache
+    if (voucherConfigData) {
+      setOperatorConfig(resolveVoucherConfig(voucherConfigData));
+    }
+  }, [voucherConfigData]);
 
   useEffect(() => {
     const orderDate = new Date(OrderDate);
@@ -141,17 +129,7 @@ export const OrderDetails = ({route, navigation}) => {
 
       
 
-      const {data: resData} = await axiosConf.delete('/api/teliaOrder', {
-        data: {
-          voucherNumber,
-          OrderDate,
-          reason: 'retur',
-          serialNumber,
-          id,
-          prebookId,
-           operator: operator === "TELIA" ? "Telia" : "Halebop", // <--- backend expects this for TELIA & HALEBOP
-        },
-      });
+      const resData = await deleteTeliaOrder(id).unwrap();
 
       console.log(resData);
 
@@ -187,15 +165,7 @@ export const OrderDetails = ({route, navigation}) => {
       setShowWarning(true);
       setLoading(true);
 
-      const {data: resData} = await axiosConf.delete('/api/order', {
-        data: {
-          voucherNumber: voucherNumber,
-          OrderDate: OrderDate,
-          reason: 'retur',
-          serialNumber: serialNumber,
-          id: id,
-        },
-      });
+      const resData = await deleteOrder(id).unwrap();
 
       console.log(resData);
 
@@ -271,11 +241,11 @@ export const OrderDetails = ({route, navigation}) => {
       await BluetoothEscposPrinter.printText('\r\n', {});
 
       // Get operator-specific config (formatted with voucher number)
-      // If config not loaded yet, fetch fallback synchronously
+      // If config not loaded yet, resolve fallback synchronously
       let configToUse = operatorConfig;
       if (!configToUse) {
         console.warn('Operator config not loaded, using fallback');
-        configToUse = await fetchVoucherConfig();
+        configToUse = resolveVoucherConfig(voucherConfigData);
       }
       
       const config = getOperatorConfig(configToUse, operator, voucherNumber) || 
