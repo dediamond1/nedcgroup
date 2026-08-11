@@ -107,6 +107,87 @@ export const verifyPin = createAsyncThunk(
 );
 
 /**
+ * Passwordless login — step 1: request a login code by email.
+ * The backend emails a single-use 6-digit code (10-min expiry).
+ */
+export const requestLoginCode = createAsyncThunk(
+  'auth/requestLoginCode',
+  async ({ email }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearError());
+
+      const response = await authService.requestLoginCode(email);
+
+      if (!response.success) {
+        // Surface the backend's message (unknown email, cooldown, send failure).
+        throw new Error(response.data?.message || response.error || 'Request code failed');
+      }
+
+      if (response.data?.message) {
+        return response.data;
+      }
+
+      throw new Error('Invalid code request response');
+    } catch (error) {
+      console.error('Request code action error:', error);
+      dispatch(setError(error.message || 'Request code failed'));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+/**
+ * Passwordless login — step 2: verify the emailed code.
+ * On success the final token is persisted and the store is updated, so App.js
+ * automatically switches from AuthNavigation to AppSideNavigation (no PIN
+ * gate — the code replaced the password).
+ */
+export const verifyLoginCode = createAsyncThunk(
+  'auth/verifyLoginCode',
+  async ({ email, code }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearError());
+
+      const response = await authService.verifyLoginCode({ email, code });
+
+      if (!response.success) {
+        // Surface the backend's message (wrong code, expired, too many attempts).
+        throw new Error(response.data?.message || response.error || 'Verify code failed');
+      }
+
+      if (response.data?.token) {
+        await storeToken(response.data.token);
+        dispatch(setToken(response.data.token));
+
+        if (response.data.user) {
+          dispatch(setUser(response.data.user));
+        }
+
+        dispatch(setRequiresPin(false));
+        return response.data;
+      }
+
+      // Soft-error responses (HTTP 200 with a backend error message, no token)
+      if (response.data?.message) {
+        throw new Error(response.data.message);
+      }
+
+      throw new Error('Invalid code verification response');
+    } catch (error) {
+      console.error('Verify code action error:', error);
+      dispatch(setError(error.message || 'Verify code failed'));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+/**
  * Async thunk for checkout PIN confirmation (confirm-pin endpoint)
  * Returns the RAW service response so the caller can switch on the backend
  * messages ('Pin code is Correct', invalid/expired token, credit limit reached).

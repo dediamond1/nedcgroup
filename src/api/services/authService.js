@@ -140,6 +140,20 @@ export const getProfile = async () => {
   }
 };
 
+/**
+ * Passwordless login — request an email code (step 1).
+ * @param {string} email
+ */
+export const requestLoginCode = async (email) =>
+  api.post('/api/auth/request-code', { email });
+
+/**
+ * Passwordless login — verify the emailed code (step 2) → final token.
+ * @param {{ email: string, code: string }} payload
+ */
+export const verifyLoginCode = async ({ email, code }) =>
+  api.post('/api/auth/verify-code', { email, code });
+
 export default {
   login,
   verifyPinCode,
@@ -147,4 +161,6 @@ export default {
   logoutUser,
   refreshToken,
   getProfile,
+  requestLoginCode,
+  verifyLoginCode,
 };
