@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import React, { Component, useEffect, useState } from 'react';
-import { useContext } from 'react';
 import {
     ActivityIndicator,
     Platform,
@@ -26,7 +25,8 @@ import {
 import { AppText } from '../../components/appText';
 import { AppButton } from '../../components/button/AppButton';
 import { apiHelper, baseUrl } from '../../constants/api';
-import { AuthContext } from '../../context/auth.context';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectToken, setInActive } from '../../redux/features/auth/authSlice';
 import {
     getBluetooth,
     getToken,
@@ -66,9 +66,9 @@ export const QrCodeScreen = ({ navigation, route }) => {
 
 
 
-    const { setClosed, setInActive, user, } = useContext(AuthContext);
-
-    // const {}=useGetCompanyInfo()
+    const dispatch = useDispatch();
+    const user = useSelector(selectToken);
+    const { setClosed } = useGetCompanyInfo();
 
     const { data, moreInfo, title, compInformation, companyInfo } =
         route.params || {};
@@ -142,7 +142,7 @@ export const QrCodeScreen = ({ navigation, route }) => {
                 data?.message ===
                 'Company deativted because you have reached Credit Limit' 
             ) {
-                setInActive(true);
+                dispatch(setInActive(true));
             } else if (data?.message === 'invalid token in the request.') {
                 Alert.alert('OBS...', 'DU HAR BLIVIT UTLOGGAD');
                 await removeToken();

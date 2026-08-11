@@ -1,9 +1,8 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { KeycodeInput } from 'react-native-keycode';
 import { TopHeader } from '../../components/header/TopHeader';
 import { baseUrl } from '../../constants/api';
 import axios from 'axios';
-import { AuthContext } from '../../context/auth.context';
 import { View, Alert, StyleSheet, TouchableOpacity, Text, TextInput } from 'react-native';
 
 import { AppText } from '../../components/appText';

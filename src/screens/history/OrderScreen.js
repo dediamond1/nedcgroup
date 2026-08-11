@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useLayoutEffect, useContext, useCallback } from "react"
+import React, { useState, useLayoutEffect, useCallback } from "react"
 import { View, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { AppText } from "../../components/appText"
@@ -8,8 +8,9 @@ import { AppButton } from "../../components/button/AppButton"
 import { TopHeader } from "../../components/header/TopHeader"
 import { OrderItems } from "../../components/orderItems/OrderItems"
 import { baseUrl } from "../../constants/api"
-import { AuthContext } from "../../context/auth.context"
 import { AppScreen } from "../../helper/AppScreen"
+import { useDispatch } from "react-redux"
+import { setInActive } from "../../redux/features/auth/authSlice"
 import { getToken, removeToken, getBluetooth, saveBluetooth } from "../../helper/storage"
 import { NormalLoader } from "../../../helper/Loader2"
 import { useGetCompanyInfo } from "../../hooks/useGetCompanyInfo"
@@ -46,7 +47,7 @@ export const OrderHistory = ({ route }) => {
   const [boundAddress, setBoundAddress] = useState("")
   const [name, setName] = useState("")
   const navigation = useNavigation()
-  const { setInActive } = useContext(AuthContext)
+  const dispatch = useDispatch()
   const { companyInfo, getCompanyInfo } = useGetCompanyInfo()
 
   const getAllOrders = useCallback(async () => {
@@ -79,7 +80,7 @@ export const OrderHistory = ({ route }) => {
         AlertManager.show("OBS...", "DU HAR BLIVIT UTLOGGAD")
         await removeToken()
       } else if (data?.message === "Company deativted because you have reached Credit Limit") {
-        setInActive(true)
+        dispatch(setInActive(true))
       } else {
         setOrderHistory(data?.orderlist || [])
         setFilteredOrderHistory(data?.orderlist || [])
@@ -90,7 +91,7 @@ export const OrderHistory = ({ route }) => {
     } finally {
       setLoading(false)
     }
-  }, [operator, getCompanyInfo, setInActive])
+  }, [operator, getCompanyInfo, dispatch])
 
   const handleSearch = useCallback((text) => {
     setSearchQuery(text)

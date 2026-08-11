@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useContext, useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import {
   Dimensions,
   StyleSheet,
@@ -21,7 +21,8 @@ import Ionicons from "react-native-vector-icons/Ionicons"
 import FontAwesome from "react-native-vector-icons/FontAwesome"
 import { TopHeader } from "../components/header/TopHeader"
 import { removeToken } from "../helper/storage"
-import { AuthContext } from "../context/auth.context"
+import { useDispatch } from "react-redux"
+import { setTeliaHalebop, logout } from "../redux/features/auth/authSlice"
 import ReactNativeHapticFeedback from "react-native-haptic-feedback"
 import { useNavigation } from "@react-navigation/native"
 
@@ -174,7 +175,7 @@ const MenuItem = React.memo(({ item, onPress, onLogout }) => {
 export default function IntroScreen() {
 
   const navigation = useNavigation()
-  const { setUser, setTeliaHalebop } = useContext(AuthContext)
+  const dispatch = useDispatch()
   const [featuredCompanies, setFeaturedCompanies] = useState([])
   const [otherCompanies, setOtherCompanies] = useState([])
   
@@ -210,7 +211,7 @@ export default function IntroScreen() {
     console.log(item)
   triggerHaptic("impactMedium")
   if (item?.title === "Telia" || item?.title === "Halebop") {
-    setTeliaHalebop(item?.title)
+    dispatch(setTeliaHalebop(item?.title))
   }
 
   navigation.navigate(`${route}`, { title: "Telia"})
@@ -234,7 +235,7 @@ export default function IntroScreen() {
           onPress: async () => {
             triggerHaptic("impactHeavy")
             await removeToken()
-            setUser(null)
+            dispatch(logout())
           },
         },
       ],

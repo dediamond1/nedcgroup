@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {BankIdScreen} from '../newRegSimcardScreens/BankIdScreen';
 import {RadioButton} from 'react-native-paper';
 
@@ -13,8 +13,9 @@ import {
   Alert,
 } from 'react-native';
 
-import {AuthContext} from '../../../../context/auth.context';
 import {Status} from '../../../../../helper/Status';
+import {useSelector} from 'react-redux';
+import {selectToken} from '../../../../redux/features/auth/authSlice';
 import {AppScreen} from '../../../../helper/AppScreen';
 import {AppText} from '../../../../components/appText';
 import {AppButton} from '../../../../components/button/AppButton';
@@ -36,7 +37,7 @@ export const ConfirmScreen = ({route, navigation}) => {
   const [orderRef, setOrderRef] = useState();
   const [loading, setLoading] = useState(false);
 
-  const {user} = useContext(AuthContext);
+  const user = useSelector(selectToken);
 
   const {userInfo} = route.params || {};
   const {email, street, postalCode, PhoneNumber, city, number, smsCode} =

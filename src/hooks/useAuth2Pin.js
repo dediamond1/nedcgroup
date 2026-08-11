@@ -1,11 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { useDispatch } from "react-redux";
-import { AuthContext } from "../context/auth.context";
 import { removeToken } from "../helper/storage";
 import { useGetCompanyInfo } from "./useGetCompanyInfo";
 import { confirmPin } from "../redux/features/auth/authActions";
+import { setInActive, logout } from "../redux/features/auth/authSlice";
 
 /**
  * Checkout PIN confirmation hook — wraps the redux `confirmPin` thunk.
@@ -14,7 +14,6 @@ import { confirmPin } from "../redux/features/auth/authActions";
  */
 export const useAuth2Pin = () => {
     const [loading, setLoading] = useState(false);
-    const { setInActive, setUser } = useContext(AuthContext);
     const { companyInfo, getCompanyInfo } = useGetCompanyInfo()
     const navigation = useNavigation()
     const dispatch = useDispatch()
@@ -39,7 +38,7 @@ export const useAuth2Pin = () => {
             console.log(response?.data);
             switch (response?.data?.message) {
                 case 'Company deativted because you have reached Credit Limit':
-                    setInActive(true);
+                    dispatch(setInActive(true));
                     setLoading(false)
                     break;
                 case 'pin code is required':
@@ -52,10 +51,10 @@ export const useAuth2Pin = () => {
                 case 'No token provided':
                     Alert.alert('OBS', 'Du har blivit utloggad, vänligen logga in igen', [{
                         text: 'Logga in igen',
-                        onPress: () => setUser(null),
+                        onPress: () => dispatch(logout()),
                     }]);
                     await removeToken();
-                    setUser(null);
+                    dispatch(logout());
                     break;
                 case 'Pin code is Correct':
                     setLoading(false);

@@ -5,23 +5,24 @@
  * Behaviour preserved from the legacy screen: auto-print when bluetooth +
  * company info are ready, manual retry button, done → INTRO.
  */
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { AuthContext } from '../../context/auth.context';
+import { useSelector } from 'react-redux';
 import { TopHeader } from '../../components/header/TopHeader';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
 import { fetchVoucherConfig } from '../../utils/voucherConfig';
 import { BluetoothManager } from '@brooons/react-native-bluetooth-escpos-printer';
 import { initBluetoothPrinter, printVoucher } from '../../components/operator/operatorPrint';
 import { getOperatorConfig } from '../../components/operator/operatorConfigs';
+import { selectTeliaHalebop } from '../../redux/features/auth/authSlice';
 
 const TeliaHalebopPrintScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { voucherInfo, product, companyInfo: routeCompanyInfo } = route.params || {};
-  const { teliaHalebop } = useContext(AuthContext);
+  const teliaHalebop = useSelector(selectTeliaHalebop);
 
   const config = getOperatorConfig(teliaHalebop);
   const COLOR = config.colors.primary;

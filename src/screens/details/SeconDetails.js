@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { AppText } from '../../components/appText';
 import { AppButton } from '../../components/button/AppButton';
@@ -6,8 +6,9 @@ import { AppIconButton } from '../../components/button/AppIconButton';
 import { TopHeader } from '../../components/header/TopHeader';
 import { VoucherItems } from '../../components/vouchers/voucherItems/VoucherItems';
 import { baseUrl } from '../../constants/api';
-import { AuthContext } from '../../context/auth.context';
 import { AppScreen } from '../../helper/AppScreen';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectToken, setInActive, logout } from '../../redux/features/auth/authSlice';
 import * as Animatable from 'react-native-animatable';
 import axios from 'axios';
 import { NormalLoader } from '../../../helper/Loader2';
@@ -20,7 +21,8 @@ export const SeconDetails = ({ route, navigation }) => {
   const [showItem, setShowItem] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
-  const { user, setInActive, setUser } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const user = useSelector(selectToken);
 
   const handleIncrement = () => {
     setQuantity(quantity + 1);
@@ -53,13 +55,13 @@ export const SeconDetails = ({ route, navigation }) => {
       if (
         response?.data?.message === 'Company deativted because you have reached Credit Limit'
       ) {
-        setInActive(true);
+        dispatch(setInActive(true));
       }
       if (response?.data?.message === 'invalid token in the request.') {
         await removeToken()
         Alert.alert('OBS', "Du har blivit utloggad, vänligen logga in igen", [{
           text: "Logga in igen",
-          onPress: () => setUser(null)
+          onPress: () => dispatch(logout())
         }])
         setLoading(false);
       }

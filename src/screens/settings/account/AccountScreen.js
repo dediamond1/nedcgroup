@@ -1,7 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TopHeader } from '../../../components/header/TopHeader';
-import { AuthContext } from '../../../context/auth.context';
 import { useGetCompanyInfo } from '../../../hooks/useGetCompanyInfo';
 
 export const AccountScreen = ({ navigation }) => {

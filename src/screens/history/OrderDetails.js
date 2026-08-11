@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Alert,
   StyleSheet,
@@ -12,8 +12,9 @@ import {TopHeader} from '../../components/header/TopHeader';
 import {OrderItems} from '../../components/orderItems/OrderItems';
 import {CustomAlert} from '../../components/warningAlert/CustomAlert';
 import {baseUrl} from '../../constants/api';
-import {AuthContext} from '../../context/auth.context';
 import {AppScreen} from '../../helper/AppScreen';
+import {useSelector} from 'react-redux';
+import {selectToken} from '../../redux/features/auth/authSlice';
 import {NormalLoader} from '../../../helper/Loader2';
 import * as Animatable from 'react-native-animatable';
 import {BottomSheet} from '../../components/BottomSheet';
@@ -48,7 +49,7 @@ export const OrderDetails = ({route, navigation}) => {
   const [date, setDate] = useState('');
   const [operatorConfig, setOperatorConfig] = useState(null);
   const {data, companyInfo, operator} = route.params || {};
-  const {user} = useContext(AuthContext);
+  const user = useSelector(selectToken);
 
   const axiosConf = axios.create({
         baseURL: baseUrl,

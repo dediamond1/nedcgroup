@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, FlatList, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { AppScreen } from '../../helper/AppScreen';
@@ -7,14 +7,15 @@ import { TopHeader } from '../header/TopHeader';
 import { VoucherItems } from './voucherItems/VoucherItems';
 import { AppButton } from '../button/AppButton';
 import { baseUrl } from '../../constants/api';
-import { AuthContext } from '../../context/auth.context';
+import { useSelector } from 'react-redux';
+import { selectToken } from '../../redux/features/auth/authSlice';
 
 export const Vouchers = () => {
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { user } = useContext(AuthContext);
+  const user = useSelector(selectToken);
 
   const getCategories = useCallback(async () => {
     try {

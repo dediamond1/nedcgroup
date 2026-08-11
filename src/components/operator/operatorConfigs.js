@@ -289,7 +289,7 @@ export const OPERATOR_CONFIGS = {
 };
 
 /**
- * Resolve the operator config from the auth context value used by the
+ * Resolve the operator config from the redux auth slice value used by the
  * telia/halebop flow ('Telia' | 'Halebop'). Anything else falls back to telia.
  */
 export const getOperatorConfig = (teliaHalebop) => {

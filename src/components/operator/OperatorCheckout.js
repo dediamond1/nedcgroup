@@ -11,7 +11,7 @@
  *   - telia/halebop (Telia-hale-singleProduct): features layout, navigates to
  *     the standalone print screen, order-create header uses the context token.
  */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,8 +25,9 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { AuthContext } from '../../context/auth.context';
+import { useDispatch, useSelector } from 'react-redux';
 import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
+import { selectToken, logout } from '../../redux/features/auth/authSlice';
 import { TopHeader } from '../header/TopHeader';
 import { PincodeInput } from '../../../helper/PincodeInput';
 import { api } from '../../api/api';
@@ -35,7 +36,8 @@ import { initBluetoothPrinter, printVoucher } from './operatorPrint';
 
 const OperatorCheckout = ({ config, item }) => {
   const navigation = useNavigation();
-  const { user, setUser } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const user = useSelector(selectToken);
   const { setInActive, companyInfo, getCompanyInfo, userToken } = useGetCompanyInfo();
 
   const checkout = config.checkout;
@@ -106,7 +108,7 @@ const OperatorCheckout = ({ config, item }) => {
           break;
         case 'invalid token in the request.':
           Alert.alert(checkout.invalidTokenAlert.title, checkout.invalidTokenAlert.message, checkout.invalidTokenAlert.withRelogin
-            ? [{ text: 'Logga in igen', onPress: () => setUser(null) }]
+            ? [{ text: 'Logga in igen', onPress: () => dispatch(logout()) }]
             : undefined);
           break;
         case 'Pin code is Correct':
@@ -150,7 +152,7 @@ const OperatorCheckout = ({ config, item }) => {
         setInActive(true);
       } else if (data?.message === 'invalid token in the request.') {
         Alert.alert(checkout.invalidTokenAlert.title, checkout.invalidTokenAlert.message, checkout.invalidTokenAlert.withRelogin
-          ? [{ text: 'Logga in igen', onPress: () => setUser(null) }]
+          ? [{ text: 'Logga in igen', onPress: () => dispatch(logout()) }]
           : undefined);
       } else if (data?.message === checkout.invalidTimeMessage) {
         Alert.alert('OBS', checkout.invalidTimeAlert);

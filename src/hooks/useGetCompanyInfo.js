@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { api } from "../api/api";
-import { useAuth } from "../context/auth.context";
 import { getToken, removeToken } from "../helper/storage";
 import {
   selectInActive,
   setInActive as setInActiveAction,
+  logout,
 } from "../redux/features/auth/authSlice";
 
 /**
@@ -24,7 +24,6 @@ export const useGetCompanyInfo = () => {
     const dispatch = useDispatch();
     const inActive = useSelector(selectInActive);
     const setInActive = (value) => dispatch(setInActiveAction(value));
-    const { setUser } = useAuth();
 
     const getCompanyInfo = async () => {
         setLoading(true);
@@ -41,7 +40,7 @@ export const useGetCompanyInfo = () => {
             if (response?.data?.message === 'invalid token in the request.') {
                 Alert.alert('OBS', "Du har blivit utloggad, vänligen logga in igen", [{
                     text: "Logga in igen",
-                    onPress: () => setUser(null)
+                    onPress: () => dispatch(logout())
                 }])
                 await removeToken();
                 setToken(null)

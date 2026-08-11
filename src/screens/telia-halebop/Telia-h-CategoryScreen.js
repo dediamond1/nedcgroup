@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useContext } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import {
   FlatList,
   Text,
@@ -15,12 +15,14 @@ import Icon from "react-native-vector-icons/Ionicons"
 import { TopHeader } from "../../components/header/TopHeader"
 import { useNavigation } from "@react-navigation/native"
 import { api } from "../../api/api"
-import { AuthContext } from "../../context/auth.context"
+import { useSelector } from "react-redux"
+import { selectTeliaHalebop, selectToken } from "../../redux/features/auth/authSlice"
 
 const { width, height } = Dimensions.get("window")
 
 const TeliaCategoryScreen = ({route}) => {
-  const { teliaHalebop, user } = useContext(AuthContext)
+  const teliaHalebop = useSelector(selectTeliaHalebop)
+  const user = useSelector(selectToken)
 
   const navigation = useNavigation()
   const [selectedCategory, setSelectedCategory] = useState(null)

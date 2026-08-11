@@ -1,11 +1,12 @@
-import React, {useContext, useState} from 'react';
+import React, {useState} from 'react';
 import * as Yup from 'yup';
 import {Formik} from 'formik';
 import {Alert, ScrollView, StyleSheet, View, Image} from 'react-native';
 
-import {AuthContext} from '../../../../context/auth.context';
+import {useSelector} from 'react-redux';
 
 import {TopHeader} from '../../../../components/header/TopHeader';
+import {selectToken} from '../../../../redux/features/auth/authSlice';
 import {AppText} from '../../../../components/appText';
 import {AppInput} from '../../../../components/input/AppInput';
 import {AppButton} from '../../../../components/button/AppButton';
@@ -20,7 +21,7 @@ export const NoneExistSimScreen = ({navigation}) => {
       .length(20, 'Ange IccID numret, 20 siffror'),
   });
 
-  const {user} = useContext(AuthContext);
+  const user = useSelector(selectToken);
 
   return (
     <AppScreen style={styles.screen}>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
   DrawerContentScrollView,
@@ -7,17 +7,18 @@ import {
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { removeToken } from '../../helper/storage';
-import { AuthContext } from '../../context/auth.context';
+import { useDispatch } from 'react-redux';
+import { logout as logoutAction } from '../../redux/features/auth/authSlice';
 import { AppText } from '../appText';
 import MaterialIcon from 'react-native-vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
 export const CustomDrawer = props => {
   const [token, setToken] = useState(false);
-  const { setUser } = useContext(AuthContext);
+  const dispatch = useDispatch();
 
   const logout = async () => {
     await removeToken();
-    setUser(null);
+    dispatch(logoutAction());
   };
 
 

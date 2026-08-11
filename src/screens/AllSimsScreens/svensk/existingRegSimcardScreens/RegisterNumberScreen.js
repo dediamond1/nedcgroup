@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -11,8 +11,9 @@ import * as Yup from 'yup';
 import { DrawerActions } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
 
-import { AuthContext } from '../../../../context/auth.context';
 import { baseUrl } from '../../../../constants/api';
+import { useSelector } from 'react-redux';
+import { selectToken } from '../../../../redux/features/auth/authSlice';
 import { AppScreen } from '../../../../helper/AppScreen';
 import { AppText } from '../../../../components/appText';
 import { AppInput } from '../../../../components/input/AppInput';
@@ -22,7 +23,7 @@ import { TopHeader } from '../../../../components/header/TopHeader';
 export const RegisterNumberScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
-  const { user } = useContext(AuthContext);
+  const user = useSelector(selectToken);
 
   const validationSchema = Yup.object().shape({
     phoneNumber: Yup.string()

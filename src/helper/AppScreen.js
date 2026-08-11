@@ -1,8 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { SafeAreaView, StyleSheet } from 'react-native'
 import { FloatingActionButton } from '../components/button/FloatingActionButton'
-import { AuthContext } from '../context/auth.context'
 
 export const AppScreen = ({ style, children, showIcon = false, iconAction, FlatIIconStyle }) => {
 

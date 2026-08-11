@@ -20,6 +20,8 @@ const initialState = {
   error: null,
   requiresPin: false,
   inActive: false,
+  /** Active operator section from the intro menu ('Telia' | 'Halebop' | ...). */
+  teliaHalebop: '',
 };
 
 /**
@@ -85,6 +87,13 @@ const authSlice = createSlice({
      */
     setInActive: (state, action) => {
       state.inActive = !!action.payload;
+    },
+
+    /**
+     * Set the active operator section ('Telia' | 'Halebop' — intro menu).
+     */
+    setTeliaHalebop: (state, action) => {
+      state.teliaHalebop = action.payload;
     },
 
     /**
@@ -171,6 +180,13 @@ export const selectRequiresPin = (state) => state.auth.requiresPin;
  * @returns {boolean} Whether the company/account is inactive
  */
 export const selectInActive = (state) => state.auth.inActive;
+
+/**
+ * Select the active operator section ('Telia' | 'Halebop' — intro menu)
+ * @param {Object} state - Redux state
+ * @returns {string} Active operator section
+ */
+export const selectTeliaHalebop = (state) => state.auth.teliaHalebop;
 
 /**
  * Select complete auth state

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Provider, useDispatch } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import SplashScreen from 'react-native-splash-screen';
 import Crashes from 'appcenter-crashes';
 import { Alert, BackHandler } from 'react-native';
@@ -7,7 +7,6 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { NavigationContainer } from '@react-navigation/native';
 import { AppSideNavigation } from './src/navigations/Home/HomeNavigation';
 import { AuthNavigation } from './src/navigations/auth/AuthNavigation';
-import { AuthContext } from './src/context/auth.context';
 import { NoNetwork } from './helper/NoNetwork';
 import { ClosedShop } from './helper/Closed';
 import { AccountStatus } from './src/helper/AccountStatus';
@@ -21,7 +20,7 @@ import DeviceInfo from 'react-native-device-info';
 import { api } from './src/api/api';
 import { store } from './src/redux/store';
 import { loadStoredToken } from './src/redux/features/auth/authActions';
-import { useAuth } from './src/context/auth.context';
+import { selectToken, selectInActive, selectTeliaHalebop } from './src/redux/features/auth/authSlice';
 
 const AppInner = () => {
   const netInfo = useNetInfo();
@@ -34,10 +33,11 @@ const AppInner = () => {
   const [loadingAnnouncement, setLoadingAnnouncement] = useState(true);
   const [announcementError, setAnnouncementError] = useState(false);
   const [isAnnouncementPaused, setIsAnnouncementPaused] = useState(false);
-  const [teliaHalebop, setTeliaHalebop]= useState('')
 
-  // Auth state is owned by the RTK authSlice — the AuthContext below is a thin bridge.
-  const { user, inActive, setUser, setInActive } = useAuth();
+  // All auth state is owned by the RTK authSlice — single source of truth.
+  const user = useSelector(selectToken);
+  const inActive = useSelector(selectInActive);
+  const teliaHalebop = useSelector(selectTeliaHalebop);
   const dispatch = useDispatch();
 
   const {
@@ -76,14 +76,15 @@ const AppInner = () => {
     setLoadingAnnouncement(true);
     setAnnouncementError(false);
     try {
-      const response = await fetch(`${baseUrl}/api/announcement`);
+      const response = await fetch(`${baseUrl}/api/announcements`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      
+      const announcements = Array.isArray(data) ? data : data?.announcements ?? [];
+
       // Filter out announcements with type "new"
-      const filteredAnnouncements = data.filter(
+      const filteredAnnouncements = announcements.filter(
         announcement => announcement.type !== 'news' && new Date(announcement.expirationDate) >= new Date()
       );
       
@@ -195,19 +196,8 @@ const AppInner = () => {
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        companyInfo,
-        setClosed,
-        setInActive,
-        getCompanyInfo,
-        teliaHalebop, 
-        setTeliaHalebop
-      }}>
-      <NavigationContainer>
-        {user ? <AppSideNavigation /> : <AuthNavigation />}
+    <NavigationContainer>
+      {user ? <AppSideNavigation /> : <AuthNavigation />}
         <UpdateNotification
           visible={updateVisible}
           onClose={() => {
@@ -229,7 +219,6 @@ const AppInner = () => {
           />
         )}
       </NavigationContainer>
-    </AuthContext.Provider>
   );
 };
 
