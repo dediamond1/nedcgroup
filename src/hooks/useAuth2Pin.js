@@ -37,7 +37,7 @@ export const useAuth2Pin = () => {
             const response = resultAction.payload;
             console.log(response?.data);
             switch (response?.data?.message) {
-                case 'Company deativted because you have reached Credit Limit':
+                case 'Company deactivated because you have reached Credit Limit':
                     dispatch(setInActive(true));
                     setLoading(false)
                     break;

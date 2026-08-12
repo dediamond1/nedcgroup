@@ -5,11 +5,21 @@ import { StyleSheet } from 'react-native';
 import { MainNavigation } from '../homeNavigations/MainNavigation';
 import { AllSimCardsNavigations } from '../AllSimRegNavigations';
 import LycaNavigation from '../lyckaNavigations/LycaNavigation';
+import { AccountStatus } from '../../helper/AccountStatus';
+import { useGetCompanyInfo } from '../../hooks/useGetCompanyInfo';
 
 const Stack = createStackNavigator();
 
 const Fake = () => null;
 export const AppNav = () => {
+  // Deactivated accounts (credit limit reached) see the clean support screen
+  // instead of the app — "Försök igen" re-checks the company status so a
+  // reactivated account resumes automatically.
+  const { inActive, getCompanyInfo } = useGetCompanyInfo();
+
+  if (inActive) {
+    return <AccountStatus onPress={getCompanyInfo} />;
+  }
 
   return (
     <Stack.Navigator

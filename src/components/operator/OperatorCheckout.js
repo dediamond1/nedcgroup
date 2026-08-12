@@ -108,7 +108,11 @@ const OperatorCheckout = ({ config, item }) => {
 
       const resultAction = await dispatch(confirmPin({ pinCode }));
       if (resultAction.type.endsWith('/rejected')) {
-        Alert.alert('Error', 'Ett fel uppstod. Försök igen.');
+        const errMsg =
+          resultAction.payload?.message ||
+          resultAction.payload?.error ||
+          'Ett fel uppstod. Försök igen.';
+        Alert.alert('Fel', errMsg);
         return;
       }
       const response = resultAction.payload;
@@ -135,7 +139,7 @@ const OperatorCheckout = ({ config, item }) => {
       }
     } catch (error) {
       console.error('Error verifying pincode:', error);
-      Alert.alert('Error', 'Ett fel uppstod. Försök igen.');
+      Alert.alert('Fel', error?.message || 'Ett fel uppstod. Försök igen.');
     } finally {
       setLoading(false);
     }

@@ -93,7 +93,7 @@ export const OrderHistory = ({ route }) => {
     if (body?.message === "invalid token in the request.") {
       AlertManager.show("OBS...", "DU HAR BLIVIT UTLOGGAD")
       removeToken()
-    } else if (body?.message === "Company deativted because you have reached Credit Limit") {
+    } else if (body?.message === "Company deactivated because you have reached Credit Limit") {
       dispatch(setInActive(true))
     } else {
       setOrderHistory(body?.orderlist || [])
@@ -129,7 +129,7 @@ export const OrderHistory = ({ route }) => {
     try {
       const isAmu = await DeviceInfo.isEmulator()
       if (isAmu) {
-        return Alert.alert('obs', "not real device")
+        return Alert.alert('Fel', 'Detta är INTE en riktig enhet!')
       }
 
       let enabled = await BluetoothManager.checkBluetoothEnabled()

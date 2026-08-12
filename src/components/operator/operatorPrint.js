@@ -73,7 +73,7 @@ export const printVoucher = async ({
 }) => {
   const isEmulator = await deviceManager.isEmulator();
   if (isEmulator) {
-    Alert.alert('FEL', 'Detta ar INTE en riktig enhet!');
+    Alert.alert('FEL', 'Detta är INTE en riktig enhet!');
     return;
   }
 

@@ -133,15 +133,19 @@ export const OrderDetails = ({route, navigation}) => {
 
       console.log(resData);
 
+      const supplierMsg =
+        resData?.data?.response?.errorInformation?.errors?.[0]?.statusDescription ||
+        resData?.data?.errorInformation?.errors?.[0]?.statusDescription ||
+        resData?.data?.statusDescription ||
+        resData?.message ||
+        '';
+      const alreadyUsed = /already (used|barred|cancelled)|redan anv|already returned/i.test(supplierMsg);
+
       if (resData.message === 'Order Returned.') {
         setLoading(false);
         setStatus('success');
         setMessage('RETUR GODKÄND');
-      } else if (
-        resData?.data?.response?.errorInformation?.errors?.[0]
-          ?.statusDescription ===
-        'Cant cancel voucher because it was already barred'
-      ) {
+      } else if (alreadyUsed) {
         setShowWarning(false);
         setLoading(false);
         setStatus('failed');
@@ -150,13 +154,16 @@ export const OrderDetails = ({route, navigation}) => {
         setShowWarning(false);
         setLoading(false);
         setStatus('failed');
-        setMessage('VOUCHER REDAN ANVÄND!');
+        setMessage(supplierMsg || 'Returnen kunde inte genomföras. Kontakta support.');
       }
     } catch (error) {
       setShowWarning(false);
       setLoading(false);
       console.log(error);
-      Alert.alert('Fel', 'Det gick inte att returnera ordern');
+      Alert.alert(
+        'Fel',
+        error?.data?.message || error?.message || 'Det gick inte att returnera ordern'
+      );
     }
   };
 
@@ -169,15 +176,19 @@ export const OrderDetails = ({route, navigation}) => {
 
       console.log(resData);
 
+      const supplierMsg =
+        resData?.data?.response?.errorInformation?.errors?.[0]?.statusDescription ||
+        resData?.data?.errorInformation?.errors?.[0]?.statusDescription ||
+        resData?.data?.statusDescription ||
+        resData?.message ||
+        '';
+      const alreadyUsed = /already (used|barred|cancelled)|redan anv|already returned/i.test(supplierMsg);
+
       if (resData.message === 'Order Returned.') {
         setLoading(false);
         setStatus('success');
         setMessage('RETUR GODKÄND');
-      } else if (
-        resData?.data?.response?.errorInformation?.errors?.[0]
-          ?.statusDescription ===
-        'Cant cancel voucher because it was already barred'
-      ) {
+      } else if (alreadyUsed) {
         setShowWarning(false);
         setLoading(false);
         setStatus('failed');
@@ -186,13 +197,16 @@ export const OrderDetails = ({route, navigation}) => {
         setShowWarning(false);
         setLoading(false);
         setStatus('failed');
-        setMessage('VOUCHER REDAN ANVÄND!');
+        setMessage(supplierMsg || 'Returnen kunde inte genomföras. Kontakta support.');
       }
     } catch (error) {
       setShowWarning(false);
       setLoading(false);
       console.log(error);
-      Alert.alert('Fel', 'Det gick inte att returnera ordern');
+      Alert.alert(
+        'Fel',
+        error?.data?.message || error?.message || 'Det gick inte att returnera ordern'
+      );
     }
   };
 

@@ -48,7 +48,7 @@ const lycaCheckout = {
         closeOtp: true,
         statusText: 'Produkten är slutsåld eller något fick fel',
         alertTitle: 'OBS',
-        alert: 'Produkten är slutsåld eller något fick fel kontakta support +467****4031',
+        alert: 'Produkten är slutsåld eller något fick fel kontakta support +46 793 394 031',
       };
     }
     if (!data?.products?.[0]?.voucherNumber) {

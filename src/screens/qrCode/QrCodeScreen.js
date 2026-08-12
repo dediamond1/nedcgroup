@@ -133,7 +133,7 @@ export const QrCodeScreen = ({ navigation, route }) => {
 
             if (
                 data?.message ===
-                'Company deativted because you have reached Credit Limit' 
+                'Company deactivated because you have reached Credit Limit' 
             ) {
                 dispatch(setInActive(true));
             } else if (data?.message === 'invalid token in the request.') {

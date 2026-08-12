@@ -55,7 +55,7 @@ export const useGetCompanyInfo = () => {
     if (
       companyInfo.manager?.IsActive === false ||
       companyInfo.message ===
-        "Company deativted because you have reached Credit Limit"
+        "Company deactivated because you have reached Credit Limit"
     ) {
       setInActive(true);
     } else {
