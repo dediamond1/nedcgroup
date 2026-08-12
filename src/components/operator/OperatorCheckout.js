@@ -147,12 +147,21 @@ const OperatorCheckout = ({ config, item }) => {
 
       // Fetch the voucher through the RTK Query checkout API (auth header is
       // injected automatically from the store — no per-call token plumbing).
+      // On failure surface the server's real message instead of a silent null
+      // (a 401/5xx/network error previously collapsed into the generic
+      // "Kunde inte hämta voucher." fallback and hid the actual cause).
+      const prebookError = (e) => ({
+        data: {
+          success: false,
+          message: e?.data?.message || e?.error || 'Kunde inte hämta voucher.',
+        },
+      });
       const voucherResult = isTelia
         ? checkout.voucherFromResponse(
-            (await teliaVouchers(checkout.voucherRequest(item)).unwrap().catch(() => null))?.data
+            (await teliaVouchers(checkout.voucherRequest(item)).unwrap().catch(prebookError))?.data
           )
         : checkout.voucherFromResponse(
-            (await lycaReserve(checkout.voucherRequest(item)).unwrap().catch(() => null))?.data,
+            (await lycaReserve(checkout.voucherRequest(item)).unwrap().catch(prebookError))?.data,
             item,
           );
 
@@ -171,6 +180,16 @@ const OperatorCheckout = ({ config, item }) => {
         ? await teliaOrderCreate(orderBody)
         : await lycaOrderCreate(orderBody);
       const data = orderRes?.data;
+
+      // Order-create failure must be visible, not silently passed through to print.
+      if (!data) {
+        Alert.alert(
+          'Fel',
+          orderRes?.error?.data?.message || orderRes?.error?.error || 'Kunde inte spara ordern. Försök igen.'
+        );
+        setLoading(false);
+        return;
+      }
 
       if (data?.message === checkout.deactivationMessage) {
         setInActive(true);
@@ -198,7 +217,7 @@ const OperatorCheckout = ({ config, item }) => {
       }
     } catch (error) {
       console.error('Transaction Error:', error);
-      Alert.alert('Fel', 'Ett fel uppstod under transaktionen.');
+      Alert.alert('Fel', error?.message || 'Ett fel uppstod under transaktionen.');
     } finally {
       setLoading(false);
       setStatusText('');
