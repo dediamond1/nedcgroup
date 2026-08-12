@@ -18,6 +18,7 @@ export const SeconDetails = ({ route, navigation }) => {
   const { data, title } = route.params;
   const [showItem, setShowItem] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [itemError, setItemError] = useState('');
 
   const dispatch = useDispatch();
   const [getArticle] = catalogApi.useLazyArticleQuery();
@@ -37,39 +38,55 @@ export const SeconDetails = ({ route, navigation }) => {
       const result = await getArticle(data?.articalId);
 
       console.log(result?.data);
+      // --- HTTP-level failure (4xx/5xx) — supplier errors now arrive here ---
       if (result?.error) {
-        setLoading(false)
-        return setShowItem(false)
-      }
-      if (
-        result?.data?.message === 'Company deativted because you have reached Credit Limit'
-      ) {
-        dispatch(setInActive(true));
-      }
-      if (result?.data?.message === 'invalid token in the request.') {
-        await removeToken()
-        Alert.alert('OBS', "Du har blivit utloggad, vänligen logga in igen", [{
-          text: "Logga in igen",
-          onPress: () => dispatch(logout())
-        }])
-        setLoading(false);
-      }
-
-      if (result?.data?.data?.body?.data) {
-        navigation.navigate('PINCODEOTP', {
-          data: result?.data?.data?.body?.data,
-          title: title,
-          moreInfo: data,
-        })
-      } else {
+        const errMsg = result.error.data?.message || result.error.message || '';
+        // Legacy behaviors — must survive the supplier-error propagation:
+        if (errMsg === 'Company deativted because you have reached Credit Limit') {
+          dispatch(setInActive(true));
+          setLoading(false);
+          return;
+        }
+        if (errMsg === 'invalid token in the request.') {
+          await removeToken();
+          Alert.alert('OBS', "Du har blivit utloggad, vänligen logga in igen", [{
+            text: "Logga in igen",
+            onPress: () => dispatch(logout())
+          }]);
+          setLoading(false);
+          return;
+        }
+        setItemError(errMsg || 'Kunde inte hämta produkten. Försök igen.');
         setShowItem(false);
         setLoading(false);
+        return;
       }
-      setLoading(false)
+
+      const payload = result?.data?.data;
+
+      if (payload?.body?.data) {
+        navigation.navigate('PINCODEOTP', {
+          data: payload.body.data,
+          title: title,
+          moreInfo: data,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // --- Soft 200 without voucher data (discontinued product etc.) ---
+      const supplierMsg =
+        payload?.response?.message ||
+        payload?.response?.data?.message ||
+        '';
+      setItemError(supplierMsg || 'Denna produkt säljs inte längre. Kontakta support.');
+      setShowItem(false);
+      setLoading(false);
     } catch (error) {
       console.log(error.message);
-      setShowItem(false)
-      setLoading(false)
+      setItemError('Kunde inte hämta produkten. Försök igen.');
+      setShowItem(false);
+      setLoading(false);
     }
   };
 
@@ -93,6 +110,19 @@ export const SeconDetails = ({ route, navigation }) => {
             padding: 10,
           }}>
           <View>
+            {!!itemError && (
+              <AppText
+                style={{
+                  color: '#c0392b',
+                  fontSize: 15,
+                  textAlign: 'center',
+                  marginVertical: 6,
+                  marginHorizontal: 10,
+                  fontFamily: "ComviqSansWebBold",
+                }}
+                text={itemError}
+              />
+            )}
             <AppText
               style={{
                 color: '#2bb2e0',
