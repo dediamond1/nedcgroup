@@ -65,15 +65,6 @@ const appContent = {
       img: require("../../assets/images/telia.png"),
       isFeatured: true,
     },
-    {
-      id: 'halebop',
-      title: "Halebop",
-      link: "TELIA_NAVIGATION",
-      backgroundColor: "#9fdcdd",
-      customFont: "azo_sans-700",
-      img: require("../../assets/images/Haleboplogo.png"),
-      isFeatured: true,
-    },
   ],
   utilities: [
     {

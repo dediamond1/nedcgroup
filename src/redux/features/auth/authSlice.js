@@ -124,6 +124,7 @@ export const {
   setUser,
   setRequiresPin,
   setInActive,
+  setTeliaHalebop,
   logout,
   resetAuth,
 } = authSlice.actions;
