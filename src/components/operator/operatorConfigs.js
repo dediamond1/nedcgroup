@@ -55,7 +55,7 @@ const lycaCheckout = {
       return {
         ok: false,
         closeOtp: true,
-        statusText: 'Produkten är slutsåld eller något fick fel kontakta support +467****4031',
+        statusText: 'Produkten är slutsåld eller något fick fel kontakta support +46 793 394 031',
         alertTitle: 'OBS',
         alert: 'Produkten är slutsåld eller något fick fel',
       };
@@ -157,7 +157,7 @@ const teliaHalebopCategoryList = (key, label, productsRoute) => ({
   }),
   headerTitle: label,
   emptyText: 'Något gick fel, vänligen kontakta support',
-  phoneText: '+467****4031',
+  phoneText: '+46 793 394 031',
   fullScreenLoading: true,
 });
 
@@ -240,9 +240,9 @@ export const OPERATOR_CONFIGS = {
       detailParams: (item, categoryName) => ({ subcategory: item, categoryName }),
       headerTitle: 'Lyca mobile',
       headerTextStyle: { fontSize: 24, color: '#fff' },
-      emptyText: 'Inga kategorier tillgängliga. Kontakta support: +467****4031',
-      noProductsText: 'Inga produkter hittades. Kontakta support: +467****4031',
-      errorText: 'Något gick fel. Kontakta support: +467****4031',
+      emptyText: 'Inga kategorier tillgängliga. Kontakta support: +46 793 394 031',
+      noProductsText: 'Inga produkter hittades. Kontakta support: +46 793 394 031',
+      errorText: 'Något gick fel. Kontakta support: +46 793 394 031',
       fullScreenLoading: false,
     },
     checkout: lycaCheckout,

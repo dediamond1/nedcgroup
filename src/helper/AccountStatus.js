@@ -1,6 +1,7 @@
 import React from 'react'
-import { Linking, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native'
 import { AppText } from '../components/appText'
+import { AppButton } from '../components/button/AppButton'
 import { TopHeader } from '../components/header/TopHeader'
 import { colors } from '../constants/colors'
 
@@ -35,23 +36,14 @@ export const AccountStatus = ({ onPress }) => {
             </Pressable>
             <AppText text="E-post" style={{ fontSize: 16, color: '#e2027b' }} />
             <AppText text={SUPPORT_EMAIL} style={{ fontSize: 16, color: '#000' }} />
-            <AppText text="Öppettider" style={{ fontSize: 16, color: '#e2027b' }} />
-            <AppText text="Måndag–Fredag 07.00 – 15.30" style={{ fontSize: 16, color: '#000' }} />
           </View>
         </View>
-        <TouchableOpacity
+        <AppButton
+          text="Försök igen"
           onPress={onPress}
-          style={{
-            padding: 8,
-            borderRadius: 5,
-            backgroundColor: '#e2027b',
-            alignItems: 'center',
-            width: '100%',
-            marginVertical: 10,
-          }}
-        >
-          <AppText text="Försök igen" style={{ fontSize: 18 }} />
-        </TouchableOpacity>
+          style={styles.retryButton}
+          color="#e2027b"
+        />
       </View>
     </>
   )
@@ -69,6 +61,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 20,
     alignItems: 'center',
+  },
+  retryButton: {
+    marginVertical: 10,
+    width: '100%',
   },
   text: {
     color: colors.primary.main,

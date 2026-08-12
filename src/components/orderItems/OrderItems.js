@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
   content: {
     flexDirection: "row",

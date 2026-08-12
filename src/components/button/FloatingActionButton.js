@@ -34,7 +34,7 @@ export const FloatingActionButton = ({
           alignSelf: 'flex-end',
           borderColor: '#fff',
           borderWidth: 1,
-          elevation: 5,
+          elevation: 3,
         }}
         activeOpacity={0.6}
         onPress={onPress}>

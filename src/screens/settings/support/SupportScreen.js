@@ -9,7 +9,6 @@ import { AppScreen } from '../../../helper/AppScreen';
 // Tel: 0790 40 40 40
 // emai: info@artinsgruppen.se
 // Öppet:
-// Måndag-Fredag 07.00 - 15.30
 export const SupportScreen = ({ navigation, route }) => {
     const callSupport = async () => {
         try {
@@ -77,14 +76,6 @@ export const SupportScreen = ({ navigation, route }) => {
                     <AppText text={'E-post'} style={{ fontSize: 16, color: '#e2027b' }} />
                     <AppText
                         text={'info@artinsgruppen.se'}
-                        style={{ fontSize: 16, color: '#000' }}
-                    />
-                    <AppText
-                        text={'Öppettider'}
-                        style={{ fontSize: 16, color: '#e2027b' }}
-                    />
-                    <AppText
-                        text={'Måndag-Fredag 07.00 - 15.30'}
                         style={{ fontSize: 16, color: '#000' }}
                     />
                 </View>

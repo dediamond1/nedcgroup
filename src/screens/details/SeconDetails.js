@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   btns: {
-    elevation: 4,
+    elevation: 2,
   },
   container: {
     alignItems: 'center',

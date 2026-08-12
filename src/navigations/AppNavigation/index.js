@@ -53,6 +53,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     borderRadius: 10,
-    elevation: 5,
+    elevation: 2,
   },
 });
