@@ -26,11 +26,12 @@ export const useAuthPincode = () => {
                 const message = String(resultAction.payload || '').toLowerCase();
                 // Preserve the current "invalid pin" alert behavior
                 if (message.includes('invalid')) {
-                    Alert.alert('fel pinkod', 'Försök igen!');
+                    Alert.alert('Fel pinkod', 'Försök igen.');
                 }
             }
         } catch (error) {
             console.log(error);
+            Alert.alert('Fel', error?.message || 'Något gick fel. Försök igen.');
         } finally {
             setLoading(false);
         }

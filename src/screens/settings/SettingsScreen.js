@@ -30,18 +30,18 @@ export const SetttingsScreen = () => {
       if (supported) {
         await Linking.openURL(url)
       } else {
-        Alert.alert("Error", "Cannot open the browser")
+        Alert.alert("Fel", "Det gick inte att öppna webbläsaren")
       }
     } catch (error) {
       console.error(error)
-      Alert.alert("Error", "Something went wrong while opening the browser")
+      Alert.alert("Fel", "Något gick fel när webbläsaren skulle öppnas")
     }
   }
 
   const getUpdate = async () => {
     try {
       setLoadingStatus(true)
-      setUpdateText("Checking for updates...")
+      setUpdateText("Söker efter uppdatering...")
       // Simulate update check
       setTimeout(() => {
         setLoadingStatus(false)
@@ -50,7 +50,7 @@ export const SetttingsScreen = () => {
     } catch (error) {
       console.log(error)
       setLoadingStatus(false)
-      Alert.alert("Error", "Failed to check for updates")
+      Alert.alert("Fel", "Kunde inte söka efter uppdateringar")
     }
   }
 
