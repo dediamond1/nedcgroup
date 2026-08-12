@@ -74,8 +74,8 @@ const lycaCheckout = {
       employeeId: null,
     }),
   },
-  // Historical message strings (note the "deativted" typo is the actual API message).
-  deactivationMessage: 'Company deativted because you have reached Credit Limit',
+  // Historical message strings — the API message (correct spelling).
+  deactivationMessage: 'Company deactivated because you have reached Credit Limit',
   invalidTimeMessage: 'not valid time to book order.',
   invalidTimeAlert: 'Inte giltig tid att boka order',
   invalidTokenAlert: {

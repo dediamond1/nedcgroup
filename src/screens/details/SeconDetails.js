@@ -42,7 +42,7 @@ export const SeconDetails = ({ route, navigation }) => {
       if (result?.error) {
         const errMsg = result.error.data?.message || result.error.message || '';
         // Legacy behaviors — must survive the supplier-error propagation:
-        if (errMsg === 'Company deativted because you have reached Credit Limit') {
+        if (errMsg === 'Company deactivated because you have reached Credit Limit') {
           dispatch(setInActive(true));
           setLoading(false);
           return;
