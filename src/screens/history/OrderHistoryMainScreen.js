@@ -48,17 +48,6 @@ const operators = [
     fontSize: 32,
     image: require("../../../assets/images/telialogo.png"),
   },
-  {
-    id: "halebop",
-    name: "Halebop",
-    value: "HALEBOP",
-    backgroundColor: "#bff6f7ff",
-    textColor: "#fff",
-    fontFamily: "azo_sans-700",
-    textTransform: "uppercase",
-    fontSize: 28,
-    image: require("../../../assets/images/Haleboplogo.png"),
-  }
 ]
 
 // Reusable operator button component

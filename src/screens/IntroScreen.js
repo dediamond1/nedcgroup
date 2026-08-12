@@ -201,8 +201,8 @@ export default function IntroScreen() {
 
     console.log(item)
   triggerHaptic("impactMedium")
-  if (item?.title === "Telia" || item?.title === "Halebop") {
-    dispatch(setTeliaHalebop(item?.title))
+  if (item?.title === "Telia") {
+    dispatch(setTeliaHalebop(item?.title));
   }
 
   navigation.navigate(`${route}`, { title: "Telia"})
