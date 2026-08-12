@@ -141,9 +141,9 @@ export const requestLoginCode = createAsyncThunk(
 
 /**
  * Passwordless login — step 2: verify the emailed code.
- * On success the final token is persisted and the store is updated, so App.js
- * automatically switches from AuthNavigation to AppSideNavigation (no PIN
- * gate — the code replaced the password).
+ * The code replaces the PASSWORD — it does NOT complete the login. It returns
+ * a short-lived step token, and the app routes to PINSCREEN (step 3) — the
+ * PIN is always required, so the user stays in the habit of using it.
  */
 export const verifyLoginCode = createAsyncThunk(
   'auth/verifyLoginCode',
@@ -157,6 +157,51 @@ export const verifyLoginCode = createAsyncThunk(
       if (!response.success) {
         // Surface the backend's message (wrong code, expired, too many attempts).
         throw new Error(response.data?.message || response.error || 'Verify code failed');
+      }
+
+      // Step-1 complete: the backend issued a step token (no session token).
+      // The login continues at PINSCREEN (verify-code-pin).
+      if (response.data?.stepToken) {
+        dispatch(setRequiresPin(true));
+        return {
+          requiresPin: true,
+          stepToken: response.data.stepToken,
+          email,
+        };
+      }
+
+      // Soft-error responses (HTTP 200 with a backend error message, no token)
+      if (response.data?.message) {
+        throw new Error(response.data.message);
+      }
+
+      throw new Error('Invalid code verification response');
+    } catch (error) {
+      console.error('Verify code action error:', error);
+      dispatch(setError(error.message || 'Verify code failed'));
+      return rejectWithValue(error.message);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+);
+
+/**
+ * Passwordless login — step 3: PIN after the email code (verify-code-pin).
+ * Mirrors verifyPin: persists the final token + updates the store, so App.js
+ * automatically switches from AuthNavigation to AppSideNavigation.
+ */
+export const verifyCodePin = createAsyncThunk(
+  'auth/verifyCodePin',
+  async ({ stepToken, pinCode }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearError());
+
+      const response = await authService.verifyCodePin({ stepToken, pin: pinCode });
+
+      if (!response.success) {
+        throw new Error(response.data?.message || response.error || 'PIN verification failed');
       }
 
       if (response.data?.token) {
@@ -176,10 +221,10 @@ export const verifyLoginCode = createAsyncThunk(
         throw new Error(response.data.message);
       }
 
-      throw new Error('Invalid code verification response');
+      throw new Error('Invalid PIN verification response');
     } catch (error) {
-      console.error('Verify code action error:', error);
-      dispatch(setError(error.message || 'Verify code failed'));
+      console.error('Verify code PIN action error:', error);
+      dispatch(setError(error.message || 'PIN verification failed'));
       return rejectWithValue(error.message);
     } finally {
       dispatch(setLoading(false));

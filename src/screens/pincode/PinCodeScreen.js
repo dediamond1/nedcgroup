@@ -9,7 +9,7 @@ import { NormalLoader } from '../../../helper/Loader2';
 
 export const PinCodeScreen = ({ navigation, route }) => {
   const { loginInfo, login } = route.params || {};
-  const { email, password } = loginInfo || {};
+  const { email, password, stepToken } = loginInfo || {};
   const { verifyPincode, loading } = useAuthPincode()
 
   return (
@@ -21,7 +21,7 @@ export const PinCodeScreen = ({ navigation, route }) => {
       />
       {loading && <NormalLoader subTitle={login ? "Loggar in" : "vänligen vänta printer ut voucher"} loading={loading} />}
 
-      <PincodeInput onPress={async (pincode) => await verifyPincode({ pinCode: pincode, email: email, password: password })} />
+      <PincodeInput onPress={async (pincode) => await verifyPincode({ pinCode: pincode, email: email, password: password, stepToken: stepToken })} />
     </>
   );
 };

@@ -99,14 +99,23 @@ export const LoginScreen = () => {
       return;
     }
     setCodeError('');
+    Keyboard.dismiss();
     setLoading(true);
     const resultAction = await dispatch(verifyLoginCode({ email: email.trim(), code }));
     setLoading(false);
     if (resultAction.type.endsWith('/rejected')) {
       setCodeError(String(resultAction.payload || 'Felaktig kod. Försök igen.'));
+      return;
     }
-    // On success the thunk persisted the token + updated the store — App.js
-    // automatically switches from AuthNavigation to AppSideNavigation.
+    // Code verified — step 1 done. The PIN is still required (step 2, always):
+    // route to PINSCREEN, which completes the login via verify-code-pin.
+    const payload = resultAction.payload;
+    if (payload?.stepToken) {
+      setCode('');
+      navigation.navigate('PINSCREEN', {
+        loginInfo: { email: email.trim(), stepToken: payload.stepToken, login: true },
+      });
+    }
   };
 
   const changeEmail = () => {

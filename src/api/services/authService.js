@@ -174,6 +174,23 @@ export const verifyLoginCode = async ({ email, code }) => {
   }
 };
 
+/**
+ * Passwordless login — step 3: PIN after the email code (verify-code-pin).
+ * @param {{ stepToken: string, pin: string }} payload
+ */
+export const verifyCodePin = async ({ stepToken, pin }) => {
+  try {
+    const response = await api.post('/api/auth/verify-code-pin', { stepToken, pin });
+    if (response.ok) {
+      return handleApiSuccess(response);
+    }
+    return handleApiError(response);
+  } catch (error) {
+    console.error('Verify code PIN service error:', error);
+    return handleApiError(error);
+  }
+};
+
 export default {
   login,
   verifyPinCode,
@@ -183,4 +200,5 @@ export default {
   getProfile,
   requestLoginCode,
   verifyLoginCode,
+  verifyCodePin,
 };
