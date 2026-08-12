@@ -51,6 +51,14 @@ export const useGetCompanyInfo = () => {
 
   // Deactivation / credit-limit handling (preserved from the legacy hook).
   useEffect(() => {
+    // A deactivated account gets 401 "Account deactivated" on the company-info
+    // call — show the deactivated screen even when the app opens mid-deactivation.
+    // "Försök igen" (refetch) re-checks: once support reactivates the account,
+    // the same token still works (no re-login needed) and the app resumes.
+    if (error?.data?.message === "Account deactivated. Please contact support.") {
+      setInActive(true);
+      return;
+    }
     if (!companyInfo) return;
     if (
       companyInfo.manager?.IsActive === false ||
@@ -62,7 +70,7 @@ export const useGetCompanyInfo = () => {
       setInActive(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [companyInfo]);
+  }, [companyInfo, error]);
 
   return {
     loading: isLoading,
